@@ -48,7 +48,9 @@ No content has been excluded based on ideological grounds. Technical decisions (
 
 ## Future Vision
 
-The domain **marxism.ai** is being considered for this project, emphasizing the goal of making Marxist theory accessible to AI systems for research, education, and organizing support.
+The domain **marxism.app** has been secured for this project (marxism.ai was already taken by the capitalists!), emphasizing the goal of making Marxist theory accessible to AI systems for research, education, and organizing support.
+
+"There's an app for that" - even for class struggle!
 
 ## License and Usage
 
