@@ -11,6 +11,7 @@
 ### 1. Documentation-First Approach
 
 **BEFORE implementing any module:**
+
 1. Read this entire document
 2. Read your assigned module specification in `specs/`
 3. Document all assumptions about scale handling
@@ -20,6 +21,7 @@
 ### 2. Test-Driven Development at Scale
 
 **Mandatory testing levels:**
+
 1. **Unit tests**: Component functionality
 2. **Integration tests**: Module interfaces
 3. **Scale tests**: Performance with GB-sized samples
@@ -27,6 +29,7 @@
 5. **End-to-end tests**: Full pipeline on subset
 
 **Testing pyramid for 200GB:**
+
 ```
     /\     E2E (1% sample)
    /  \    Integration (10% sample)
@@ -37,6 +40,7 @@
 ### 3. Parallel Development Discipline
 
 **Module assignments for parallel Claude instances:**
+
 - **Instance A**: Distributed Processing Orchestrator
 - **Instance B**: Embedding Pipeline (VertexAI/alternatives)
 - **Instance C**: Vector Database Interface
@@ -51,6 +55,7 @@
 **📌 PRIMARY RECOMMENDATION: Runpod.io GPU Rental**
 
 See **[RUNPOD_EMBEDDINGS.md](./RUNPOD_EMBEDDINGS.md)** for complete implementation guide.
+
 - **Total cost: $40-60** (vs $500-1000 for APIs)
 - RTX 4090 rental at $0.50/hour
 - BAAI/bge-large-en-v1.5 model (beats OpenAI ada-002)
@@ -112,6 +117,7 @@ graph TD
 ### Phase 1: Infrastructure Setup (Week 1)
 
 **Instance A Tasks:**
+
 ```python
 # Distributed Processing Setup
 - [ ] Set up Ray/Dask cluster for distributed processing
@@ -122,6 +128,7 @@ graph TD
 ```
 
 **Instance B Tasks:**
+
 ```python
 # VertexAI Integration
 - [ ] Set up GCP project and authentication
@@ -132,6 +139,7 @@ graph TD
 ```
 
 **Instance C Tasks:**
+
 ```python
 # Vector Database Setup
 - [ ] Deploy Weaviate cluster (3+ nodes)
@@ -144,6 +152,7 @@ graph TD
 ### Phase 2: Processing Pipeline (Week 2)
 
 **Parallel Processing Strategy:**
+
 ```python
 # Shard the 200GB corpus
 shards = [
@@ -160,6 +169,7 @@ shards = [
 ### Phase 3: Optimization (Week 3)
 
 **Performance Targets:**
+
 - Processing throughput: 10GB/hour minimum
 - Embedding generation: 100K docs/hour
 - Query latency: <100ms p50, <500ms p99
@@ -283,12 +293,14 @@ When implementing distributed systems:
 ## 🚨 Anti-Patterns at Scale
 
 ### ❌ Loading Everything in Memory
+
 ```python
 # NEVER DO THIS with 200GB
 all_docs = load_all_documents()  # 💥 OOM
 ```
 
 ### ❌ Sequential Processing
+
 ```python
 # Will take weeks
 for doc in documents:
@@ -296,6 +308,7 @@ for doc in documents:
 ```
 
 ### ❌ Synchronous API Calls
+
 ```python
 # Will hit rate limits immediately
 for chunk in chunks:
@@ -303,6 +316,7 @@ for chunk in chunks:
 ```
 
 ### ❌ No Checkpointing
+
 ```python
 # Can't resume after failure
 process_all()  # 48 hours later... crash at 99%
@@ -311,6 +325,7 @@ process_all()  # 48 hours later... crash at 99%
 ## ✅ Best Practices at Scale
 
 ### ✅ Streaming & Chunking
+
 ```python
 def process_corpus():
     for batch in read_in_chunks(corpus_path, chunk_size="1GB"):
@@ -318,6 +333,7 @@ def process_corpus():
 ```
 
 ### ✅ Distributed Processing
+
 ```python
 import ray
 
@@ -332,6 +348,7 @@ results = ray.get(futures)
 ```
 
 ### ✅ Batch API Calls
+
 ```python
 async def batch_embeddings(texts, batch_size=100):
     batches = [texts[i:i+batch_size]
@@ -342,6 +359,7 @@ async def batch_embeddings(texts, batch_size=100):
 ```
 
 ### ✅ Checkpoint Everything
+
 ```python
 class CheckpointedProcessor:
     def __init__(self):
@@ -360,6 +378,7 @@ class CheckpointedProcessor:
 ## 🎯 Success Criteria
 
 ### Minimum Viable Pipeline
+
 - [ ] Process 10GB sample successfully
 - [ ] Generate embeddings for 100K documents
 - [ ] Insert 1M vectors into database
@@ -367,6 +386,7 @@ class CheckpointedProcessor:
 - [ ] System handles worker failures gracefully
 
 ### Production Ready
+
 - [ ] Process full 200GB corpus
 - [ ] Generate embeddings for all documents
 - [ ] Store all vectors (10M+ estimated)
@@ -381,6 +401,7 @@ class CheckpointedProcessor:
 ### Claude Instance Prompts
 
 **Instance A - Distributed Processing:**
+
 ```
 I need to implement the distributed processing orchestrator for a 200GB corpus.
 Read CLAUDE_ENTERPRISE.md and specs/02-DOCUMENT-PROCESSING-SPEC.md.
@@ -389,6 +410,7 @@ The system must handle failures and support checkpointing.
 ```
 
 **Instance B - Embedding Pipeline:**
+
 ```
 I need to implement the embedding pipeline using VertexAI.
 Read CLAUDE_ENTERPRISE.md and implement batch embedding generation.
@@ -397,6 +419,7 @@ Target: 100K documents/hour throughput.
 ```
 
 **Instance C - Vector Database:**
+
 ```
 I need to set up Weaviate for 10M+ vectors from a 200GB corpus.
 Read CLAUDE_ENTERPRISE.md and implement the vector storage layer.
@@ -405,6 +428,7 @@ Target: 10K insertions/second.
 ```
 
 **Instance D - Query Engine:**
+
 ```
 I need to implement the query engine for the vector database.
 Read CLAUDE_ENTERPRISE.md and specs/04-QUERY-INTERFACE-SPEC.md.
@@ -412,6 +436,7 @@ Include caching, query optimization, and <100ms latency target.
 ```
 
 **Instance E - MCP Server:**
+
 ```
 I need to implement the MCP server wrapping the query engine.
 Read CLAUDE_ENTERPRISE.md and specs/05-MCP-INTEGRATION-SPEC.md.
@@ -419,6 +444,7 @@ Focus on tool definitions and PercyBrain integration.
 ```
 
 **Instance F - Monitoring:**
+
 ```
 I need to implement monitoring for the entire pipeline.
 Read CLAUDE_ENTERPRISE.md and set up Prometheus + Grafana.

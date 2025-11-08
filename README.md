@@ -3,6 +3,7 @@
 > **⚠️ SCALE UPDATE**: This system is designed for **200GB corpus**, not the original 38GB estimate.
 >
 > **Key Documents for 200GB Scale:**
+>
 > - **[CLOUD-ARCHITECTURE-PLAN.md](./CLOUD-ARCHITECTURE-PLAN.md)** - Complete GCP infrastructure
 > - **[RUNPOD_EMBEDDINGS.md](./RUNPOD_EMBEDDINGS.md)** - GPU rental strategy ($40-60 total!)
 > - **[PARALLEL-DEV-ARCHITECTURE.md](./PARALLEL-DEV-ARCHITECTURE.md)** - 6-instance development plan
@@ -13,6 +14,7 @@ Complete enterprise-scale pipeline for converting the **200GB Marxists Internet 
 ## 🔥 What This Does
 
 Converts **200GB corpus** (5-10M documents) of Marxist theory into:
+
 - Clean markdown with preserved metadata (GCS storage)
 - Semantically chunked text with Parquet storage
 - Vector embeddings via **Runpod GPU rental ($40-60 total!)**
@@ -20,6 +22,7 @@ Converts **200GB corpus** (5-10M documents) of Marxist theory into:
 - Enterprise-scale, cloud-hosted knowledge base
 
 Perfect for:
+
 - Material analysis research
 - Class composition studies
 - Theoretical framework development
@@ -28,6 +31,7 @@ Perfect for:
 ## 📋 Prerequisites
 
 ### System Requirements
+
 - Python 3.9+
 - Google Cloud Platform account
 - Terraform 1.5+
@@ -35,6 +39,7 @@ Perfect for:
 - Runpod.io account with $100 credits
 
 ### Cloud Infrastructure Required
+
 - **GCP Project** with billing enabled
 - **GCS Buckets** for storage (see TERRAFORM-INFRASTRUCTURE.md)
 - **GKE Cluster** for Weaviate (3+ nodes)
@@ -77,6 +82,7 @@ terraform apply
 ### Step 1: Get the 200GB Archive
 
 **Option A: Internet Archive Torrent** (200GB complete archive)
+
 ```bash
 # Torrent: https://archive.org/details/dump_www-marxists-org
 # Upload to GCS after download:
@@ -84,6 +90,7 @@ gsutil -m cp -r dump_www-marxists-org/* gs://mia-raw-torrent/
 ```
 
 **Option B: GitHub Mirror** (HTML only, smaller)
+
 ```bash
 git clone https://github.com/emijrp/www.marxists.org.git
 gsutil -m cp -r www.marxists.org/* gs://mia-raw-torrent/
@@ -96,6 +103,7 @@ python mia_processor.py --download-json
 ```
 
 This fetches:
+
 - `authors.json` - All 850+ authors with links to their works
 - `sections.json` - Subject/topic organization
 - `periodicals.json` - Revolutionary publications archive
@@ -116,6 +124,7 @@ python mia_processor.py \
 ```
 
 **What this does:**
+
 - Converts HTML → Markdown
 - Converts PDF → Markdown  
 - Filters to English content only
@@ -124,6 +133,7 @@ python mia_processor.py \
 - Generates content hashes for deduplication
 
 **Output structure:**
+
 ```
 ~/marxists-processed/
 ├── markdown/          # Converted documents with frontmatter
@@ -133,6 +143,7 @@ python mia_processor.py \
 ```
 
 **Processing time:**
+
 - HTML: ~1-2 hours for 126k pages
 - PDFs: ~3-6 hours for 38k documents (OCR intensive)
 - Total: ~4-8 hours depending on hardware
@@ -140,6 +151,7 @@ python mia_processor.py \
 ### Step 4: Ingest to Vector DB
 
 **Chroma (easiest, local-only):**
+
 ```bash
 python rag_ingest.py \
     --db chroma \
@@ -148,6 +160,7 @@ python rag_ingest.py \
 ```
 
 **Qdrant (better performance, local or cloud):**
+
 ```bash
 # Local Qdrant
 python rag_ingest.py \
@@ -163,16 +176,19 @@ python rag_ingest.py \
 ```
 
 **Chunking strategies:**
+
 - `--strategy semantic` (default) - Respects paragraph boundaries, good for theory
 - `--strategy section` - Chunks by headers, preserves document structure
 - `--strategy token` - Fixed token count, predictable but may split mid-thought
 
 **Chunk size:**
+
 - `--chunk-size 512` (default) - Good for most LLMs
 - `--chunk-size 1024` - For models with larger context windows
 - `--chunk-size 256` - More granular retrieval
 
 **Embedding models** (via Ollama):
+
 - `nomic-embed-text` (default) - 768d, balanced
 - `mxbai-embed-large` - 1024d, higher quality
 - `all-minilm` - 384d, faster/smaller
@@ -182,6 +198,7 @@ python rag_ingest.py \
 **Processing Pipeline Confidence: 85%**
 
 Limitations:
+
 - PDF OCR quality varies (pre-1990s works may have errors)
 - Some nested HTML structures may lose formatting
 - Non-English detection is heuristic-based (~5% false positives)
@@ -190,6 +207,7 @@ Limitations:
 **RAG Ingestion Confidence: 90%**
 
 Known issues:
+
 - Very long works (>50k words) may need manual chunking review
 - Mathematical notation in PDFs often garbled
 - Some diagrams/images lost in text conversion
@@ -264,6 +282,7 @@ def search_marxist_theory(query: str, n_results: int = 5):
 ```
 
 Add to your `mcp_config.json`:
+
 ```json
 {
   "mcpServers": {
@@ -283,6 +302,7 @@ Add to your `mcp_config.json`:
 **Why semantic chunking for theory?**
 
 Marxist texts have specific rhetorical structure:
+
 1. Thesis statement
 2. Historical/material evidence
 3. Dialectical synthesis
@@ -291,6 +311,7 @@ Marxist texts have specific rhetorical structure:
 Semantic chunking preserves these argumentative units better than arbitrary token counts.
 
 Example from Capital Vol. 1:
+
 ```
 BAD (token-based):
 Chunk 1: "The value of labour-power is determined, as in the case of every other commodity, by the labour-time necessary for the production, and consequently also the reproduction, of this special article. So far as it has value, it represents no more than a definite quantity of the average labour of society incorporated in it. Labour-power exists only as a capacity, or power of the living individual. Its production consequently pre-supposes his"
@@ -304,6 +325,7 @@ Chunk 1: "The value of labour-power is determined, as in the case of every other
 ## 🎯 Use Cases
 
 ### 1. Material Analysis Assistant
+
 ```python
 def analyze_locality(zip_code: str):
     # Get census data for area
@@ -319,6 +341,7 @@ def analyze_locality(zip_code: str):
 ```
 
 ### 2. Theoretical Framework Search
+
 ```python
 # Find relevant frameworks for a specific organizing question
 results = search_marxist_theory(
@@ -330,6 +353,7 @@ results = search_marxist_theory(
 ```
 
 ### 3. Historical Precedent Lookup
+
 ```python
 # What did revolutionaries say about X situation?
 results = search_marxist_theory(
@@ -343,12 +367,14 @@ results = search_marxist_theory(
 ## 🔐 Security & Privacy
 
 **No data leaves your machine:**
+
 - Vector DB is local
 - Embeddings generated locally via Ollama
 - No API calls to OpenAI/Anthropic needed
 - Full control over data access
 
 **OPSEC considerations:**
+
 - Store on encrypted volume (LUKS)
 - Keep backups on separate encrypted drives
 - Vector DB files contain full text - protect accordingly
@@ -357,11 +383,13 @@ results = search_marxist_theory(
 ## 🐛 Troubleshooting
 
 ### "Import Error: No module named X"
+
 ```bash
 pip install <module> --break-system-packages
 ```
 
 ### "Ollama connection refused"
+
 ```bash
 # Start Ollama service
 ollama serve
@@ -371,13 +399,17 @@ ps aux | grep ollama
 ```
 
 ### "PDF extraction is slow"
+
 PDF processing is CPU-intensive. Options:
+
 - Use `--skip-pdfs` flag (add it to script)
 - Process in batches
 - Use `nice` to lower priority: `nice -n 19 python mia_processor.py ...`
 
 ### "Out of memory during ingestion"
+
 Reduce batch size in `rag_ingest.py`:
+
 ```python
 # Around line 200, add batching:
 for i in range(0, len(all_chunks), 100):
@@ -386,11 +418,13 @@ for i in range(0, len(all_chunks), 100):
 ```
 
 ### "Non-English content slipping through"
+
 Edit `is_english_content()` in `mia_processor.py` to add more language filters.
 
 ## 📈 Future Enhancements
 
 **Phase 2 ideas:**
+
 - [ ] Temporal metadata extraction (decade, revolutionary period)
 - [ ] Automatic concept linking (references between works)
 - [ ] Subject taxonomy from MIA sections.json
@@ -399,6 +433,7 @@ Edit `is_english_content()` in `mia_processor.py` to add more language filters.
 - [ ] Automated theory → practice mapping
 
 **MCP tool ideas:**
+
 - `synthesize_from_theory(situation: str)` - Apply theory to current events
 - `find_precedents(organizing_context: str)` - Historical examples
 - `critique_analysis(text: str)` - Theoretical critique of a take
@@ -408,6 +443,7 @@ Edit `is_english_content()` in `mia_processor.py` to add more language filters.
 This is DIY infrastructure for the people. Fork it, hack it, share it.
 
 Improvements needed:
+
 - Better author extraction
 - Footnote preservation
 - Cross-document reference detection
@@ -422,6 +458,7 @@ Improvements needed:
 ## ⚠️ Copyright Notice
 
 MIA content licensing varies:
+
 - Public domain works (Marx, Engels, Lenin, etc.) - freely usable
 - Translations may have copyright
 - Contemporary authors - check individual licenses

@@ -3,7 +3,7 @@
 ## Project Information
 
 **Author**: Persphone Raskova
-**Repository**: https://github.com/percy-raskova/marxists.org-rag-db
+**Repository**: <https://github.com/percy-raskova/marxists.org-rag-db>
 
 ## Overview
 
@@ -14,6 +14,7 @@ This project implements a 200GB-scale RAG (Retrieval Augmented Generation) syste
 ### For Claude Code Instances
 
 1. **Identify your instance** (1-6):
+
    ```bash
    mise run instance{N}:setup
    ```
@@ -109,7 +110,8 @@ test(weaviate): add integration tests
 ## Data Sources
 
 The project uses the Marxists Internet Archive dump (200GB):
-- Available at: https://archive.org/details/dump_www-marxists-org
+
+- Available at: <https://archive.org/details/dump_www-marxists-org>
 - Partial download already available at: `/home/user/Downloads/dump_www-marxists-org/`
 
 ## Architecture
@@ -141,6 +143,7 @@ mise run check:interfaces
 ## Documentation
 
 Key documents:
+
 - `README.md` - Project overview
 - `AI-AGENT-INSTRUCTIONS.md` - AI agent guidelines
 - `INSTANCE-BOUNDARIES.md` - Instance ownership
@@ -150,6 +153,7 @@ Key documents:
 ## Support
 
 For questions or issues:
+
 - Create an issue on GitHub
 - Check existing documentation
 - Review work logs for context

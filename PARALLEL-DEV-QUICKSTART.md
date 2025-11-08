@@ -7,6 +7,7 @@ You now have complete formal specifications for building the MIA RAG system in p
 ## What You Have
 
 ### Specifications (specs/)
+
 - `00-ARCHITECTURE-SPEC.md` - **READ THIS FIRST** - System overview
 - `02-DOCUMENT-PROCESSING-SPEC.md` - HTML/PDF → Markdown conversion
 - `03-RAG-INGESTION-SPEC.md` - Chunking, embedding, vector DB
@@ -16,6 +17,7 @@ You now have complete formal specifications for building the MIA RAG system in p
 - `INDEX.md` - Master index with assignments
 
 ### Working Implementation (for reference)
+
 - `mia_processor.py` - Initial processing implementation
 - `rag_ingest.py` - Initial ingestion implementation
 - `query_example.py` - Query interface example
@@ -27,17 +29,20 @@ You now have complete formal specifications for building the MIA RAG system in p
 ### Setup (Do Once)
 
 1. **Create project directory:**
+
    ```bash
    mkdir ~/mia-rag-system
    cd ~/mia-rag-system
    ```
 
 2. **Copy specs:**
+
    ```bash
    cp -r /path/to/specs ./
    ```
 
 3. **Create module directories:**
+
    ```bash
    mkdir -p src/{processing,ingestion,query,mcp} tests
    ```
@@ -45,6 +50,7 @@ You now have complete formal specifications for building the MIA RAG system in p
 ### Parallel Development Workflow
 
 #### Instance 1: Processing Module
+
 ```bash
 # In terminal 1
 cd ~/mia-rag-system
@@ -70,6 +76,7 @@ Start by reading the specs and confirming you understand the requirements.
 ```
 
 #### Instance 2: Ingestion Module
+
 ```bash
 # In terminal 2
 cd ~/mia-rag-system
@@ -96,6 +103,7 @@ Start by reading the specs and confirming you understand the requirements.
 ```
 
 #### Instance 3: Query + MCP
+
 ```bash
 # In terminal 3
 cd ~/mia-rag-system
@@ -166,6 +174,7 @@ The reference implementation (`mia_processor.py`, `rag_ingest.py`, `query_exampl
 3. **Refactor to spec** - Restructure to match spec architecture
 
 **Don't just copy** - the specs define better architecture with:
+
 - Proper abstractions
 - Better error handling
 - Testability
@@ -194,14 +203,16 @@ Use test fixtures from specs/06-TESTING-VALIDATION-SPEC.md
 
 ## Tips for Effective Parallel Development
 
-### For AI Instances:
+### For AI Instances
+
 1. **Always read specs completely first** - Don't start coding immediately
 2. **Follow data structures exactly** - They're the integration contract
 3. **Check acceptance criteria** - Use them as a checklist
 4. **Ask clarifying questions** - Specs may have ambiguities
 5. **Document deviations** - If you must deviate from spec, document why
 
-### For You (Human):
+### For You (Human)
+
 1. **Monitor all instances** - Check progress regularly
 2. **Integrate frequently** - Don't wait until everything is "done"
 3. **Test interfaces early** - Verify modules can talk to each other
@@ -251,13 +262,15 @@ mia-rag-system/
 
 ## Success Metrics
 
-### Per Module:
+### Per Module
+
 - ✅ All acceptance criteria met
 - ✅ Unit tests pass
 - ✅ Integrates with dependencies
 - ✅ Documented
 
-### System:
+### System
+
 - ✅ Process 126k HTML without crashes
 - ✅ Process 38k PDFs without crashes
 - ✅ Query returns relevant results

@@ -9,6 +9,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 For enterprise-scale implementation, see: **[CLAUDE_ENTERPRISE.md](./CLAUDE_ENTERPRISE.md)**
 
 The enterprise document includes:
+
 - Distributed processing with Ray/Dask
 - VertexAI embeddings (recommended) with alternatives
 - Weaviate vector database for billion-scale vectors
@@ -43,11 +44,13 @@ MIA Archive (HTML/PDF)
 ### Data Structures
 
 **DocumentMetadata** (defined in `mia_processor.py:33-44`):
+
 - Used throughout the pipeline as the canonical metadata format
 - Includes: source_url, title, author, date, language, doc_type, word_count, content_hash
 - Stored as YAML frontmatter in markdown files and as JSON sidecar files
 
 **Chunk** (defined in `rag_ingest.py:27-32`):
+
 - Contains: content (str), metadata (Dict), chunk_id (str), chunk_index (int)
 - Metadata preserves all DocumentMetadata fields plus chunk-specific info
 
@@ -103,16 +106,19 @@ python query_example.py --db chroma --persist-dir ./test-vectordb/ --query "test
 ### Processing Pipeline (`mia_processor.py`)
 
 **Key Classes:**
+
 - `MIAProcessor` (line 47): Main orchestrator for document processing
 - `DocumentMetadata` (line 33): Dataclass for document metadata
 
 **Important Methods:**
+
 - `is_english_content()` (line 118): Heuristic language detection - ~95% accurate but may need tuning
 - `html_to_markdown()` (line 183): HTML conversion with boilerplate removal
 - `pdf_to_markdown()` (line 215): PDF conversion using pymupdf4llm
 - `extract_metadata_from_html()` (line 144): Metadata extraction - author extraction is ~70% accurate
 
 **Output Format:**
+
 - Markdown files with YAML frontmatter at `~/marxists-processed/markdown/`
 - JSON metadata sidecar files at `~/marxists-processed/metadata/`
 - Processing report at `~/marxists-processed/processing_report.json`
@@ -120,21 +126,25 @@ python query_example.py --db chroma --persist-dir ./test-vectordb/ --query "test
 ### Ingestion Pipeline (`rag_ingest.py`)
 
 **Key Classes:**
+
 - `RAGIngestor` (line 112): Main ingestion orchestrator
 - `ChunkStrategy` (line 35): Static methods for different chunking strategies
 - `Chunk` (line 27): Dataclass for text chunks
 
 **Chunking Strategies:**
+
 - `by_semantic_breaks()` (line 72): **Default** - Respects paragraph boundaries, best for theory
 - `by_section()` (line 39): Chunks by markdown headers, preserves document structure
 - `by_token_count()` (line 99): Fixed token count, predictable but may split mid-thought
 
 **Vector Database Support:**
+
 - `setup_chroma()` (line 133): Local-only ChromaDB setup
 - `setup_qdrant()` (line 155): Local or remote Qdrant setup
 - Collection name is always "marxist_theory"
 
 **Embedding Generation:**
+
 - `get_embedding()` (line 192): Calls Ollama API at localhost:11434
 - Default model: "nomic-embed-text" (768 dimensions)
 - Alternative: "mxbai-embed-large" (1024d) or "all-minilm" (384d)
@@ -142,9 +152,11 @@ python query_example.py --db chroma --persist-dir ./test-vectordb/ --query "test
 ### Query Interface (`query_example.py`)
 
 **Key Classes:**
+
 - `RAGQuery` (line 23): Query interface for both Chroma and Qdrant
 
 **Query Methods:**
+
 - `query_chroma()` (line 95): ChromaDB search
 - `query_qdrant()` (line 115): Qdrant search with manual embedding
 - `interactive_mode()` (line 168): Interactive CLI with example queries
@@ -152,25 +164,33 @@ python query_example.py --db chroma --persist-dir ./test-vectordb/ --query "test
 ## Important Implementation Notes
 
 ### Language Detection
+
 The `is_english_content()` function (mia_processor.py:118) uses path-based heuristics with ~5% false positive rate. When working on language filtering:
+
 - Non-English directory list is at line 123
 - Default behavior is to process (line 142)
 - Archive/history/reference sections assumed English (lines 135-140)
 
 ### Author Extraction
+
 Author extraction from file paths (mia_processor.py:158) is only ~70% accurate. The pattern:
+
 - Looks for `/archive/` in path
 - Takes first path component after `/archive/`
 - Converts hyphens to spaces and title-cases
 
 ### PDF OCR Quality
+
 PDF processing (mia_processor.py:215) using pymupdf4llm has variable quality:
+
 - Pre-1990s works may have OCR errors
 - Mathematical notation often garbled
 - Diagrams/images lost in text conversion
 
 ### Chunking for Theory
+
 Semantic chunking is **strongly preferred** for Marxist texts because they have specific rhetorical structure:
+
 1. Thesis statement
 2. Historical/material evidence
 3. Dialectical synthesis
@@ -179,7 +199,9 @@ Semantic chunking is **strongly preferred** for Marxist texts because they have 
 Token-based chunking may split these argumentative units mid-thought (see README.md:261-270 for example).
 
 ### Embedding Requirements
+
 The system **requires Ollama running locally**:
+
 - Must be accessible at `http://localhost:11434`
 - Model must be pre-downloaded with `ollama pull <model-name>`
 - If Ollama is not running, ingestion will fail at embedding generation
@@ -187,6 +209,7 @@ The system **requires Ollama running locally**:
 ## Formal Specifications
 
 The `specs/` directory contains detailed formal specifications for a refactored, production-ready version:
+
 - **00-ARCHITECTURE-SPEC.md** - System architecture overview
 - **02-DOCUMENT-PROCESSING-SPEC.md** - Processing module spec
 - **03-RAG-INGESTION-SPEC.md** - Ingestion module spec
@@ -200,16 +223,19 @@ The current implementation (mia_processor.py, rag_ingest.py, query_example.py) i
 ## Performance Characteristics
 
 ### Processing Times (typical hardware)
+
 - HTML processing: ~1-2 hours for 126k pages
 - PDF processing: ~3-6 hours for 38k documents (OCR intensive)
 - Total processing: ~4-8 hours
 
 ### Ingestion Times
+
 - Depends on embedding model and batch size
 - Use `--chunk-size` to control chunk granularity (default: 512 tokens)
 - Semantic chunking is slower but produces better results
 
 ### Query Performance
+
 - Target: <500ms for typical queries
 - Depends on collection size and vector DB choice
 - Qdrant generally faster than Chroma for large collections
@@ -217,12 +243,15 @@ The current implementation (mia_processor.py, rag_ingest.py, query_example.py) i
 ## Integration Points
 
 ### MCP Server Integration
+
 See `specs/05-MCP-INTEGRATION-SPEC.md` for detailed MCP server implementation plan. Key tools to expose:
+
 - `search_marxist_theory(query, n_results)` - Semantic search
 - `find_by_author(author, work_title)` - Author-specific search
 - `get_historical_context(time_period, topic)` - Temporal search
 
 ### PercyBrain/Zettelkasten Integration
+
 The system is designed to integrate with PercyBrain via MCP. Query results can cross-reference with personal Zettelkasten notes for synthesis.
 
 ## Known Limitations
@@ -250,6 +279,7 @@ The system is designed to integrate with PercyBrain via MCP. Query results can c
 ## Security & Privacy
 
 **All processing is local:**
+
 - No external API calls except to Ollama (localhost)
 - Vector DB files contain full text - protect accordingly
 - Store on encrypted volume for OPSEC
@@ -258,6 +288,7 @@ The system is designed to integrate with PercyBrain via MCP. Query results can c
 ## Dependencies
 
 Core dependencies (requirements.txt):
+
 - requests>=2.31.0 - HTTP client for metadata download
 - beautifulsoup4>=4.12.0 - HTML parsing
 - markdownify>=0.11.6 - HTML to Markdown conversion
@@ -265,9 +296,11 @@ Core dependencies (requirements.txt):
 - lxml>=4.9.0 - XML/HTML parser
 
 Optional dependencies:
+
 - chromadb - Local vector database (simpler)
 - qdrant-client - Local/remote vector database (better scale)
 - tqdm - Progress bars for ingestion
 
 External dependencies:
+
 - Ollama - Local embedding generation (required)

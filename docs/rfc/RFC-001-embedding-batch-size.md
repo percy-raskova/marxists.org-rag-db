@@ -148,17 +148,20 @@ Fully backward compatible. Fixed batch size can still be specified.
 ## Implementation Plan
 
 ### Phase 1: Core Implementation (Instance2)
+
 - [x] Implement DynamicBatchProcessor class
 - [ ] Add GPU memory monitoring
 - [ ] Add batch size adjustment logic
 - [ ] Unit tests with mocked GPU
 
 ### Phase 2: Integration (Instance2 + Instance3)
+
 - [ ] Update embedding pipeline
 - [ ] Test with Weaviate ingestion
 - [ ] Add checkpoint support for dynamic batches
 
 ### Phase 3: Monitoring (Instance6)
+
 - [ ] Add batch size metrics
 - [ ] Create Grafana dashboard
 - [ ] Set up alerts for OOM errors
@@ -257,18 +260,21 @@ Use predetermined batch sizes (8, 16, 32, 64) based on document length ranges.
 ## Review Comments
 
 ### Instance2 Review
+
 **Reviewer:** Instance2 Lead
 **Date:** 2024-01-15
 **Decision:** Approve
 **Comments:** This is my RFC. Implementation is ready for review.
 
 ### Instance3 Review
+
 **Reviewer:** [Pending]
 **Date:** [Pending]
 **Decision:** [Pending]
 **Comments:** Need to verify Weaviate can handle variable batch sizes efficiently.
 
 ### Instance6 Review
+
 **Reviewer:** [Pending]
 **Date:** [Pending]
 **Decision:** [Pending]

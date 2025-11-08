@@ -3,6 +3,7 @@
 ## 🎯 The Challenge
 
 Converting a **200GB Marxist Internet Archive** into a queryable RAG system with:
+
 - Maximum power, robustness, and scalability
 - Parallel development with multiple Claude Code CLI instances
 - Cost-effective approach
@@ -10,6 +11,7 @@ Converting a **200GB Marxist Internet Archive** into a queryable RAG system with
 ## 💡 The Solution
 
 ### 1. **Embeddings: Runpod.io GPU Rental**
+
 - **Cost: $40-60 total** (vs $500-1000 for APIs)
 - **Approach**: Rent RTX 4090 on Runpod.io
 - **Model**: BAAI/bge-large-en-v1.5 (1024 dimensions, beats OpenAI)
@@ -17,12 +19,14 @@ Converting a **200GB Marxist Internet Archive** into a queryable RAG system with
 - **Full guide**: [RUNPOD_EMBEDDINGS.md](./RUNPOD_EMBEDDINGS.md)
 
 ### 2. **Vector Database: Weaviate**
+
 - **Scale**: Handles billions of vectors
 - **Features**: Hybrid search, production-grade, multi-tenancy
 - **Deployment**: 3+ node cluster for reliability
 - **Alternative**: Qdrant if you prefer Rust-based performance
 
 ### 3. **Processing: Distributed Architecture**
+
 - **Framework**: Ray or Dask for distributed computing
 - **Queue**: Redis or RabbitMQ for job management
 - **Sharding**: Split 200GB into 10-20GB shards
@@ -33,31 +37,37 @@ Converting a **200GB Marxist Internet Archive** into a queryable RAG system with
 ### 6 Claude Code CLI Instances
 
 **Instance A - Distributed Processing Orchestrator**
+
 ```bash
 claude-code --prompt "Implement distributed processing for 200GB corpus using Ray/Dask. Read CLAUDE_ENTERPRISE.md"
 ```
 
 **Instance B - Runpod Embedding Pipeline**
+
 ```bash
 claude-code --prompt "Implement Runpod GPU embedding pipeline. Read RUNPOD_EMBEDDINGS.md"
 ```
 
 **Instance C - Weaviate Vector Database**
+
 ```bash
 claude-code --prompt "Set up Weaviate cluster for 10M+ vectors. Read CLAUDE_ENTERPRISE.md"
 ```
 
 **Instance D - Query Engine**
+
 ```bash
 claude-code --prompt "Build query engine with <100ms latency. Read specs/04-QUERY-INTERFACE-SPEC.md"
 ```
 
 **Instance E - MCP Server**
+
 ```bash
 claude-code --prompt "Implement MCP server for PercyBrain integration. Read specs/05-MCP-INTEGRATION-SPEC.md"
 ```
 
 **Instance F - Monitoring**
+
 ```bash
 claude-code --prompt "Set up Prometheus + Grafana monitoring. Track costs and performance"
 ```
@@ -65,11 +75,13 @@ claude-code --prompt "Set up Prometheus + Grafana monitoring. Track costs and pe
 ## 💰 Cost Breakdown
 
 ### One-Time Processing Costs
+
 - **Runpod GPU rental**: $40-60
 - **Storage (500GB for processing)**: ~$50/month during processing
 - **Total processing cost**: **Under $150**
 
 ### Ongoing Operational Costs
+
 - **Weaviate hosting**: ~$100-200/month (or self-host)
 - **Storage for vectors**: ~$20-30/month
 - **Query compute**: Minimal if self-hosted
@@ -103,24 +115,28 @@ claude-code --prompt "Set up Prometheus + Grafana monitoring. Track costs and pe
 ## 🚀 Quick Start Sequence
 
 ### Week 1: Infrastructure
+
 1. Set up Runpod account and test with 1GB sample
 2. Deploy Weaviate cluster (3 nodes minimum)
 3. Set up Ray/Dask for distributed processing
 4. Create monitoring dashboards
 
 ### Week 2: Processing
+
 1. Start Runpod GPU pod(s)
 2. Begin processing 200GB in 10GB shards
 3. Monitor progress and costs
 4. Handle any failures with checkpointing
 
 ### Week 3: Integration
+
 1. Verify all embeddings generated
 2. Load vectors into Weaviate
 3. Build and test query API
 4. Integrate MCP server
 
 ### Week 4: Optimization
+
 1. Performance tuning for <100ms queries
 2. Cost optimization
 3. Documentation
@@ -154,6 +170,7 @@ claude-code --prompt "Set up Prometheus + Grafana monitoring. Track costs and pe
    - specs/INDEX.md (module specifications)
 
 2. **Set up development environment**:
+
    ```bash
    pip install ray dask weaviate-client redis sentence-transformers
    ```

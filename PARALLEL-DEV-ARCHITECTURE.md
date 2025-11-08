@@ -5,6 +5,7 @@
 This document defines the architecture and protocols for coordinating 6+ parallel Claude Code instances working on the MIA RAG system. The architecture ensures zero conflicts, clear boundaries, and efficient integration while maintaining development velocity.
 
 **Key Principles:**
+
 - Each instance owns specific modules with clear interfaces
 - Lock-free development through isolation
 - Async communication via documentation

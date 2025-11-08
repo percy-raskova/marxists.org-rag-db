@@ -1,7 +1,7 @@
 # Project Status - MIA RAG System
 
 **Author**: Persphone Raskova
-**Repository**: https://github.com/percy-raskova/marxists.org-rag-db
+**Repository**: <https://github.com/percy-raskova/marxists.org-rag-db>
 **Date**: 2025-01-08
 
 ## Current Status
@@ -42,18 +42,22 @@
 ### 📋 Next Steps
 
 #### Immediate (Today)
+
 1. Complete the MIA archive download (5GB remaining)
 2. Initialize git repository and push to GitHub
 3. Run `poetry install` to set up base dependencies
 4. Test Mise commands work correctly
 
 #### Instance Development (Ready to Start)
+
 Each of the 6 Claude Code instances can now:
+
 1. Clone the repository
 2. Run `mise run instance{N}:setup`
 3. Begin TDD development in their assigned modules
 
 #### Infrastructure (Week 1)
+
 1. Set up GCP project
 2. Create GCS buckets for storage tiers
 3. Set up Runpod account for embeddings
@@ -90,8 +94,8 @@ The environment is fully configured for 6 parallel Claude Code instances to begi
 
 ### 🔗 Resources
 
-- **Repository**: https://github.com/percy-raskova/marxists.org-rag-db
-- **MIA Archive**: https://archive.org/details/dump_www-marxists-org
+- **Repository**: <https://github.com/percy-raskova/marxists.org-rag-db>
+- **MIA Archive**: <https://archive.org/details/dump_www-marxists-org>
 - **Documentation**: See README.md and AI-AGENT-INSTRUCTIONS.md
 - **Specifications**: See specs/ directory
 

@@ -15,6 +15,7 @@ You are working on a 200GB RAG system with 6 parallel Claude Code instances. Thi
 ## 🚫 NEVER DO THIS (Violations = Immediate Stop)
 
 ### 1. **NEVER modify code outside your assigned instance**
+
 ```python
 # ❌ WRONG (Instance 2 modifying Instance 3's code)
 edit_file("src/mia_rag/vectordb/client.py")
@@ -24,6 +25,7 @@ edit_file("src/mia_rag/embeddings/batch_processor.py")
 ```
 
 Your boundaries:
+
 - Instance 1: `src/mia_rag/storage/`, `src/mia_rag/pipeline/`
 - Instance 2: `src/mia_rag/embeddings/`
 - Instance 3: `src/mia_rag/vectordb/`
@@ -32,6 +34,7 @@ Your boundaries:
 - Instance 6: `src/mia_rag/monitoring/`, `tests/integration/`
 
 ### 2. **NEVER change interface contracts without RFC**
+
 ```python
 # ❌ WRONG: Changing interface signature
 class StorageInterface(ABC):
@@ -44,6 +47,7 @@ class StorageInterface(ABC):
 ```
 
 ### 3. **NEVER skip tests or commit with <80% coverage**
+
 ```bash
 # ❌ WRONG
 git commit -m "feat: add batch processor" --no-verify
@@ -55,19 +59,22 @@ git commit -m "feat: add batch processor with 85% coverage"
 ```
 
 ### 4. **NEVER hardcode credentials or secrets**
-```python
-# ❌ WRONG
-RUNPOD_API_KEY = "rp-1234567890abcdef"
-client = RunpodClient(api_key=RUNPOD_API_KEY)
 
-# ✅ CORRECT
+```python
+# ❌ WRONG - Hardcoded credentials
+credentials = "hardcoded-secret-value"
+client = ServiceClient(api_key=credentials)
+
+# ✅ CORRECT - Use environment variables
 import os
 from dotenv import load_dotenv
 load_dotenv(f".env.{os.getenv('INSTANCE_ID', 'instance2')}")
-RUNPOD_API_KEY = os.getenv("RUNPOD_API_KEY")
+credentials = os.getenv("SERVICE_CREDENTIALS")  # Set in .env file
+client = ServiceClient(api_key=credentials)
 ```
 
 ### 5. **NEVER load entire 200GB dataset into memory**
+
 ```python
 # ❌ WRONG
 with open("200gb_corpus.txt") as f:
@@ -81,6 +88,7 @@ def stream_documents(path: Path, chunk_size: int = 1024 * 1024):
 ```
 
 ### 6. **NEVER ignore type hints**
+
 ```python
 # ❌ WRONG
 def process_batch(data, size):  # type: ignore
@@ -95,6 +103,7 @@ def process_batch(data: List[T], size: int) -> List[T]:
 ```
 
 ### 7. **NEVER create vague TODOs**
+
 ```python
 # ❌ WRONG
 # TODO: fix this
@@ -110,6 +119,7 @@ def process_batch(data: List[T], size: int) -> List[T]:
 ## ✅ ALWAYS DO THIS (Required Practices)
 
 ### 1. **ALWAYS write tests first (TDD)**
+
 ```bash
 # Workflow for EVERY feature:
 # 1. Write failing test
@@ -130,6 +140,7 @@ mise run test
 ```
 
 ### 2. **ALWAYS use dataclasses for data structures**
+
 ```python
 # ❌ WRONG
 def process_document(doc):
@@ -154,6 +165,7 @@ def process_document(doc: Document) -> Document:
 ```
 
 ### 3. **ALWAYS handle errors with retry logic**
+
 ```python
 # ✅ CORRECT
 from tenacity import retry, stop_after_attempt, wait_exponential
@@ -181,6 +193,7 @@ def call_runpod_api(endpoint: str, data: dict) -> dict:
 ```
 
 ### 4. **ALWAYS log structured data**
+
 ```python
 # ❌ WRONG
 print(f"Processed document {doc_id} in {time}ms")
@@ -200,6 +213,7 @@ logger.info(
 ```
 
 ### 5. **ALWAYS checkpoint long-running operations**
+
 ```python
 # ✅ CORRECT: Resumable processing
 from pathlib import Path
@@ -244,6 +258,7 @@ class BatchProcessor:
 ```
 
 ### 6. **ALWAYS update work logs**
+
 ```bash
 # Start of day
 mise run work:start
@@ -256,6 +271,7 @@ mise run work:end
 ```
 
 Example work log entry:
+
 ```markdown
 # Work Log: Instance 2 - Embeddings
 ## Date: 2025-01-08
@@ -340,6 +356,7 @@ mise run work:end
 ## 🎯 Confidence Levels & Decision Making
 
 ### 95-100% Confidence: Implement Directly
+
 - Proven patterns from documentation
 - Clear specifications in your module spec
 - Well-established best practices
@@ -347,12 +364,14 @@ mise run work:end
 Example: Using Ray for distributed processing (proven at 200GB scale)
 
 ### 80-94% Confidence: Implement with Extra Tests
+
 - Should work based on documentation
 - Minor uncertainties about edge cases
 
 Example: Specific Runpod API behavior under load
 
 ### 60-79% Confidence: Create Proof-of-Concept First
+
 - Theoretical capability
 - Needs validation before full implementation
 
@@ -367,6 +386,7 @@ def proof_of_concept():
 ```
 
 ### <60% Confidence: Ask for Guidance
+
 ```python
 # Create an RFC or issue
 """
@@ -404,6 +424,7 @@ mise run ci:validate
 ## 🚨 Common AI Agent Mistakes to Avoid
 
 ### 1. Structural Duplication
+
 ```python
 # ❌ WRONG: Reimplementing existing functionality
 class MyBatchProcessor:
@@ -417,6 +438,7 @@ from mia_rag.common.batch_processor import BatchProcessor
 ```
 
 ### 2. Breaking Dependent Code
+
 ```python
 # ❌ WRONG: Changing signature without checking dependents
 def upload(self, path: str, content: str, metadata: dict):  # Added param!
@@ -427,6 +449,7 @@ mise run check:dependents upload
 ```
 
 ### 3. Over-Engineering
+
 ```python
 # ❌ WRONG: Unnecessary abstraction
 class AbstractFactoryBuilderStrategyPattern:
@@ -438,6 +461,7 @@ def process_document(doc: str) -> str:
 ```
 
 ### 4. Ignoring Scale Implications
+
 ```python
 # ❌ WRONG: O(n²) algorithm for 200GB
 for doc1 in all_docs:
@@ -450,6 +474,7 @@ results = vector_db.search(query_vector, top_k=10)
 ```
 
 ### 5. Vague Error Messages
+
 ```python
 # ❌ WRONG
 raise ValueError("Invalid input")
@@ -466,6 +491,7 @@ raise ValueError(
 Your module is successful when:
 
 ### Code Quality
+
 - ✅ Test coverage > 80%
 - ✅ All tests passing
 - ✅ No linting errors
@@ -473,6 +499,7 @@ Your module is successful when:
 - ✅ No security issues
 
 ### Performance
+
 - ✅ Meets spec requirements:
   - Instance 1: 10GB/hour processing
   - Instance 2: 100K docs/hour embeddings
@@ -482,6 +509,7 @@ Your module is successful when:
   - Instance 6: <1% metric loss
 
 ### Integration
+
 - ✅ Interface contracts honored
 - ✅ Integration tests pass
 - ✅ No blocking issues for other instances
@@ -499,6 +527,7 @@ Ask for help when:
 7. **Need clarification on requirements** - Better to ask than guess
 
 DO NOT:
+
 - Guess and hope it works
 - Skip tests because they're hard
 - Change interfaces without approval

@@ -82,10 +82,12 @@ graph LR
 ## Implementation Plan
 
 ### Phase 1: [Title]
+
 - [ ] Task 1
 - [ ] Task 2
 
 ### Phase 2: [Title]
+
 - [ ] Task 3
 - [ ] Task 4
 
@@ -154,12 +156,14 @@ graph LR
 [Space for reviewers to add comments]
 
 ### Instance1 Review
+
 **Reviewer:** [Name]
 **Date:** [Date]
 **Decision:** Approve/Request Changes/Reject
 **Comments:**
 
 ### Instance2 Review
+
 **Reviewer:** [Name]
 **Date:** [Date]
 **Decision:** Approve/Request Changes/Reject

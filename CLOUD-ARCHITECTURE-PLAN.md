@@ -5,6 +5,7 @@
 This document defines the complete cloud infrastructure architecture for processing and hosting a 200GB Marxist Internet Archive RAG system. The architecture prioritizes cost-effectiveness while maintaining enterprise-scale capabilities, supporting 6+ parallel development instances, and ensuring production reliability.
 
 **Key Decisions:**
+
 - **Primary Cloud Provider**: Google Cloud Platform (GCP)
 - **Embedding Generation**: Runpod.io GPU rental ($40-60 one-time)
 - **Vector Database**: Weaviate on GKE
@@ -26,6 +27,7 @@ This document defines the complete cloud infrastructure architecture for process
 | **Learning Curve** | Moderate | Steep | Moderate | GCP/Azure |
 
 **Rationale for GCP:**
+
 1. Lowest storage costs for archival data (critical for 200GB corpus)
 2. Best integration with Weaviate via GKE marketplace
 3. Simpler networking model than AWS
@@ -35,6 +37,7 @@ This document defines the complete cloud infrastructure architecture for process
 ### Alternative Configurations
 
 #### AWS Architecture
+
 ```yaml
 Storage: S3 with Intelligent Tiering
 Compute: EC2 Spot Fleet
@@ -45,6 +48,7 @@ Cost: ~$200-300/month
 ```
 
 #### Azure Architecture
+
 ```yaml
 Storage: Blob Storage with Archive tier
 Compute: Spot VMs with VMSS
@@ -465,6 +469,7 @@ gcloud dns record-sets transaction execute --zone=mia-zone
 ## 10. Implementation Roadmap
 
 ### Week 1: Foundation
+
 - [ ] Create GCP project structure
 - [ ] Set up Terraform state backend
 - [ ] Deploy networking foundation
@@ -472,12 +477,14 @@ gcloud dns record-sets transaction execute --zone=mia-zone
 - [ ] Set up monitoring basics
 
 ### Week 2: Processing Infrastructure
+
 - [ ] Deploy processing VMs
 - [ ] Set up job queue (Cloud Tasks)
 - [ ] Create Runpod integration
 - [ ] Test with 1GB sample
 
 ### Week 3: Vector Database
+
 - [ ] Deploy GKE cluster
 - [ ] Install Weaviate
 - [ ] Configure persistence
@@ -485,6 +492,7 @@ gcloud dns record-sets transaction execute --zone=mia-zone
 - [ ] Verify query performance
 
 ### Week 4: API & Integration
+
 - [ ] Deploy Cloud Run services
 - [ ] Set up load balancer
 - [ ] Configure Cloud CDN
@@ -492,6 +500,7 @@ gcloud dns record-sets transaction execute --zone=mia-zone
 - [ ] End-to-end testing
 
 ### Week 5: Production Readiness
+
 - [ ] Security audit
 - [ ] Performance optimization
 - [ ] Disaster recovery test
@@ -511,6 +520,7 @@ gcloud dns record-sets transaction execute --zone=mia-zone
 ## 12. Success Metrics
 
 ### Technical Metrics
+
 - [ ] Process 200GB corpus successfully
 - [ ] Generate embeddings for all documents
 - [ ] Query latency <100ms p50, <500ms p99
@@ -518,12 +528,14 @@ gcloud dns record-sets transaction execute --zone=mia-zone
 - [ ] Support 100+ concurrent queries
 
 ### Cost Metrics
+
 - [ ] One-time processing <$200
 - [ ] Monthly operational <$100
 - [ ] Cost per query <$0.001
 - [ ] Storage growth <10% monthly
 
 ### Development Metrics
+
 - [ ] 6 instances working in parallel
 - [ ] No resource conflicts
 - [ ] <1 hour to provision new env

@@ -11,12 +11,14 @@ Using Runpod.io for GPU rental provides the best cost-performance ratio for embe
 ### Optimal Configuration
 
 **GPU**: RTX 4090 (24GB VRAM)
+
 - Cost: ~$0.50/hour
 - Throughput: ~25,000 embeddings/hour
 - Total time: 80-100 hours
 - Total cost: $40-60
 
 **Model**: BAAI/bge-large-en-v1.5
+
 - Dimensions: 1024
 - Quality: Excellent (beats OpenAI ada-002 on MTEB)
 - Open source: No licensing issues
@@ -24,12 +26,14 @@ Using Runpod.io for GPU rental provides the best cost-performance ratio for embe
 ### Alternative Budget Option
 
 **GPU**: RTX 3090 (24GB VRAM)
+
 - Cost: ~$0.30/hour
 - Throughput: ~15,000 embeddings/hour
 - Total time: 130-160 hours
 - Total cost: $40-50
 
 **Model**: sentence-transformers/all-MiniLM-L12-v2
+
 - Dimensions: 384
 - Quality: Good (smaller but faster)
 
@@ -415,7 +419,7 @@ st.line_chart(progress_data.set_index('Time'))
 
 ## Quick Start
 
-1. **Sign up for Runpod**: https://runpod.io
+1. **Sign up for Runpod**: <https://runpod.io>
 2. **Add credits**: $100 should be more than enough
 3. **Deploy the pod**: Run `deploy_to_runpod.sh`
 4. **Start processing**: Run `python runpod_embeddings.py`
@@ -425,12 +429,14 @@ st.line_chart(progress_data.set_index('Time'))
 ## Estimated Timeline
 
 With single RTX 4090:
+
 - Day 1-2: Setup and testing on small sample
 - Day 3-6: Main corpus processing (running 24/7)
 - Day 7: Verification and cleanup
 - **Total: ~1 week of rental = $60-80 maximum**
 
 With 4x RTX 4090 pods (parallel):
+
 - Day 1: Setup all pods
 - Day 2-3: Complete processing
 - **Total: ~48 hours = $100 total** (but done in 2 days!)

@@ -5,6 +5,7 @@
 This document defines the comprehensive storage strategy for the 200GB Marxist Internet Archive RAG system. The strategy optimizes for cost, performance, and reliability while ensuring embeddings are generated only once and stored permanently.
 
 **Key Decisions:**
+
 - Raw torrent: GCS Archive tier ($2.40/month)
 - Processed markdown: GCS Standard→Nearline lifecycle ($1/month)
 - Embeddings: Parquet format with Snappy compression ($0.40/month)
@@ -73,6 +74,7 @@ Vector DB Data:
 **Format**: Original archive format (mixed HTML/PDF)
 **Compression**: Keep as-is (already compressed PDFs)
 **Structure**:
+
 ```
 gs://mia-raw-torrent/
 ├── dump_www-marxists-org.tar.gz (or original format)
@@ -85,6 +87,7 @@ gs://mia-raw-torrent/
 **Format**: Individual markdown files with YAML frontmatter
 **Compression**: Gzip for transport, uncompressed at rest
 **Structure**:
+
 ```
 gs://mia-processed-markdown/
 ├── by-author/
@@ -103,6 +106,7 @@ gs://mia-processed-markdown/
 ```
 
 **Markdown Format**:
+
 ```markdown
 ---
 title: "Capital, Volume I, Chapter 1"
@@ -155,6 +159,7 @@ partitioning = pa.dataset.partitioning(
 ```
 
 **Storage Structure**:
+
 ```
 gs://mia-embeddings/
 ├── version-1.0/
@@ -173,6 +178,7 @@ gs://mia-embeddings/
 ```
 
 **Compression Analysis**:
+
 ```python
 # Size calculations
 raw_size = 5_000_000 * 1024 * 4  # 5M chunks × 1024 dims × 4 bytes
@@ -191,6 +197,7 @@ total_size = parquet_size * 1.2  # 20% overhead
 **Format**: Weaviate native format
 **Storage Backend**: Google Persistent Disk SSD
 **Structure**:
+
 ```
 /var/lib/weaviate/
 ├── data/
@@ -827,6 +834,7 @@ for item, cost in costs.items():
 ### 5.2 Optimization Recommendations
 
 1. **Use Object Lifecycle Management**
+
    ```bash
    gsutil lifecycle set lifecycle.json gs://bucket-name
    ```

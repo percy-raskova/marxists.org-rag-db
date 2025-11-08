@@ -5,6 +5,7 @@
 This document defines the comprehensive testing strategy that enables 6+ parallel Claude Code instances to develop and test the MIA RAG system without requiring cloud resources initially. The strategy emphasizes isolation, mock services, and deterministic test data.
 
 **Key Principles:**
+
 - Tests run locally without cloud dependencies
 - Each instance has isolated test environment
 - Shared test fixtures for consistency

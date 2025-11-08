@@ -1195,41 +1195,41 @@ resource "null_resource" "set_quotas" {
 ENVIRONMENT ?= dev
 
 help:
-	@echo "Available targets:"
-	@echo "  init       - Initialize Terraform"
-	@echo "  plan       - Create execution plan"
-	@echo "  apply      - Apply infrastructure changes"
-	@echo "  destroy    - Destroy infrastructure"
-	@echo "  fmt        - Format Terraform files"
-	@echo "  validate   - Validate configuration"
+ @echo "Available targets:"
+ @echo "  init       - Initialize Terraform"
+ @echo "  plan       - Create execution plan"
+ @echo "  apply      - Apply infrastructure changes"
+ @echo "  destroy    - Destroy infrastructure"
+ @echo "  fmt        - Format Terraform files"
+ @echo "  validate   - Validate configuration"
 
 init:
-	@cd environments/$(ENVIRONMENT) && terraform init -upgrade
+ @cd environments/$(ENVIRONMENT) && terraform init -upgrade
 
 plan:
-	@cd environments/$(ENVIRONMENT) && terraform plan -out=tfplan
+ @cd environments/$(ENVIRONMENT) && terraform plan -out=tfplan
 
 apply:
-	@cd environments/$(ENVIRONMENT) && terraform apply tfplan
+ @cd environments/$(ENVIRONMENT) && terraform apply tfplan
 
 destroy:
-	@cd environments/$(ENVIRONMENT) && terraform destroy
+ @cd environments/$(ENVIRONMENT) && terraform destroy
 
 fmt:
-	@terraform fmt -recursive .
+ @terraform fmt -recursive .
 
 validate:
-	@cd environments/$(ENVIRONMENT) && terraform validate
+ @cd environments/$(ENVIRONMENT) && terraform validate
 
 cost:
-	@cd environments/$(ENVIRONMENT) && infracost breakdown --path .
+ @cd environments/$(ENVIRONMENT) && infracost breakdown --path .
 
 security:
-	@tfsec . --format json | jq
+ @tfsec . --format json | jq
 
 clean:
-	@find . -type f -name "*.tfplan" -delete
-	@find . -type d -name ".terraform" -exec rm -rf {} +
+ @find . -type f -name "*.tfplan" -delete
+ @find . -type d -name ".terraform" -exec rm -rf {} +
 ```
 
 ### CI/CD Pipeline

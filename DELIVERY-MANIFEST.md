@@ -11,6 +11,7 @@
 Complete, standalone specification documents for parallel AI development:
 
 #### Core Specifications
+
 1. **00-ARCHITECTURE-SPEC.md** (7.2 KB)
    - System architecture overview
    - Module interfaces and data flow
@@ -115,6 +116,7 @@ Initial working code (not spec-compliant but functional):
 ## How to Use This Delivery
 
 ### Option 1: Parallel Development (Recommended)
+
 Use multiple Claude Code instances, each working on different modules:
 
 ```bash
@@ -131,6 +133,7 @@ claude-code --context specs/00-ARCHITECTURE-SPEC.md,specs/04-QUERY-INTERFACE-SPE
 See `PARALLEL-DEV-QUICKSTART.md` for detailed instructions.
 
 ### Option 2: Sequential Development
+
 One Claude instance implementing modules in dependency order:
 
 ```bash
@@ -138,6 +141,7 @@ claude-code --context specs/INDEX.md,specs/00-ARCHITECTURE-SPEC.md
 ```
 
 ### Option 3: Use Reference Implementation
+
 Start with working code and refactor to spec:
 
 ```bash
@@ -172,20 +176,23 @@ outputs/
 
 ## What's Next
 
-### Immediate Actions:
+### Immediate Actions
+
 1. ✅ Download Internet Archive torrent (or GitHub mirror)
 2. ✅ Review all specs (start with INDEX.md)
 3. ✅ Decide on parallel vs sequential development
 4. ✅ Set up Claude Code instances
 5. ✅ Begin implementation
 
-### Development Timeline (3 devs in parallel):
+### Development Timeline (3 devs in parallel)
+
 - **Week 1:** Processing + Ingestion foundations
 - **Week 2:** Complete Processing + Ingestion, start Query
 - **Week 3:** Complete Query + MCP, integrate
 - **Week 4:** Testing, optimization, deployment
 
-### Success Criteria:
+### Success Criteria
+
 - ✅ Process 126k HTML pages
 - ✅ Process 38k PDFs
 - ✅ Generate embeddings for all chunks
@@ -195,7 +202,8 @@ outputs/
 
 ## Key Features
 
-### What Makes These Specs Good:
+### What Makes These Specs Good
+
 - ✅ **Standalone** - Each module can be implemented independently
 - ✅ **Complete** - All classes, methods, data structures defined
 - ✅ **Testable** - Clear acceptance criteria
@@ -203,7 +211,8 @@ outputs/
 - ✅ **Well-structured** - Proper abstractions and interfaces
 - ✅ **AI-optimized** - Written for LLM consumption
 
-### Spec Quality Metrics:
+### Spec Quality Metrics
+
 - **Total Specification Text:** ~70 KB
 - **Total Reference Code:** ~40 KB
 - **Acceptance Criteria:** 48 items across all modules
@@ -214,41 +223,48 @@ outputs/
 ## Confidence Levels
 
 ### Specifications: 95%
+
 - Based on working implementation
 - Incorporates best practices
 - Clear acceptance criteria
 - Well-defined interfaces
 
 **Limitations:**
+
 - Some edge cases may need clarification during implementation
 - Performance numbers are estimates based on typical hardware
 
 ### Reference Implementation: 85%
+
 - Fully functional for basic use case
 - Tested on sample data
 - Handles errors gracefully
 
 **Limitations:**
+
 - Not optimized for scale
 - Monolithic structure
 - Limited test coverage
 
 ## Support & Troubleshooting
 
-### If Specs Are Unclear:
+### If Specs Are Unclear
+
 1. Check Architecture Spec for context
 2. Look at reference implementation
 3. Check other module specs for patterns
 4. Make reasonable decisions and document them
 
-### If Implementation Fails:
+### If Implementation Fails
+
 1. Verify dependencies installed
 2. Check Ollama is running
 3. Verify Internet Archive download
 4. Check logs for specific errors
 5. Review error handling in specs
 
-### Common Issues:
+### Common Issues
+
 - **Ollama connection:** Make sure `ollama serve` is running
 - **PDF extraction slow:** Expected, use `--skip-pdfs` for testing
 - **Out of memory:** Reduce batch size in ingestion
@@ -257,6 +273,7 @@ outputs/
 ## Success Stories in Advance
 
 This architecture enables:
+
 - 🔥 **Material Analysis RAG** - Query theory while analyzing localities
 - 🔥 **Organizing Tools** - Historical precedent lookup for current struggles
 - 🔥 **Theory Synthesis** - Apply theoretical frameworks to current events
@@ -274,6 +291,7 @@ You now have everything needed to build a complete, production-quality RAG syste
 - ✅ **Integration Guides** for PercyBrain
 
 This is **Documentation Driven Development for LLMs** in practice:
+
 - Specs are AI-readable
 - Implementation can be parallelized
 - Quality is measurable (acceptance criteria)
@@ -282,6 +300,7 @@ This is **Documentation Driven Development for LLMs** in practice:
 ## Files Delivered: 13
 
 ### Specs: 7 files (~70 KB)
+
 - INDEX.md
 - 00-ARCHITECTURE-SPEC.md
 - 02-DOCUMENT-PROCESSING-SPEC.md
@@ -291,12 +310,14 @@ This is **Documentation Driven Development for LLMs** in practice:
 - 06-TESTING-VALIDATION-SPEC.md
 
 ### Implementation: 4 files (~40 KB)
+
 - mia_processor.py
 - rag_ingest.py
 - query_example.py
 - requirements.txt
 
 ### Documentation: 2 files (~20 KB)
+
 - README.md
 - PARALLEL-DEV-QUICKSTART.md
 
