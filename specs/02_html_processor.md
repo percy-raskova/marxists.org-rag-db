@@ -12,6 +12,7 @@ Convert MIA HTML files to clean, RAG-optimized Markdown while preserving semanti
 ## 2. Scope
 
 **In Scope:**
+
 - HTML parsing and cleaning
 - Markdown conversion with proper formatting
 - Boilerplate removal (nav, headers, footers)
@@ -20,6 +21,7 @@ Convert MIA HTML files to clean, RAG-optimized Markdown while preserving semanti
 - Frontmatter generation
 
 **Out of Scope:**
+
 - PDF processing
 - Vector embedding
 - Database operations
@@ -28,11 +30,13 @@ Convert MIA HTML files to clean, RAG-optimized Markdown while preserving semanti
 ## 3. Technical Requirements
 
 ### 3.1 System Requirements
+
 - Python 3.9+
 - UTF-8 encoding support
 - 4GB RAM minimum for batch processing
 
 ### 3.2 Dependencies
+
 ```python
 beautifulsoup4>=4.12.0
 markdownify>=0.11.6
@@ -40,6 +44,7 @@ lxml>=4.9.0
 ```
 
 ### 3.3 Performance Requirements
+
 - Process 100 HTML files/minute minimum
 - Memory usage: <100MB per process
 - Support parallel processing
@@ -47,6 +52,7 @@ lxml>=4.9.0
 ## 4. Data Contracts
 
 ### 4.1 Input
+
 ```python
 @dataclass
 class HTMLProcessConfig:
@@ -61,6 +67,7 @@ class HTMLProcessConfig:
 ```
 
 ### 4.2 Output Structure
+
 ```markdown
 ---
 title: The Communist Manifesto
@@ -81,6 +88,7 @@ The history of all hitherto existing society is the history of class struggles..
 ```
 
 ### 4.3 Return Value
+
 ```python
 @dataclass
 class ProcessingResult:
@@ -94,6 +102,7 @@ class ProcessingResult:
 ```
 
 ### 4.4 Document Metadata Structure
+
 ```python
 @dataclass
 class DocumentMetadata:
@@ -112,6 +121,7 @@ class DocumentMetadata:
 ## 5. Functional Specification
 
 ### 5.1 Core Function Signature
+
 ```python
 def process_html_file(
     html_path: Path,
@@ -142,9 +152,10 @@ def process_html_file(
 7. Clean markdown → 8. Generate frontmatter → 9. Write output
 ```
 
-#### Step-by-Step:
+#### Step-by-Step
 
 **1. File Reading**
+
 ```python
 def read_html_file(path: Path) -> str:
     """
@@ -161,6 +172,7 @@ def read_html_file(path: Path) -> str:
 ```
 
 **2. Language Detection**
+
 ```python
 def detect_language(html_path: Path) -> Optional[str]:
     """
@@ -194,6 +206,7 @@ def detect_language(html_path: Path) -> Optional[str]:
 ```
 
 **3. HTML Parsing**
+
 ```python
 def parse_html(content: str) -> BeautifulSoup:
     """Parse HTML with lxml parser for speed."""
@@ -201,6 +214,7 @@ def parse_html(content: str) -> BeautifulSoup:
 ```
 
 **4. Boilerplate Removal**
+
 ```python
 def remove_boilerplate(soup: BeautifulSoup) -> BeautifulSoup:
     """
@@ -231,6 +245,7 @@ def remove_boilerplate(soup: BeautifulSoup) -> BeautifulSoup:
 ```
 
 **5. Metadata Extraction**
+
 ```python
 def extract_metadata(
     soup: BeautifulSoup,
@@ -257,6 +272,7 @@ def extract_metadata(
 ```
 
 **6. Markdown Conversion**
+
 ```python
 def convert_to_markdown(soup: BeautifulSoup) -> str:
     """
@@ -280,6 +296,7 @@ def convert_to_markdown(soup: BeautifulSoup) -> str:
 ```
 
 **7. Markdown Cleaning**
+
 ```python
 def clean_markdown(content: str) -> str:
     """
@@ -305,6 +322,7 @@ def clean_markdown(content: str) -> str:
 ```
 
 **8. Frontmatter Generation**
+
 ```python
 def generate_frontmatter(metadata: DocumentMetadata) -> str:
     """
@@ -327,6 +345,7 @@ content_hash: {metadata.content_hash}
 ```
 
 **9. Output Writing**
+
 ```python
 def write_output(
     content: str,
@@ -354,6 +373,7 @@ def write_output(
 ```
 
 ### 5.3 Batch Processing
+
 ```python
 def process_html_directory(
     input_dir: Path,
@@ -391,6 +411,7 @@ def process_html_directory(
 ## 6. Error Handling
 
 ### 6.1 Error Types
+
 ```python
 class HTMLProcessError(Exception):
     """Base exception"""
@@ -419,6 +440,7 @@ class MetadataExtractionError(HTMLProcessError):
 ## 7. Quality Validation
 
 ### 7.1 Output Quality Checks
+
 ```python
 def validate_output(markdown: str, metadata: DocumentMetadata) -> bool:
     """
@@ -446,6 +468,7 @@ def validate_output(markdown: str, metadata: DocumentMetadata) -> bool:
 ```
 
 ### 7.2 Content Quality Heuristics
+
 ```python
 def assess_content_quality(soup: BeautifulSoup) -> float:
     """
@@ -481,6 +504,7 @@ def assess_content_quality(soup: BeautifulSoup) -> float:
 ## 8. Testing Requirements
 
 ### 8.1 Unit Tests
+
 ```python
 def test_language_detection():
     """Test language detection heuristics"""
@@ -499,6 +523,7 @@ def test_frontmatter_generation():
 ```
 
 ### 8.2 Integration Tests
+
 ```python
 def test_full_pipeline():
     """Test complete HTML→Markdown pipeline"""
@@ -511,7 +536,9 @@ def test_parallel_processing():
 ```
 
 ### 8.3 Test Fixtures
+
 Create test HTML files representing:
+
 - Simple article (Marx essay)
 - Complex nested structure (Capital chapter)
 - Heavy boilerplate (index page)
@@ -521,6 +548,7 @@ Create test HTML files representing:
 ## 9. Success Criteria
 
 ### 9.1 Functional
+
 - [ ] Processes 95%+ of English HTML files
 - [ ] Removes all navigation boilerplate
 - [ ] Preserves document structure (headings, lists, quotes)
@@ -529,6 +557,7 @@ Create test HTML files representing:
 - [ ] Produces clean, readable Markdown
 
 ### 9.2 Non-Functional
+
 - [ ] Processes ≥100 files/minute
 - [ ] Memory usage <100MB per process
 - [ ] No data loss on interruption (atomic writes)
@@ -536,7 +565,8 @@ Create test HTML files representing:
 
 ## 10. Example Test Case
 
-### Input HTML:
+### Input HTML
+
 ```html
 <!DOCTYPE html>
 <html>
@@ -554,7 +584,8 @@ Create test HTML files representing:
 </html>
 ```
 
-### Expected Output:
+### Expected Output
+
 ```markdown
 ---
 title: Wage Labour and Capital - Marx
@@ -584,10 +615,12 @@ Wages are determined through the antagonistic struggle between capitalist and wo
 **Confidence:** 90%
 
 **Risks:**
+
 - Edge cases in HTML structure (10%)
 - Character encoding issues with old scans (5%)
 
 **Mitigation:**
+
 - Extensive test suite
 - Graceful degradation
 

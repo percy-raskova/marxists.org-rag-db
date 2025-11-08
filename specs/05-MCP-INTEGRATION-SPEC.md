@@ -12,6 +12,7 @@ Exposes RAG system as MCP server tools for integration with PercyBrain and Claud
 ## MCP Tools
 
 ### search_marxist_theory
+
 ```python
 {
     "name": "search_marxist_theory",
@@ -28,6 +29,7 @@ Exposes RAG system as MCP server tools for integration with PercyBrain and Claud
 ```
 
 ### find_author_works
+
 ```python
 {
     "name": "find_author_works",
@@ -43,6 +45,7 @@ Exposes RAG system as MCP server tools for integration with PercyBrain and Claud
 ```
 
 ### get_work_context
+
 ```python
 {
     "name": "get_work_context",
@@ -83,6 +86,7 @@ async def call_tool(name: str, arguments: dict) -> str:
 ## PercyBrain Integration
 
 Add to `mcp_config.json`:
+
 ```json
 {
   "mcpServers": {

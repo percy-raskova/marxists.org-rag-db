@@ -37,6 +37,7 @@ Complete system for converting **200GB Marxists Internet Archive** (5-10M estima
 ## Module Breakdown
 
 ### 1. Archive Acquisition Module
+
 **Spec Document:** `01-ARCHIVE-ACQUISITION-SPEC.md`
 
 - Torrent download handling
@@ -45,6 +46,7 @@ Complete system for converting **200GB Marxists Internet Archive** (5-10M estima
 - Archive validation
 
 ### 2. Document Processing Module
+
 **Spec Document:** `02-DOCUMENT-PROCESSING-SPEC.md`
 
 - HTML → Markdown conversion
@@ -54,6 +56,7 @@ Complete system for converting **200GB Marxists Internet Archive** (5-10M estima
 - Content deduplication
 
 ### 3. RAG Ingestion Module
+
 **Spec Document:** `03-RAG-INGESTION-SPEC.md`
 
 - Chunking strategies (semantic, section, token)
@@ -62,6 +65,7 @@ Complete system for converting **200GB Marxists Internet Archive** (5-10M estima
 - Batch processing
 
 ### 4. Query Interface Module
+
 **Spec Document:** `04-QUERY-INTERFACE-SPEC.md`
 
 - Semantic search
@@ -70,6 +74,7 @@ Complete system for converting **200GB Marxists Internet Archive** (5-10M estima
 - Interactive CLI
 
 ### 5. MCP Integration Module
+
 **Spec Document:** `05-MCP-INTEGRATION-SPEC.md`
 
 - MCP server implementation
@@ -78,6 +83,7 @@ Complete system for converting **200GB Marxists Internet Archive** (5-10M estima
 - Context management
 
 ### 6. Testing & Validation Module
+
 **Spec Document:** `06-TESTING-VALIDATION-SPEC.md`
 
 - Unit tests
@@ -134,6 +140,7 @@ Internet Archive Torrent (126k pages, 38k PDFs)
 ## Technology Stack
 
 ### Core Dependencies
+
 - **Python:** 3.9+
 - **Embedding:** Ollama (nomic-embed-text, 768d)
 - **Vector DB:** ChromaDB (local) or Qdrant (local/cloud)
@@ -142,12 +149,14 @@ Internet Archive Torrent (126k pages, 38k PDFs)
 - **PDF:** pymupdf4llm
 
 ### Storage Requirements
+
 - **Source Archive:** ~15-20 GB
 - **Processed Markdown:** ~8-10 GB
 - **Vector DB:** ~5-8 GB
 - **Total:** ~30-40 GB
 
 ### Performance Targets
+
 - **Processing Rate:** 100 HTML/min, 10 PDF/min
 - **Embedding Rate:** 50 chunks/sec (local Ollama)
 - **Query Latency:** <500ms for top-5 results
@@ -218,6 +227,7 @@ mia-rag-system/
 ## Data Schemas
 
 ### Document Metadata Schema
+
 ```json
 {
   "source_url": "string",
@@ -235,6 +245,7 @@ mia-rag-system/
 ```
 
 ### Chunk Schema
+
 ```json
 {
   "chunk_id": "string (unique)",
@@ -250,6 +261,7 @@ mia-rag-system/
 ```
 
 ### MIA Author Schema (from JSON)
+
 ```json
 {
   "name": "string",
@@ -263,16 +275,19 @@ mia-rag-system/
 ## Inter-Module Interfaces
 
 ### Processing → Ingestion
+
 **Input:** Directory of markdown files with frontmatter  
 **Output:** None (direct file system)  
 **Contract:** Each .md file has YAML frontmatter with complete metadata
 
 ### Ingestion → Query
+
 **Input:** Vector DB path/connection  
 **Output:** Query results (list of chunks with metadata)  
 **Contract:** Vector DB contains "marxist_theory" collection
 
 ### Query → MCP
+
 **Input:** Search query string  
 **Output:** Formatted results for Claude context  
 **Contract:** MCP tool schema compliance
@@ -280,6 +295,7 @@ mia-rag-system/
 ## Configuration Management
 
 ### Environment Variables
+
 ```bash
 MIA_ARCHIVE_PATH="/path/to/archive"
 MIA_OUTPUT_DIR="~/marxists-processed"
@@ -292,6 +308,7 @@ OLLAMA_HOST="http://localhost:11434"
 ```
 
 ### Config File Format (config.yaml)
+
 ```yaml
 archive:
   path: "/path/to/archive"
@@ -327,17 +344,20 @@ mcp:
 ## Error Handling Strategy
 
 ### Retry Logic
+
 - **Network requests:** 3 retries with exponential backoff
 - **Ollama embeddings:** 3 retries with 2s delay
 - **Vector DB operations:** 2 retries
 
 ### Failure Modes
+
 1. **Partial Processing Failure:** Log error, continue with next document
 2. **Embedding Service Down:** Pause ingestion, alert user
 3. **Vector DB Connection Loss:** Save progress, retry connection
 4. **Corrupt Archive File:** Skip file, log warning
 
 ### Logging
+
 - **Level:** INFO for progress, WARNING for skips, ERROR for failures
 - **Format:** `[TIMESTAMP] [LEVEL] [MODULE] Message`
 - **Destinations:** Console + file (`mia_rag.log`)
@@ -345,16 +365,19 @@ mcp:
 ## Security Considerations
 
 ### Local-Only Architecture
+
 - No external API calls except Ollama (localhost)
 - No data exfiltration
 - Full content stored locally
 
 ### Data Privacy
+
 - Vector DB contains full text
 - Store on encrypted volume (LUKS recommended)
 - No network exposure by default
 
 ### Copyright Compliance
+
 - Respect MIA licensing (public domain + CC-BY-SA)
 - Track copyright status in metadata
 - User responsible for legal use
@@ -362,16 +385,19 @@ mcp:
 ## Performance Optimization
 
 ### Processing Phase
+
 - Parallel HTML processing (4-8 workers)
 - PDF processing serialized (CPU-bound)
 - Batch metadata writes
 
 ### Ingestion Phase
+
 - Batch embedding requests (10-50 chunks)
 - Async vector DB inserts
 - Progress checkpointing for resume
 
 ### Query Phase
+
 - Index-based similarity search
 - Metadata pre-filtering
 - Result caching (optional)
@@ -379,7 +405,9 @@ mcp:
 ## Extensibility Points
 
 ### Custom Chunking Strategies
+
 Implement `ChunkStrategy` interface:
+
 ```python
 class CustomStrategy(ChunkStrategy):
     def chunk(self, content: str, max_tokens: int) -> List[str]:
@@ -388,7 +416,9 @@ class CustomStrategy(ChunkStrategy):
 ```
 
 ### Additional Vector DBs
+
 Implement `VectorDB` interface:
+
 ```python
 class CustomVectorDB(VectorDB):
     def insert(self, chunks: List[Chunk]) -> None: pass
@@ -396,7 +426,9 @@ class CustomVectorDB(VectorDB):
 ```
 
 ### New Document Types
+
 Implement `DocumentProcessor` interface:
+
 ```python
 class CustomProcessor(DocumentProcessor):
     def process(self, path: Path) -> tuple[str, Metadata]: pass
@@ -426,6 +458,7 @@ mcp
 ## Acceptance Criteria
 
 ### System Level
+
 - [ ] Process 126k HTML pages without crashes
 - [ ] Process 38k PDFs without crashes
 - [ ] Generate embeddings for all chunks
@@ -435,11 +468,13 @@ mcp
 - [ ] Total pipeline completes in <12 hours
 
 ### Module Level
+
 See individual spec documents for detailed acceptance criteria.
 
 ## Parallel Development Strategy
 
 ### Team Assignment
+
 1. **Dev 1:** Archive Acquisition + Metadata (Spec 01)
 2. **Dev 2:** Document Processing (Spec 02)
 3. **Dev 3:** RAG Ingestion (Spec 03)
@@ -448,23 +483,25 @@ See individual spec documents for detailed acceptance criteria.
 6. **Dev 6:** Testing & Validation (Spec 06)
 
 ### Integration Points
+
 - All devs use same data schemas (defined here)
 - Modules communicate via file system or defined APIs
 - Integration testing after individual module completion
 
 ### Versioning
+
 - Each spec has version number
 - Modules declare spec version compatibility
 - Breaking changes require spec version bump
 
 ## References
 
-- MIA Archive: https://archive.org/details/dump_www-marxists-org
-- MIA GitHub Mirror: https://github.com/emijrp/www.marxists.org
-- MIA JSON APIs: https://www.marxists.org/admin/js/data/
-- Ollama Docs: https://github.com/ollama/ollama/blob/main/docs/api.md
-- ChromaDB Docs: https://docs.trychroma.com/
-- Qdrant Docs: https://qdrant.tech/documentation/
+- MIA Archive: <https://archive.org/details/dump_www-marxists-org>
+- MIA GitHub Mirror: <https://github.com/emijrp/www.marxists.org>
+- MIA JSON APIs: <https://www.marxists.org/admin/js/data/>
+- Ollama Docs: <https://github.com/ollama/ollama/blob/main/docs/api.md>
+- ChromaDB Docs: <https://docs.trychroma.com/>
+- Qdrant Docs: <https://qdrant.tech/documentation/>
 
 ## Revision History
 
@@ -475,6 +512,7 @@ See individual spec documents for detailed acceptance criteria.
 ---
 
 **Next Steps:**
+
 1. Review and approve architecture
 2. Distribute individual spec documents to development instances
 3. Begin parallel implementation

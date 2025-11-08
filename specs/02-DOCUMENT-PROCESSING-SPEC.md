@@ -33,6 +33,7 @@ src/processing/
 ## Data Structures
 
 ### DocumentMetadata (dataclass)
+
 ```python
 @dataclass
 class DocumentMetadata:
@@ -59,6 +60,7 @@ class DocumentMetadata:
 ```
 
 ### ProcessingStats (dataclass)
+
 ```python
 @dataclass
 class ProcessingStats:
@@ -82,6 +84,7 @@ class ProcessingStats:
 ## Core Classes
 
 ### HTMLProcessor
+
 ```python
 class HTMLProcessor:
     """Convert HTML files to markdown"""
@@ -118,6 +121,7 @@ class HTMLProcessor:
 ```
 
 ### PDFProcessor
+
 ```python
 class PDFProcessor:
     """Convert PDF files to markdown"""
@@ -150,6 +154,7 @@ class PDFProcessor:
 ```
 
 ### MetadataExtractor
+
 ```python
 class MetadataExtractor:
     """Extract and infer metadata from various sources"""
@@ -200,6 +205,7 @@ class MetadataExtractor:
 ```
 
 ### LanguageFilter
+
 ```python
 class LanguageFilter:
     """Filter documents by language"""
@@ -237,6 +243,7 @@ class LanguageFilter:
 ```
 
 ### DocumentProcessor (Main Orchestrator)
+
 ```python
 class DocumentProcessor:
     """Main processing orchestrator"""
@@ -305,6 +312,7 @@ class DocumentProcessor:
 ## Algorithms
 
 ### HTML Cleaning Algorithm
+
 ```python
 def clean_html(soup: BeautifulSoup) -> BeautifulSoup:
     """
@@ -338,6 +346,7 @@ def clean_html(soup: BeautifulSoup) -> BeautifulSoup:
 ```
 
 ### Author Inference Algorithm
+
 ```python
 def infer_author(path: Path, authors_data: dict) -> Optional[str]:
     """
@@ -374,6 +383,7 @@ def infer_author(path: Path, authors_data: dict) -> Optional[str]:
 ```
 
 ### Content Hash Generation
+
 ```python
 def generate_content_hash(content: str) -> str:
     """
@@ -393,6 +403,7 @@ def generate_content_hash(content: str) -> str:
 ## File Formats
 
 ### Output Markdown Format
+
 ```markdown
 ---
 title: The Communist Manifesto
@@ -411,6 +422,7 @@ A specter is haunting Europe—the specter of communism...
 ```
 
 ### Metadata JSON Format
+
 ```json
 {
   "source_url": "https://www.marxists.org/archive/marx/works/1848/communist-manifesto/",
@@ -429,6 +441,7 @@ A specter is haunting Europe—the specter of communism...
 ## Error Handling
 
 ### Error Categories
+
 1. **Encoding Errors:** Try utf-8, latin-1, cp1252 fallbacks
 2. **Malformed HTML:** Use lenient parser, log warning
 3. **Corrupt PDFs:** Skip file, log error
@@ -436,6 +449,7 @@ A specter is haunting Europe—the specter of communism...
 5. **Disk Full:** Fail gracefully with clear message
 
 ### Retry Logic
+
 ```python
 @retry(max_attempts=3, exceptions=(UnicodeDecodeError,))
 def read_file_with_retry(path: Path) -> str:
@@ -451,6 +465,7 @@ def read_file_with_retry(path: Path) -> str:
 ## Configuration
 
 ### CLI Interface
+
 ```bash
 python processor_main.py \
     --archive /path/to/archive \
@@ -461,6 +476,7 @@ python processor_main.py \
 ```
 
 ### CLI Arguments
+
 ```python
 parser = argparse.ArgumentParser()
 parser.add_argument('--archive', type=Path, required=True,
@@ -480,6 +496,7 @@ parser.add_argument('--verbose', action='store_true',
 ## Testing Requirements
 
 ### Unit Tests
+
 - [ ] `test_html_processor` - Test HTML→MD conversion
 - [ ] `test_pdf_processor` - Test PDF→MD conversion
 - [ ] `test_metadata_extraction` - Test all metadata extraction paths
@@ -489,12 +506,14 @@ parser.add_argument('--verbose', action='store_true',
 - [ ] `test_hash_generation` - Test deterministic hashing
 
 ### Integration Tests
+
 - [ ] Process sample archive (100 files)
 - [ ] Verify all output files created
 - [ ] Verify metadata completeness
 - [ ] Verify no data loss in conversion
 
 ### Test Fixtures
+
 ```
 tests/fixtures/
 ├── sample_html/
@@ -544,18 +563,21 @@ requests>=2.31.0  # For JSON metadata download
 ## Implementation Notes
 
 ### Optimization Opportunities
+
 1. **Multiprocessing:** Use `multiprocessing.Pool` for HTML
 2. **Caching:** Skip already-processed files (check by hash)
 3. **Progress Tracking:** Use `tqdm` for user feedback
 4. **Batch Writes:** Buffer metadata writes to reduce I/O
 
 ### Known Limitations
+
 1. **PDF OCR Quality:** Pre-1990 scans may have errors
 2. **Author Extraction:** Only ~70% accurate due to irregular paths
 3. **Date Extraction:** Often missing or inconsistent format
 4. **Mathematical Notation:** LaTeX/equations may not convert well
 
 ### Future Enhancements
+
 - Language detection via `langdetect` library
 - Better date parsing with `dateutil`
 - Table preservation in PDFs

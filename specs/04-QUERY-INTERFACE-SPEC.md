@@ -31,6 +31,7 @@ src/query/
 ## Core Classes
 
 ### Searcher
+
 ```python
 class Searcher:
     """Main search interface"""

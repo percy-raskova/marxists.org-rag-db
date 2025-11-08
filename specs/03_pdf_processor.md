@@ -12,6 +12,7 @@ Convert MIA PDF files (scanned revolutionary publications, historical documents)
 ## 2. Scope
 
 **In Scope:**
+
 - PDF text extraction (including OCR when needed)
 - Markdown conversion with structure preservation
 - Metadata extraction from PDF properties and filenames
@@ -20,6 +21,7 @@ Convert MIA PDF files (scanned revolutionary publications, historical documents)
 - Quality assessment
 
 **Out of Scope:**
+
 - HTML processing
 - Image extraction/processing
 - Vector embedding
@@ -28,11 +30,13 @@ Convert MIA PDF files (scanned revolutionary publications, historical documents)
 ## 3. Technical Requirements
 
 ### 3.1 System Requirements
+
 - Python 3.9+
 - 8GB RAM minimum (OCR is memory-intensive)
 - CPU: Multi-core recommended for parallel processing
 
 ### 3.2 Dependencies
+
 ```python
 pymupdf4llm>=0.0.10   # PDF to Markdown conversion
 PyMuPDF>=1.23.0       # PDF manipulation
@@ -41,6 +45,7 @@ PyMuPDF>=1.23.0       # PDF manipulation
 **Note:** `pymupdf4llm` handles OCR internally via PyMuPDF.
 
 ### 3.3 Performance Requirements
+
 - Process 10-20 PDFs/minute (non-OCR)
 - Process 2-5 PDFs/minute (with OCR)
 - Handle PDFs up to 500 pages
@@ -49,6 +54,7 @@ PyMuPDF>=1.23.0       # PDF manipulation
 ## 4. Data Contracts
 
 ### 4.1 Input
+
 ```python
 @dataclass
 class PDFProcessConfig:
@@ -61,6 +67,7 @@ class PDFProcessConfig:
 ```
 
 ### 4.2 Output Structure
+
 ```markdown
 ---
 title: The State and Revolution
@@ -86,6 +93,7 @@ quality_score: 0.95
 ```
 
 ### 4.3 Return Value
+
 ```python
 @dataclass
 class PDFProcessingResult:
@@ -102,6 +110,7 @@ class PDFProcessingResult:
 ```
 
 ### 4.4 PDF Metadata Structure
+
 ```python
 @dataclass
 class PDFMetadata:
@@ -123,6 +132,7 @@ class PDFMetadata:
 ## 5. Functional Specification
 
 ### 5.1 Core Function Signature
+
 ```python
 def process_pdf_file(
     pdf_path: Path,
@@ -153,9 +163,10 @@ def process_pdf_file(
 7. Assess quality → 8. Generate frontmatter → 9. Write output
 ```
 
-#### Step-by-Step:
+#### Step-by-Step
 
 **1. PDF Opening & Validation**
+
 ```python
 def open_pdf(pdf_path: Path) -> PDFDocument:
     """
@@ -184,6 +195,7 @@ def open_pdf(pdf_path: Path) -> PDFDocument:
 ```
 
 **2. Language Detection**
+
 ```python
 def detect_pdf_language(pdf_path: Path) -> Optional[str]:
     """
@@ -207,6 +219,7 @@ def detect_pdf_language(pdf_path: Path) -> Optional[str]:
 ```
 
 **3. OCR Detection**
+
 ```python
 def needs_ocr(doc: PDFDocument) -> bool:
     """
@@ -232,6 +245,7 @@ def needs_ocr(doc: PDFDocument) -> bool:
 ```
 
 **4. Metadata Extraction**
+
 ```python
 def extract_pdf_metadata(
     doc: PDFDocument,
@@ -285,6 +299,7 @@ def extract_pdf_metadata(
 ```
 
 **5. Markdown Conversion**
+
 ```python
 def convert_pdf_to_markdown(
     pdf_path: Path,
@@ -310,6 +325,7 @@ def convert_pdf_to_markdown(
 ```
 
 **6. Markdown Cleaning**
+
 ```python
 def clean_pdf_markdown(content: str) -> str:
     """
@@ -342,6 +358,7 @@ def clean_pdf_markdown(content: str) -> str:
 ```
 
 **7. Quality Assessment**
+
 ```python
 def assess_pdf_quality(
     markdown: str,
@@ -381,6 +398,7 @@ def assess_pdf_quality(
 ```
 
 ### 5.3 Batch Processing
+
 ```python
 def process_pdf_directory(
     input_dir: Path,
@@ -410,6 +428,7 @@ def process_pdf_directory(
 ## 6. Error Handling
 
 ### 6.1 Error Types
+
 ```python
 class PDFProcessError(Exception):
     """Base exception"""
@@ -436,6 +455,7 @@ class QualityError(PDFProcessError):
 | Timeout | Skip, log timeout duration |
 
 ### 6.3 Quality Filtering
+
 ```python
 if result.quality_score < config.quality_threshold:
     logger.warning(f"Low quality PDF: {pdf_path} (score: {result.quality_score})")
@@ -445,6 +465,7 @@ if result.quality_score < config.quality_threshold:
 ## 7. Testing Requirements
 
 ### 7.1 Unit Tests
+
 ```python
 def test_pdf_opening():
     """Test PDF opening and validation"""
@@ -466,6 +487,7 @@ def test_markdown_cleaning():
 ```
 
 ### 7.2 Integration Tests
+
 ```python
 def test_text_based_pdf():
     """Test modern text-based PDF"""
@@ -481,7 +503,9 @@ def test_large_pdf():
 ```
 
 ### 7.3 Test Fixtures
+
 Need sample PDFs:
+
 - Modern text-based (born-digital)
 - Scanned historical document (requires OCR)
 - Multi-column layout
@@ -491,6 +515,7 @@ Need sample PDFs:
 ## 8. Success Criteria
 
 ### 8.1 Functional
+
 - [ ] Processes 90%+ of valid PDFs
 - [ ] Correctly detects when OCR is needed
 - [ ] Preserves document structure
@@ -499,6 +524,7 @@ Need sample PDFs:
 - [ ] Quality scores correlate with usability
 
 ### 8.2 Non-Functional
+
 - [ ] Processes 10+ PDFs/minute (non-OCR)
 - [ ] Handles PDFs up to 500 pages
 - [ ] Memory usage <500MB per PDF
@@ -507,18 +533,21 @@ Need sample PDFs:
 ## 9. Known Limitations
 
 ### 9.1 OCR Accuracy
+
 - Pre-1990s documents may have poor OCR
 - Handwritten notes typically fail
 - Mathematical notation often garbled
 - Quality depends on scan resolution
 
 ### 9.2 Layout Challenges
+
 - Complex tables may lose structure
 - Multi-column layouts sometimes merge incorrectly
 - Footnotes may be misplaced
 - Diagrams/images lost (text only)
 
 ### 9.3 Workarounds
+
 ```python
 # For particularly important but low-quality PDFs:
 # 1. Manual review flagged in metadata
@@ -534,6 +563,7 @@ Need sample PDFs:
 - Scanned PDF (OCR): 2-10x slower
 
 **Batch processing 38,000 PDFs:**
+
 - Estimated: 10-20 hours (without OCR)
 - Estimated: 40-80 hours (with OCR where needed)
 
@@ -542,11 +572,13 @@ Need sample PDFs:
 **Confidence:** 75%
 
 **Risks:**
+
 - OCR quality highly variable (20%)
 - Complex layouts may fail (15%)
 - Memory issues with large PDFs (10%)
 
 **Mitigation:**
+
 - Quality scoring to flag problems
 - Graceful degradation
 - Page-by-page processing for large files
@@ -561,6 +593,7 @@ Need sample PDFs:
 ## 13. Example Output Comparison
 
 ### Good Quality PDF (score: 0.9+)
+
 ```markdown
 # The State and Revolution
 
@@ -570,6 +603,7 @@ The state is a product of the irreconcilability of class antagonisms. The state 
 ```
 
 ### Poor Quality PDF (score: <0.5)
+
 ```markdown
 # Th e St at e an d Rev ol ut io n
 

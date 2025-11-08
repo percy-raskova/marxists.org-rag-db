@@ -33,6 +33,7 @@ tests/
 ## Unit Test Requirements
 
 ### Document Processing
+
 - [ ] HTML → Markdown conversion preserves structure
 - [ ] PDF → Markdown extraction works
 - [ ] Metadata extraction is accurate (>70% for author)
@@ -40,12 +41,14 @@ tests/
 - [ ] Content hashing is deterministic
 
 ### Chunking
+
 - [ ] Semantic chunking respects boundaries
 - [ ] Section chunking preserves headers
 - [ ] Token chunking doesn't exceed limits
 - [ ] Overlap works correctly
 
 ### Embedding & Vector DB
+
 - [ ] Embeddings are 768-dimensional
 - [ ] Vector DB insert/search works
 - [ ] Batch operations handle errors
@@ -54,6 +57,7 @@ tests/
 ## Integration Test Requirements
 
 ### End-to-End Pipeline
+
 ```python
 def test_full_pipeline():
     """Test complete pipeline on sample data"""
@@ -75,6 +79,7 @@ def test_full_pipeline():
 ```
 
 ### Query Quality
+
 ```python
 def test_query_quality():
     """Test query returns relevant results"""
@@ -97,16 +102,19 @@ def test_query_quality():
 ## Quality Metrics
 
 ### Processing Quality
+
 - **Metadata Completeness:** % of documents with author, title, date
 - **Language Filter Accuracy:** Precision/recall on English detection
 - **Conversion Quality:** Manual review of 100 random conversions
 
 ### RAG Quality
+
 - **Retrieval Accuracy:** Top-5 contains relevant result (manual eval on 50 queries)
 - **Semantic Similarity:** Average cosine similarity of top results
 - **Response Time:** P50, P95, P99 query latency
 
 ### Test Coverage Targets
+
 - **Unit Test Coverage:** >80%
 - **Integration Test Coverage:** >60%
 - **Critical Path Coverage:** 100%
@@ -133,6 +141,7 @@ def benchmark_query():
 ## Test Data
 
 ### Sample Documents (fixtures/)
+
 - `marx_manifesto.htm` - Clean HTML
 - `lenin_state.html` - Complex structure
 - `capital_vol1.pdf` - Scanned PDF
@@ -140,6 +149,7 @@ def benchmark_query():
 - `gramsci_prison_notebooks.pdf` - Dense theory
 
 ### Expected Outputs
+
 - Markdown conversions
 - Metadata JSON
 - Query result sets for validation
@@ -147,11 +157,13 @@ def benchmark_query():
 ## Continuous Integration
 
 ### Pre-commit Hooks
+
 - [ ] Run linters (black, flake8, mypy)
 - [ ] Run unit tests
 - [ ] Check test coverage
 
 ### CI Pipeline
+
 ```yaml
 name: Test MIA RAG
 

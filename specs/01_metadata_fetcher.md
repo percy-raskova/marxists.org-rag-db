@@ -12,6 +12,7 @@ Fetch and cache JSON metadata files from marxists.org that provide structured in
 ## 2. Scope
 
 **In Scope:**
+
 - Download three JSON metadata files from marxists.org
 - Validate JSON structure
 - Cache files locally
@@ -19,6 +20,7 @@ Fetch and cache JSON metadata files from marxists.org that provide structured in
 - Handle network errors gracefully
 
 **Out of Scope:**
+
 - Processing archive content
 - Database operations
 - Embedding generation
@@ -26,16 +28,19 @@ Fetch and cache JSON metadata files from marxists.org that provide structured in
 ## 3. Technical Requirements
 
 ### 3.1 System Requirements
+
 - Python 3.9+
 - Internet connection
 - Write access to output directory
 
 ### 3.2 Dependencies
+
 ```python
 requests>=2.31.0
 ```
 
 ### 3.3 Performance Requirements
+
 - Complete download in <60 seconds
 - Handle connection timeouts (30s max per request)
 - Retry logic: 3 attempts with exponential backoff
@@ -43,6 +48,7 @@ requests>=2.31.0
 ## 4. Data Contracts
 
 ### 4.1 Input Parameters
+
 ```python
 @dataclass
 class FetchConfig:
@@ -53,6 +59,7 @@ class FetchConfig:
 ```
 
 ### 4.2 Source URLs
+
 ```python
 METADATA_URLS = {
     "authors": "https://www.marxists.org/admin/js/data/authors.json",
@@ -62,6 +69,7 @@ METADATA_URLS = {
 ```
 
 ### 4.3 Output Structure
+
 ```
 {output_dir}/
 ├── authors.json       # 850+ author entries with work links
@@ -71,6 +79,7 @@ METADATA_URLS = {
 ```
 
 ### 4.4 Authors JSON Schema
+
 ```json
 {
   "type": "array",
@@ -88,6 +97,7 @@ METADATA_URLS = {
 ```
 
 ### 4.5 Return Value
+
 ```python
 @dataclass
 class MetadataFetchResult:
@@ -104,6 +114,7 @@ class MetadataFetchResult:
 ## 5. Functional Specification
 
 ### 5.1 Core Function Signature
+
 ```python
 def fetch_metadata(config: FetchConfig) -> MetadataFetchResult:
     """
@@ -123,26 +134,28 @@ def fetch_metadata(config: FetchConfig) -> MetadataFetchResult:
 ```
 
 ### 5.2 Processing Steps
+
 1. **Validate output directory**
    - Check write permissions
    - Create directory if doesn't exist
-   
+
 2. **For each metadata URL:**
    - Attempt download with retry logic
    - Validate JSON structure
    - Check for minimum expected size
    - Calculate SHA256 checksum
    - Save to output directory
-   
+
 3. **Generate metadata info file**
    - Timestamp
    - File sizes
    - Checksums
    - Record counts
-   
+
 4. **Return result summary**
 
 ### 5.3 Retry Logic
+
 ```python
 def fetch_with_retry(url: str, max_retries: int, timeout: int) -> bytes:
     """
@@ -162,6 +175,7 @@ def fetch_with_retry(url: str, max_retries: int, timeout: int) -> bytes:
 ## 6. Error Handling
 
 ### 6.1 Error Types
+
 ```python
 class MetadataFetchError(Exception):
     """Base exception for metadata fetch errors"""
@@ -188,11 +202,13 @@ class ChecksumError(MetadataFetchError):
 | Disk full | Fail immediately with clear message |
 
 ### 6.3 Partial Success
+
 If 2/3 files download successfully, mark as partial success and log warnings.
 
 ## 7. Validation Rules
 
 ### 7.1 JSON Validation
+
 ```python
 def validate_authors_json(data: Any) -> bool:
     """
@@ -219,6 +235,7 @@ def validate_periodicals_json(data: Any) -> bool:
 ```
 
 ### 7.2 Size Validation
+
 - authors.json: Expected 500KB - 2MB
 - sections.json: Expected 100KB - 1MB
 - periodicals.json: Expected 50KB - 500KB
@@ -228,6 +245,7 @@ Warn if outside expected ranges.
 ## 8. Testing Requirements
 
 ### 8.1 Unit Tests
+
 ```python
 def test_fetch_with_valid_url():
     """Test successful fetch"""
@@ -246,6 +264,7 @@ def test_partial_success():
 ```
 
 ### 8.2 Integration Tests
+
 ```python
 def test_full_fetch_pipeline():
     """Test complete fetch operation"""
@@ -255,7 +274,9 @@ def test_concurrent_fetch_safety():
 ```
 
 ### 8.3 Mock Testing
+
 Use `responses` library to mock HTTP requests:
+
 ```python
 @responses.activate
 def test_mock_fetch():
@@ -270,6 +291,7 @@ def test_mock_fetch():
 ## 9. Success Criteria
 
 ### 9.1 Functional
+
 - [ ] All three JSON files downloaded
 - [ ] JSON validated successfully
 - [ ] Metadata info file generated
@@ -277,6 +299,7 @@ def test_mock_fetch():
 - [ ] Returns accurate statistics
 
 ### 9.2 Non-Functional
+
 - [ ] Completes in <60 seconds on typical connection
 - [ ] Handles network interruptions gracefully
 - [ ] Clear error messages for all failure modes
@@ -286,6 +309,7 @@ def test_mock_fetch():
 ## 10. Implementation Notes
 
 ### 10.1 File Organization
+
 ```
 mia_metadata_fetcher.py    # Main implementation
 tests/
@@ -296,6 +320,7 @@ tests/
 ```
 
 ### 10.2 CLI Interface (Optional)
+
 ```bash
 python mia_metadata_fetcher.py \
   --output-dir ~/marxists-metadata/ \
@@ -304,6 +329,7 @@ python mia_metadata_fetcher.py \
 ```
 
 ### 10.3 Library Usage
+
 ```python
 from mia_metadata_fetcher import fetch_metadata, FetchConfig
 
@@ -319,11 +345,13 @@ print(f"Downloaded {len(result.files_downloaded)} files")
 ## 11. Performance Benchmarks
 
 ### 11.1 Expected Performance
+
 - Download time: 5-20 seconds (depends on connection)
 - Validation time: <1 second
 - Total time: <30 seconds typically
 
 ### 11.2 Resource Usage
+
 - Memory: <50MB
 - Disk: ~2MB total
 - Network: ~2MB download
@@ -331,11 +359,13 @@ print(f"Downloaded {len(result.files_downloaded)} files")
 ## 12. Security Considerations
 
 ### 12.1 Network Security
+
 - Verify SSL certificates by default
 - Provide option to disable for debugging
 - No credentials required (public API)
 
 ### 12.2 File System Security
+
 - Validate output directory path (no path traversal)
 - Set appropriate file permissions (644)
 - No executable permissions on JSON files
@@ -343,6 +373,7 @@ print(f"Downloaded {len(result.files_downloaded)} files")
 ## 13. Future Enhancements
 
 **Phase 2 (Not required now):**
+
 - ETag caching (only download if changed)
 - Compression support
 - Progress bars for long downloads
@@ -352,7 +383,8 @@ print(f"Downloaded {len(result.files_downloaded)} files")
 ## 14. Dependencies on Other Components
 
 **Upstream:** None (standalone component)  
-**Downstream:** 
+**Downstream:**
+
 - HTML/PDF processors will read these files
 - Metadata extraction can use author info
 
@@ -361,10 +393,12 @@ print(f"Downloaded {len(result.files_downloaded)} files")
 **Implementation Confidence:** 95%
 
 **Risks:**
+
 - URLs may change (5% risk) - mitigated by retry logic
 - JSON schema may evolve - mitigated by flexible validation
 
 **Known Unknowns:**
+
 - None - straightforward HTTP + JSON operation
 
 ## 16. Example Usage
@@ -401,6 +435,7 @@ if __name__ == "__main__":
 ## 17. Acceptance Test
 
 Run this command to verify implementation:
+
 ```bash
 python mia_metadata_fetcher.py --output-dir /tmp/mia_test/ && \
   [ -f /tmp/mia_test/authors.json ] && \

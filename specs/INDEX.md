@@ -9,6 +9,7 @@
 ## Quick Start for 6 Parallel Claude Code Instances
 
 **CRITICAL UPDATES FOR 200GB SCALE:**
+
 - Read **[CLOUD-ARCHITECTURE-PLAN.md](../CLOUD-ARCHITECTURE-PLAN.md)** for GCP infrastructure
 - Read **[RUNPOD_EMBEDDINGS.md](../RUNPOD_EMBEDDINGS.md)** for GPU embedding strategy ($40-60 total!)
 - Read **[PARALLEL-DEV-ARCHITECTURE.md](../PARALLEL-DEV-ARCHITECTURE.md)** for instance coordination
@@ -26,11 +27,13 @@ Each specification document is standalone and can be implemented independently. 
 ## Specification Documents
 
 ### 00. Architecture Overview
+
 **File:** `00-ARCHITECTURE-SPEC.md`  
 **Read First:** YES (required for all devs)  
 **Purpose:** System architecture, data flow, module interfaces, data schemas
 
 **Key Sections:**
+
 - System architecture diagram
 - Module breakdown and responsibilities
 - Data schemas (DocumentMetadata, Chunk, etc.)
@@ -43,12 +46,14 @@ Each specification document is standalone and can be implemented independently. 
 ---
 
 ### 01. Archive Acquisition
+
 **File:** `01-ARCHIVE-ACQUISITION-SPEC.md`  
 **Status:** NOT YET CREATED (deprioritized - manual download works)  
 **Dependencies:** None  
 **Estimated Time:** 8 hours
 
 **Implements:**
+
 - Internet Archive torrent handling
 - GitHub mirror cloning
 - MIA JSON metadata fetching
@@ -59,12 +64,14 @@ Each specification document is standalone and can be implemented independently. 
 ---
 
 ### 02. Document Processing
+
 **File:** `02-DOCUMENT-PROCESSING-SPEC.md`  
 **Dependencies:** Architecture Spec  
 **Estimated Time:** 16-24 hours  
 **Priority:** **CRITICAL** (blocks ingestion)
 
 **Implements:**
+
 - HTML → Markdown conversion
 - PDF → Markdown conversion
 - Metadata extraction
@@ -72,6 +79,7 @@ Each specification document is standalone and can be implemented independently. 
 - Content deduplication
 
 **Key Classes:**
+
 - `HTMLProcessor`
 - `PDFProcessor`
 - `MetadataExtractor`
@@ -79,6 +87,7 @@ Each specification document is standalone and can be implemented independently. 
 - `DocumentProcessor` (orchestrator)
 
 **Outputs:**
+
 - `~/marxists-processed/markdown/` - Markdown files with frontmatter
 - `~/marxists-processed/metadata/` - JSON metadata files
 - `processing_report.json`
@@ -88,12 +97,14 @@ Each specification document is standalone and can be implemented independently. 
 ---
 
 ### 03. RAG Ingestion (200GB Scale)
+
 **File:** `03-RAG-INGESTION-SPEC.md`
 **Dependencies:** Architecture Spec, Document Processing Spec
 **Estimated Time:** 16-20 hours + 100 hours Runpod GPU time
 **Priority:** **CRITICAL** (blocks query)
 
 **Implements:**
+
 - Chunking strategies (semantic, section, token)
 - **Embedding generation via Runpod.io GPU rental** (not Ollama)
 - Vector DB abstraction layer
@@ -103,6 +114,7 @@ Each specification document is standalone and can be implemented independently. 
 - **Parquet format for embedding storage**
 
 **Key Classes:**
+
 - `ChunkStrategy` (abstract)
 - `SemanticChunkStrategy`
 - `SectionChunkStrategy`
@@ -114,6 +126,7 @@ Each specification document is standalone and can be implemented independently. 
 - `IngestionOrchestrator`
 
 **Outputs:**
+
 - Vector database at configured path
 - Embeddings for all chunks
 - Ingestion statistics
@@ -123,12 +136,14 @@ Each specification document is standalone and can be implemented independently. 
 ---
 
 ### 04. Query Interface
+
 **File:** `04-QUERY-INTERFACE-SPEC.md`  
 **Dependencies:** Architecture Spec, RAG Ingestion Spec  
 **Estimated Time:** 8-12 hours  
 **Priority:** HIGH
 
 **Implements:**
+
 - Semantic search
 - Metadata filtering
 - Result formatting
@@ -136,6 +151,7 @@ Each specification document is standalone and can be implemented independently. 
 - Python API
 
 **Key Classes:**
+
 - `Searcher`
 - `SearchResult`
 - `MetadataFilter`
@@ -143,6 +159,7 @@ Each specification document is standalone and can be implemented independently. 
 - `InteractiveCLI`
 
 **Outputs:**
+
 - CLI tool for queries
 - Python API for programmatic access
 
@@ -151,23 +168,27 @@ Each specification document is standalone and can be implemented independently. 
 ---
 
 ### 05. MCP Integration
+
 **File:** `05-MCP-INTEGRATION-SPEC.md`  
 **Dependencies:** Architecture Spec, Query Interface Spec  
 **Estimated Time:** 8-12 hours  
 **Priority:** MEDIUM (can be done after core system works)
 
 **Implements:**
+
 - MCP server
 - Tool definitions (search_marxist_theory, find_author_works, get_work_context)
 - PercyBrain integration
 - Context management
 
 **Key Components:**
+
 - MCP server implementation
 - Tool handlers
 - Configuration for Claude integration
 
 **Outputs:**
+
 - MCP server Python file
 - mcp_config.json template
 
@@ -176,12 +197,14 @@ Each specification document is standalone and can be implemented independently. 
 ---
 
 ### 06. Testing & Validation
+
 **File:** `06-TESTING-VALIDATION-SPEC.md`  
 **Dependencies:** All module specs  
 **Estimated Time:** Ongoing (parallel with development)  
 **Priority:** MEDIUM (but should start early)
 
 **Implements:**
+
 - Unit tests for all modules
 - Integration tests
 - Performance benchmarks
@@ -189,6 +212,7 @@ Each specification document is standalone and can be implemented independently. 
 - CI/CD pipeline
 
 **Key Components:**
+
 - Unit test suite
 - Integration test suite
 - Test fixtures
@@ -196,6 +220,7 @@ Each specification document is standalone and can be implemented independently. 
 - Quality validation
 
 **Outputs:**
+
 - Complete test suite
 - Test coverage reports
 - Performance benchmarks
@@ -208,6 +233,7 @@ Each specification document is standalone and can be implemented independently. 
 ## Parallel Development Strategy
 
 ### Dependency Graph
+
 ```
 00-Architecture (read first)
     │
@@ -219,6 +245,7 @@ Each specification document is standalone and can be implemented independently. 
 ### 6-Instance Parallel Development (REQUIRED for 200GB)
 
 **Instance Assignments (from PARALLEL-DEV-ARCHITECTURE.md):**
+
 - **Instance 1 (storage):** Storage & Data Pipeline - GCS management, lifecycle policies
 - **Instance 2 (embeddings):** Runpod GPU Embeddings - $40-60 total cost!
 - **Instance 3 (weaviate):** Weaviate Vector DB - 10M+ vectors, GKE deployment
@@ -227,6 +254,7 @@ Each specification document is standalone and can be implemented independently. 
 - **Instance 6 (monitoring):** Monitoring & Testing - Prometheus, Grafana, integration tests
 
 **Cloud Resources per Instance:**
+
 - Each instance gets isolated GCS bucket prefix
 - Dedicated Terraform workspace
 - Isolated test environment
@@ -250,16 +278,18 @@ After individual modules are complete:
 
 ## Development Workflow
 
-### For Each Module:
+### For Each Module
 
 1. **Read Architecture Spec** (00-ARCHITECTURE-SPEC.md)
 2. **Read Module Spec** (your assigned spec)
 3. **Set up development environment:**
+
    ```bash
    python -m venv venv
    source venv/bin/activate
    pip install -r requirements.txt
    ```
+
 4. **Create module structure** (as defined in spec)
 5. **Implement core classes** (follow spec data structures)
 6. **Write unit tests** (as you code)
@@ -268,6 +298,7 @@ After individual modules are complete:
 9. **Submit for integration**
 
 ### Code Style
+
 - Python 3.9+
 - Type hints for all functions
 - Docstrings (Google style)
@@ -276,6 +307,7 @@ After individual modules are complete:
 - Use dataclasses for data structures
 
 ### Git Workflow (if using version control)
+
 ```bash
 # Create feature branch
 git checkout -b module-processing
@@ -298,6 +330,7 @@ git push origin module-processing
 ## Data Schema Reference
 
 ### DocumentMetadata
+
 ```python
 source_url: str
 title: str
@@ -312,6 +345,7 @@ word_count: int
 ```
 
 ### Chunk
+
 ```python
 chunk_id: str
 content: str
@@ -321,6 +355,7 @@ embedding: Optional[List[float]]
 ```
 
 ### ChunkMetadata (extends DocumentMetadata)
+
 ```python
 document_id: str
 source_file: str
@@ -333,6 +368,7 @@ chunk_size: int
 ## Configuration Reference
 
 ### Environment Variables (200GB Scale)
+
 ```bash
 # GCP Configuration
 GOOGLE_PROJECT_ID="mia-rag-project"
@@ -344,14 +380,12 @@ GCS_BUCKET_EMBEDDINGS="mia-embeddings"
 MIA_ARCHIVE_PATH="gs://mia-raw-torrent/dump_www-marxists-org/"
 MIA_OUTPUT_DIR="gs://mia-processed-markdown/"
 
-# Embeddings (Runpod)
-RUNPOD_API_KEY="your-key"
+# Embeddings (Runpod) - Set API credentials in .env file
 EMBEDDING_MODEL="BAAI/bge-large-en-v1.5"  # 1024d, beats OpenAI
 EMBEDDINGS_PATH="gs://mia-embeddings/"
 
-# Vector DB (Weaviate)
+# Vector DB (Weaviate) - Set credentials in .env file
 WEAVIATE_URL="http://weaviate-cluster:8080"
-WEAVIATE_API_KEY="your-key"
 
 # Configuration
 MIA_CHUNK_SIZE="512"
@@ -361,12 +395,14 @@ MIA_CHUNK_STRATEGY="semantic"
 ## Dependencies
 
 ### Core
+
 ```
 python>=3.9
 requests>=2.31.0
 ```
 
 ### Processing
+
 ```
 beautifulsoup4>=4.12.0
 markdownify>=0.11.6
@@ -375,6 +411,7 @@ lxml>=4.9.0
 ```
 
 ### Ingestion
+
 ```
 chromadb>=0.4.0  # OR
 qdrant-client>=1.7.0
@@ -383,6 +420,7 @@ tqdm>=4.65.0
 ```
 
 ### Testing
+
 ```
 pytest>=7.4.0
 pytest-cov>=4.1.0
@@ -391,6 +429,7 @@ pytest-cov>=4.1.0
 ## Questions & Clarifications
 
 If specs are unclear:
+
 1. Check Architecture Spec for system-level context
 2. Check other module specs for interface examples
 3. Make reasonable decisions and document them
@@ -399,12 +438,14 @@ If specs are unclear:
 ## Success Criteria
 
 ### Individual Module Success
+
 - All acceptance criteria met
 - Unit tests pass
 - Integrates with dependent modules
 - Documented any spec deviations
 
 ### System Success (200GB Scale)
+
 - End-to-end pipeline works on GCP infrastructure
 - **Processes 200GB corpus** (5-10M documents estimated)
 - **Runpod embeddings complete for $40-60 total**
@@ -416,12 +457,14 @@ If specs are unclear:
 ## Timeline Estimate (200GB Scale)
 
 **With 6 Claude Code instances working in parallel:**
+
 - **Week 1:** Infrastructure setup (Terraform, GCP, storage buckets)
 - **Week 2:** Processing pipeline + Start Runpod embeddings
 - **Week 3:** Continue embeddings (24/7), Deploy Weaviate, Build API
 - **Week 4:** Complete embeddings, Load vectors, MCP integration, Testing
 
 **Embedding Timeline:**
+
 - Runpod RTX 4090: ~100 hours runtime
 - Running 24/7: ~4-5 days
 - Total cost: $40-60
@@ -431,6 +474,7 @@ If specs are unclear:
 ## Files in This Package
 
 ### Original Specs (Updated for 200GB)
+
 ```
 specs/
 ├── 00-ARCHITECTURE-SPEC.md         (READ FIRST - system overview)
@@ -443,6 +487,7 @@ specs/
 ```
 
 ### 200GB Scale Documentation (MUST READ)
+
 ```
 project-root/
 ├── CLAUDE_ENTERPRISE.md            (200GB architecture overview)

@@ -32,6 +32,7 @@ src/ingestion/
 ## Data Structures
 
 ### Chunk (dataclass)
+
 ```python
 @dataclass
 class Chunk:
@@ -53,6 +54,7 @@ class Chunk:
 ```
 
 ### ChunkMetadata (dict structure)
+
 ```python
 {
     "document_id": str,           # Source document hash
@@ -73,6 +75,7 @@ class Chunk:
 ```
 
 ### IngestionStats (dataclass)
+
 ```python
 @dataclass
 class IngestionStats:
@@ -98,6 +101,7 @@ class IngestionStats:
 ## Core Classes
 
 ### ChunkStrategy (Abstract Base Class)
+
 ```python
 class ChunkStrategy(ABC):
     """Abstract base class for chunking strategies"""
@@ -129,6 +133,7 @@ class ChunkStrategy(ABC):
 ```
 
 ### SemanticChunkStrategy
+
 ```python
 class SemanticChunkStrategy(ChunkStrategy):
     """
@@ -234,6 +239,7 @@ class SemanticChunkStrategy(ChunkStrategy):
 ```
 
 ### SectionChunkStrategy
+
 ```python
 class SectionChunkStrategy(ChunkStrategy):
     """
@@ -300,6 +306,7 @@ class SectionChunkStrategy(ChunkStrategy):
 ```
 
 ### TokenChunkStrategy
+
 ```python
 class TokenChunkStrategy(ChunkStrategy):
     """
@@ -336,6 +343,7 @@ class TokenChunkStrategy(ChunkStrategy):
 ```
 
 ### Embedder
+
 ```python
 class Embedder:
     """Generate embeddings via Ollama API"""
@@ -418,6 +426,7 @@ class Embedder:
 ```
 
 ### VectorDB (Abstract Base Class)
+
 ```python
 class VectorDB(ABC):
     """Abstract interface for vector databases"""
@@ -444,6 +453,7 @@ class VectorDB(ABC):
 ```
 
 ### ChromaDB Implementation
+
 ```python
 class ChromaVectorDB(VectorDB):
     """ChromaDB implementation"""
@@ -508,6 +518,7 @@ class ChromaVectorDB(VectorDB):
 ```
 
 ### Qdrant Implementation
+
 ```python
 class QdrantVectorDB(VectorDB):
     """Qdrant implementation"""
@@ -579,6 +590,7 @@ class QdrantVectorDB(VectorDB):
 ```
 
 ### IngestionOrchestrator
+
 ```python
 class IngestionOrchestrator:
     """Main ingestion orchestrator"""
@@ -708,6 +720,7 @@ class IngestionOrchestrator:
 ## Configuration
 
 ### CLI Interface
+
 ```bash
 python ingestion_main.py \
     --markdown-dir ~/marxists-processed/markdown/ \
@@ -723,12 +736,14 @@ python ingestion_main.py \
 ## Testing Requirements
 
 ### Unit Tests
+
 - [ ] Test each chunking strategy
 - [ ] Test embedding generation
 - [ ] Test vector DB operations
 - [ ] Test checkpointing/resume
 
 ### Integration Tests
+
 - [ ] Full pipeline on sample dataset
 - [ ] Verify chunk quality
 - [ ] Verify embeddings dimensions
