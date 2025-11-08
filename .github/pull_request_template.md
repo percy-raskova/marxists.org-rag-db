@@ -1,4 +1,5 @@
 ## Instance & Module
+
 **Instance**: <!-- 1-6 -->
 **Module**: <!-- storage/pipeline/embeddings/weaviate/api/mcp/monitoring -->
 **Branch**: <!-- instance{N}/{module}-{feature} -->
@@ -27,7 +28,7 @@
 
 ## Testing
 <!-- Provide testing details -->
-- **Unit tests**: ___/___ passing
+- **Unit tests**: _**/**_ passing
 - **Coverage**: ___%
 - **Integration tests**: <!-- Ready/Pending/N/A -->
 - **Performance**: <!-- Within spec/Needs optimization -->
@@ -67,6 +68,7 @@
 <!-- How to rollback if this causes issues -->
 
 ## Related Issues
+
 Closes #___
 Related to #___
 
@@ -76,6 +78,7 @@ Related to #___
 ---
 
 ### PR Size Guidance
+
 - **Small**: < 100 lines (preferred)
 - **Medium**: 100-500 lines
 - **Large**: 500-1000 lines (requires extra review)

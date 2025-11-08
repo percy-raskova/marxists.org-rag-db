@@ -9,6 +9,7 @@ assignees: ''
 ## Integration Test Failure
 
 ### Failed Test
+
 **Test Name**: <!-- e.g., test_storage_to_embeddings_flow -->
 **Test File**: <!-- e.g., tests/integration/test_full_pipeline.py -->
 
@@ -22,6 +23,7 @@ assignees: ''
 - [ ] Instance 6 (Monitoring)
 
 ### Failure Type
+
 - [ ] Interface contract violation
 - [ ] Data format mismatch
 - [ ] Performance degradation
@@ -30,11 +32,13 @@ assignees: ''
 - [ ] Other: ___
 
 ### Error Details
+
 ```python
 # Paste the full error traceback here
 ```
 
 ### Test Output
+
 ```bash
 # Output of: mise run test -- -m integration -k test_name -vv
 ```
@@ -56,6 +60,7 @@ assignees: ''
 - MCP Interface: v___
 
 ### Steps to Reproduce
+
 ```bash
 # Commands to reproduce the failure
 mise run test -- -m integration -k test_name
@@ -68,6 +73,7 @@ mise run test -- -m integration -k test_name
 <!-- What actually happened -->
 
 ### Data Flow
+
 ```
 Instance X → [data] → Instance Y
     ↓ (error here)
@@ -81,6 +87,7 @@ Instance Z
 <!-- Any workarounds while the issue is being fixed -->
 
 ### Impact on Development
+
 - [ ] Blocking all integration
 - [ ] Blocking specific instances: ___
 - [ ] Non-blocking (can work around)
@@ -96,6 +103,7 @@ Instance Z
 - Issue #___
 
 ### Daily Integration Run
+
 **Date**: <!-- YYYY-MM-DD -->
 **Run ID**: <!-- GitHub Actions run ID -->
 **Branch**: integration/daily-YYYYMMDD

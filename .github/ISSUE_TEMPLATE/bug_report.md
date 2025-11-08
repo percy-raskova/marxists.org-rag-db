@@ -24,7 +24,9 @@ assignees: ''
 <!-- Specific module or component where the bug occurs -->
 
 ## To Reproduce
+
 Steps to reproduce the behavior:
+
 1. Run command '...'
 2. With input '...'
 3. See error
@@ -36,11 +38,13 @@ Steps to reproduce the behavior:
 <!-- What actually happened -->
 
 ## Error Messages
+
 ```
 # Paste any error messages here
 ```
 
 ## Environment
+
 - **Python version**:
 - **Poetry version**:
 - **Instance ID**:
@@ -48,11 +52,13 @@ Steps to reproduce the behavior:
 - **Commit hash**:
 
 ## Test Results
+
 ```bash
 # Output of: mise run test -- -k test_name
 ```
 
 ## Logs
+
 ```
 # Relevant logs from the affected component
 ```
@@ -67,6 +73,7 @@ Steps to reproduce the behavior:
 <!-- If you have suggestions on how to fix the bug -->
 
 ## Impact
+
 - [ ] Critical - Blocks all development
 - [ ] High - Blocks instance development
 - [ ] Medium - Workaround available
