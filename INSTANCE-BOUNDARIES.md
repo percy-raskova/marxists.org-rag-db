@@ -5,8 +5,10 @@
 ## 📍 Instance Ownership Map
 
 ### Instance 1: Storage & Pipeline
+
 **Owner**: Storage and data pipeline orchestration
 **Directories**:
+
 ```
 ✅ CAN MODIFY:
 src/mia_rag/storage/
@@ -20,6 +22,7 @@ Any other directories
 ```
 
 **Responsibilities**:
+
 - GCS bucket management
 - Storage lifecycle policies
 - Data pipeline orchestration
@@ -29,6 +32,7 @@ Any other directories
 **Dependencies**: None (first in chain)
 
 **Produces**:
+
 - Processed markdown files in GCS
 - Storage metadata
 - Pipeline status reports
@@ -36,8 +40,10 @@ Any other directories
 ---
 
 ### Instance 2: Embeddings
+
 **Owner**: Embedding generation and management
 **Directories**:
+
 ```
 ✅ CAN MODIFY:
 src/mia_rag/embeddings/
@@ -49,6 +55,7 @@ Any other directories
 ```
 
 **Responsibilities**:
+
 - Runpod GPU orchestration
 - Batch embedding generation
 - Parquet file creation
@@ -58,9 +65,11 @@ Any other directories
 **Dependencies**: Instance 1 (storage)
 
 **Consumes**:
+
 - Processed markdown from Instance 1
 
 **Produces**:
+
 - Embedding vectors in Parquet format
 - Checkpoint files
 - Processing metrics
@@ -68,8 +77,10 @@ Any other directories
 ---
 
 ### Instance 3: Weaviate Vector DB
+
 **Owner**: Vector database management
 **Directories**:
+
 ```
 ✅ CAN MODIFY:
 src/mia_rag/vectordb/
@@ -81,6 +92,7 @@ Any other directories
 ```
 
 **Responsibilities**:
+
 - Weaviate deployment on GKE
 - Schema management
 - Batch import of vectors
@@ -90,9 +102,11 @@ Any other directories
 **Dependencies**: Instance 2 (embeddings)
 
 **Consumes**:
+
 - Embedding Parquet files from Instance 2
 
 **Produces**:
+
 - Searchable vector database
 - Query interface
 - Database metrics
@@ -100,8 +114,10 @@ Any other directories
 ---
 
 ### Instance 4: Query & API
+
 **Owner**: REST API and query interface
 **Directories**:
+
 ```
 ✅ CAN MODIFY:
 src/mia_rag/api/
@@ -113,6 +129,7 @@ Any other directories
 ```
 
 **Responsibilities**:
+
 - FastAPI application
 - REST endpoints
 - Redis caching layer
@@ -122,9 +139,11 @@ Any other directories
 **Dependencies**: Instance 3 (vectordb)
 
 **Consumes**:
+
 - Vector search from Instance 3
 
 **Produces**:
+
 - REST API endpoints
 - Cached query results
 - API documentation (OpenAPI)
@@ -132,8 +151,10 @@ Any other directories
 ---
 
 ### Instance 5: MCP Integration
+
 **Owner**: Model Context Protocol server
 **Directories**:
+
 ```
 ✅ CAN MODIFY:
 src/mia_rag/mcp/
@@ -145,6 +166,7 @@ Any other directories
 ```
 
 **Responsibilities**:
+
 - MCP server implementation
 - Tool handlers for Claude
 - Context management
@@ -153,9 +175,11 @@ Any other directories
 **Dependencies**: Instance 4 (api)
 
 **Consumes**:
+
 - API endpoints from Instance 4
 
 **Produces**:
+
 - MCP tools for Claude
 - Formatted responses
 - Tool documentation
@@ -163,8 +187,10 @@ Any other directories
 ---
 
 ### Instance 6: Monitoring & Testing
+
 **Owner**: System monitoring and integration testing
 **Directories**:
+
 ```
 ✅ CAN MODIFY:
 src/mia_rag/monitoring/
@@ -180,6 +206,7 @@ Other instances' source code
 ```
 
 **Responsibilities**:
+
 - Prometheus metrics
 - Grafana dashboards
 - Integration testing
@@ -190,9 +217,11 @@ Other instances' source code
 **Dependencies**: All instances (for monitoring/testing)
 
 **Consumes**:
+
 - Metrics from all instances
 
 **Produces**:
+
 - Dashboards
 - Alerts
 - Test reports
@@ -205,63 +234,81 @@ Other instances' source code
 These directories require coordination between instances:
 
 ### Interfaces Directory
+
 ```
 src/mia_rag/interfaces/
 ```
+
 **Rules**:
+
 - Create RFC in `docs/rfcs/` before changes
 - 24-hour review period
 - All dependent instances must approve
 - Version interfaces if breaking changes needed
 
 ### Common Utilities
+
 ```
 src/mia_rag/common/
 ```
+
 **Rules**:
+
 - Only add truly shared utilities
 - Must have 2+ instances using it
 - Include comprehensive tests
 - Document usage patterns
 
 ### Configuration Files (Root Level)
+
 ```
 pyproject.toml
 .mise.toml
 .pre-commit-config.yaml
 .gitignore
 ```
+
 **Rules**:
+
 - Announce changes in work logs
 - Test changes don't break other instances
 - Prefer additive changes over modifications
 
 ### Documentation (Root Level)
+
 ```
 README.md
 AI-AGENT-INSTRUCTIONS.md
 INSTANCE-BOUNDARIES.md (this file)
 CONTRIBUTING.md
 ```
+
 **Rules**:
+
 - Update via PR with review
 - Keep changes minimal and focused
 - Ensure consistency across docs
 
 ### Scripts Directory
+
 ```
 scripts/
 ```
+
 **Rules**:
+
 - Scripts should be instance-agnostic
 - Use instance detection when needed
 - Test with all instance configurations
 
 ### GitHub Workflows
+
 ```
 .github/workflows/
 ```
+
 **Rules**:
+
 - Each instance has its own workflow file
 - Shared workflows need approval from all
 - Don't modify other instances' workflows
@@ -271,6 +318,7 @@ scripts/
 ## 🔄 Interface Contracts
 
 ### Storage → Embeddings Interface
+
 **Contract File**: `src/mia_rag/interfaces/storage_contract.py`
 **Owner**: Instance 1
 **Consumer**: Instance 2
@@ -291,6 +339,7 @@ class StorageInterface(ABC):
 ```
 
 ### Embeddings → Weaviate Interface
+
 **Contract File**: `src/mia_rag/interfaces/embeddings_contract.py`
 **Owner**: Instance 2
 **Consumer**: Instance 3
@@ -307,6 +356,7 @@ class EmbeddingsInterface(ABC):
 ```
 
 ### Weaviate → API Interface
+
 **Contract File**: `src/mia_rag/interfaces/vectordb_contract.py`
 **Owner**: Instance 3
 **Consumer**: Instance 4
@@ -327,6 +377,7 @@ class VectorDBInterface(ABC):
 ```
 
 ### API → MCP Interface
+
 **Contract File**: `src/mia_rag/interfaces/api_contract.py`
 **Owner**: Instance 4
 **Consumer**: Instance 5
@@ -365,6 +416,7 @@ Please revert changes to files outside your instance boundaries.
 ```
 
 To check boundaries manually:
+
 ```bash
 mise run check:boundaries
 ```
@@ -374,6 +426,7 @@ mise run check:boundaries
 ## 📝 How to Request Changes
 
 ### For Interface Changes
+
 1. Create RFC: `docs/rfcs/XXX-description.md`
 2. Include:
    - Current interface
@@ -386,12 +439,14 @@ mise run check:boundaries
 6. Implement with version support if needed
 
 ### For Shared Resource Changes
+
 1. Document need in work log
 2. Create issue/PR with rationale
 3. Tag affected instances
 4. Get consensus before proceeding
 
 ### For Emergency Fixes
+
 1. Fix the issue
 2. Document in work log immediately
 3. Create RFC retroactively
@@ -402,6 +457,7 @@ mise run check:boundaries
 ## 🔍 Checking Your Boundaries
 
 ### Command Line
+
 ```bash
 # Check what you own
 mise run show:boundaries
@@ -415,6 +471,7 @@ mise run check:boundaries
 ```
 
 ### In Code
+
 ```python
 # Scripts will auto-detect your instance
 import os
@@ -441,6 +498,7 @@ If boundaries are accidentally violated:
 5. **Document** - Update work logs with resolution
 
 Example:
+
 ```bash
 # Accidentally modified Instance 3's file
 git status

@@ -209,6 +209,7 @@ gh pr create --base develop --template .github/pull_request_template.md
 ### 5. PR Review Process
 
 The PR will automatically:
+
 1. Run instance-specific tests
 2. Check boundary violations
 3. Validate interface contracts
@@ -284,6 +285,7 @@ mise run git:activity
 ### Automatic Daily Run
 
 Every day at 2 AM UTC:
+
 1. Creates `integration/daily-YYYYMMDD` branch
 2. Merges all instance branches
 3. Runs full integration test suite
@@ -341,22 +343,26 @@ gh pr review 123 --approve
 ### Process
 
 1. **Create RFC**:
+
    ```bash
    vim docs/rfcs/001-storage-interface-v2.md
    ```
 
 2. **Create RFC branch**:
+
    ```bash
    git checkout -b rfc/001-storage-interface-v2
    ```
 
 3. **Update interface with version**:
+
    ```python
    # src/mia_rag/interfaces/storage_contract.py
    __version__ = "2.0.0"  # Bumped from 1.0.0
    ```
 
 4. **Create PR with RFC label**:
+
    ```bash
    gh pr create --label "rfc,interface-change"
    ```
@@ -442,6 +448,7 @@ poetry run pytest -m instance2 --cov --cov-report=html
 #### PR Blocked
 
 Check:
+
 1. All tests passing?
 2. Coverage ≥80%?
 3. No boundary violations?
@@ -473,6 +480,7 @@ mise run check:interfaces
 ### Issues
 
 Create GitHub issues for:
+
 - Integration test failures
 - Boundary clarifications
 - Interface change proposals

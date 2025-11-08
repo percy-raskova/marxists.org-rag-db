@@ -1,0 +1,281 @@
+# MIA RAG System - Documentation Index
+
+**Master index of all documentation in the marxist-rag project.**
+
+Last Updated: 2025-11-08
+
+---
+
+## 🚀 Quick Start (Choose Your Role)
+
+**AI Agent working on a specific instance?**
+→ Go directly to your instance guide:
+
+- [INSTANCE1-STORAGE.md](./INSTANCE1-STORAGE.md) - Storage & Data Pipeline
+- [INSTANCE2-EMBEDDINGS.md](./INSTANCE2-EMBEDDINGS.md) - Runpod Embeddings
+- [INSTANCE3-WEAVIATE.md](./INSTANCE3-WEAVIATE.md) - Vector Database
+- [INSTANCE4-API.md](./INSTANCE4-API.md) - Query & API Layer
+- [INSTANCE5-MCP.md](./INSTANCE5-MCP.md) - MCP Server Integration
+- [INSTANCE6-MONITORING.md](./INSTANCE6-MONITORING.md) - Monitoring & Testing
+
+**New contributor or user?**
+→ Start here: [README.md](./README.md) or [START_HERE.md](./START_HERE.md)
+
+**Need architecture overview?**
+→ See [ARCHITECTURE.md](./ARCHITECTURE.md)
+
+---
+
+## 📋 Documentation Structure
+
+### Root-Level Documentation (15 files)
+
+#### Essential Entry Points
+- [README.md](./README.md) - User-facing project overview
+- [START_HERE.md](./START_HERE.md) - Navigation hub for all stakeholders
+- [CONTRIBUTING.md](./CONTRIBUTING.md) - Contributor guidelines
+- [DOCUMENTATION-INDEX.md](./DOCUMENTATION-INDEX.md) - THIS FILE
+
+#### Instance Quick-Start Guides (6 files)
+- [INSTANCE1-STORAGE.md](./INSTANCE1-STORAGE.md) - Storage & Pipeline (1-2 pages)
+- [INSTANCE2-EMBEDDINGS.md](./INSTANCE2-EMBEDDINGS.md) - Embeddings (1-2 pages)
+- [INSTANCE3-WEAVIATE.md](./INSTANCE3-WEAVIATE.md) - Weaviate Vector DB (1-2 pages)
+- [INSTANCE4-API.md](./INSTANCE4-API.md) - Query & API (1-2 pages)
+- [INSTANCE5-MCP.md](./INSTANCE5-MCP.md) - MCP Server (1-2 pages)
+- [INSTANCE6-MONITORING.md](./INSTANCE6-MONITORING.md) - Monitoring & Testing (1-2 pages)
+
+#### Architecture & Infrastructure
+- [ARCHITECTURE.md](./ARCHITECTURE.md) - **Comprehensive 200GB architecture** (consolidates CLAUDE_ENTERPRISE + CLOUD-ARCHITECTURE-PLAN + 200GB_SOLUTION_SUMMARY)
+- [TERRAFORM.md](./TERRAFORM.md) - Infrastructure as code
+- [RUNPOD.md](./RUNPOD.md) - Runpod GPU rental strategy
+
+#### AI Agent Guidance
+- [AI-AGENTS.md](./AI-AGENTS.md) - AI agent instructions, NEVER/ALWAYS rules
+- [BOUNDARIES.md](./BOUNDARIES.md) - Instance boundary enforcement
+
+#### Project Management
+- [PROJECT-STATUS.md](./PROJECT-STATUS.md) - Current project status
+- [DELIVERY-MANIFEST.md](./DELIVERY-MANIFEST.md) - Deliverable tracking
+
+---
+
+### docs/ Directory Structure
+
+```
+docs/
+├── instances/                  # Detailed instance-specific docs
+│   ├── instance1-storage/
+│   │   ├── README.md           # Detailed implementation guide
+│   │   ├── gcs-configuration.md  (to be created)
+│   │   ├── parquet-schema.md     (to be created)
+│   │   └── troubleshooting.md    (to be created)
+│   ├── instance2-embeddings/
+│   │   ├── README.md
+│   │   └── ... (similar structure)
+│   ├── instance3-weaviate/
+│   ├── instance4-api/
+│   ├── instance5-mcp/
+│   └── instance6-monitoring/
+│
+├── architecture/               # Architecture documentation
+│   ├── system-overview.md      (to be created)
+│   ├── infrastructure.md       (to be created)
+│   ├── storage-strategy.md     (to be created)
+│   ├── interface-contracts.md  (to be created)
+│   └── diagrams/               (architecture diagrams)
+│
+├── processes/                  # Process documentation
+│   ├── git-workflow.md         ✅ Exists
+│   ├── rfc-process.md          (to be created)
+│   ├── testing-strategy.md     (to be created)
+│   └── deployment.md           (to be created)
+│
+├── rfc/                        # Request for Comments
+│   ├── RFC-TEMPLATE.md         ✅ Exists
+│   └── RFC-001-embedding-batch-size.md  ✅ Exists
+│
+└── decisions/                  # Architecture Decision Records
+    └── adr-template.md         (to be created)
+```
+
+---
+
+### specs/ Directory (Formal Specifications)
+
+**Status**: To be reorganized with consistent naming
+
+**Current**:
+- [INDEX.md](./specs/INDEX.md) - Master specification index
+- [00-ARCHITECTURE-SPEC.md](./specs/00-ARCHITECTURE-SPEC.md) - System architecture
+- [02-DOCUMENT-PROCESSING-SPEC.md](./specs/02-DOCUMENT-PROCESSING-SPEC.md) - Processing spec
+- [03-RAG-INGESTION-SPEC.md](./specs/03-RAG-INGESTION-SPEC.md) - RAG ingestion
+- [04-QUERY-INTERFACE-SPEC.md](./specs/04-QUERY-INTERFACE-SPEC.md) - Query interface
+- [05-MCP-INTEGRATION-SPEC.md](./specs/05-MCP-INTEGRATION-SPEC.md) - MCP integration
+- [06-TESTING-VALIDATION-SPEC.md](./specs/06-TESTING-VALIDATION-SPEC.md) - Testing
+
+**Planned Reorganization**:
+- [01-STORAGE-PIPELINE.md](./specs/01-STORAGE-PIPELINE.md) - Consolidated storage spec
+- [02-EMBEDDINGS.md](./specs/02-EMBEDDINGS.md) - Embeddings spec (extract from RAG-INGESTION)
+- [03-VECTOR-DB.md](./specs/03-VECTOR-DB.md) - Weaviate spec (extract from RAG-INGESTION)
+- [04-API.md](./specs/04-API.md) - Rename from QUERY-INTERFACE
+- [05-MCP.md](./specs/05-MCP.md) - Rename from MCP-INTEGRATION
+- [06-TESTING.md](./specs/06-TESTING.md) - Rename from TESTING-VALIDATION
+
+---
+
+### .github/ Directory
+
+#### Templates
+- [.github/pull_request_template.md](./.github/pull_request_template.md) - PR template with instance validation
+- [.github/ISSUE_TEMPLATE/bug_report.md](./.github/ISSUE_TEMPLATE/bug_report.md) - Bug report template
+- [.github/ISSUE_TEMPLATE/integration_failure.md](./.github/ISSUE_TEMPLATE/integration_failure.md) - Integration failure template
+
+#### Issues (Design Pattern Refactoring)
+- [.github/issues/README.md](./.github/issues/README.md) - Complexity reduction initiative index
+- [refactor-check-conflicts-chain-of-responsibility.md](./.github/issues/refactor-check-conflicts-chain-of-responsibility.md)
+- [refactor-instance-map-command-pattern.md](./.github/issues/refactor-instance-map-command-pattern.md)
+- [refactor-check-boundaries-specification-pattern.md](./.github/issues/refactor-check-boundaries-specification-pattern.md)
+- [refactor-check-interfaces-visitor-pattern.md](./.github/issues/refactor-check-interfaces-visitor-pattern.md)
+- [refactor-instance-recovery-template-method.md](./.github/issues/refactor-instance-recovery-template-method.md)
+
+---
+
+## 📚 Documentation by Topic
+
+### Getting Started
+1. [README.md](./README.md) - Project overview
+2. [START_HERE.md](./START_HERE.md) - Navigation hub
+3. [CONTRIBUTING.md](./CONTRIBUTING.md) - How to contribute
+4. [ARCHITECTURE.md](./ARCHITECTURE.md) - System architecture
+
+### For AI Agents (Instance-Specific)
+1. Choose your instance guide (INSTANCE1-6)
+2. Read [AI-AGENTS.md](./AI-AGENTS.md) for rules
+3. Read [BOUNDARIES.md](./BOUNDARIES.md) for your territory
+4. Check `docs/instances/instanceX/` for detailed docs
+
+### Architecture & Design
+1. [ARCHITECTURE.md](./ARCHITECTURE.md) - **START HERE**
+2. [specs/00-ARCHITECTURE-SPEC.md](./specs/00-ARCHITECTURE-SPEC.md) - Formal spec
+3. `docs/architecture/` - Detailed architecture docs
+4. [TERRAFORM.md](./TERRAFORM.md) - Infrastructure
+
+### Implementation Specifications
+1. [specs/INDEX.md](./specs/INDEX.md) - Spec overview
+2. Instance-specific specs in `specs/`
+3. Interface contracts in `src/mia_rag/interfaces/contracts.py`
+
+### Testing & Quality
+1. [PARALLEL-TEST-STRATEGY.md](./PARALLEL-TEST-STRATEGY.md) - Testing approach
+2. [specs/06-TESTING-VALIDATION-SPEC.md](./specs/06-TESTING-VALIDATION-SPEC.md) - Formal testing spec
+3. `docs/processes/testing-strategy.md` (to be created)
+
+### Project Management
+1. [PROJECT-STATUS.md](./PROJECT-STATUS.md) - Current status
+2. [DELIVERY-MANIFEST.md](./DELIVERY-MANIFEST.md) - Deliverables
+3. `work-logs/instance{1-6}/` - Async work logs
+
+---
+
+## 🗺️ Navigation Patterns
+
+### "I'm a new AI agent, where do I start?"
+```
+START_HERE.md
+  → Identify your instance (1-6)
+  → Go to INSTANCEX-*.md
+  → Read AI-AGENTS.md for rules
+  → Read BOUNDARIES.md for your territory
+  → Read specs/0X-*.md for your formal spec
+  → Start implementing!
+```
+
+### "I need to understand the architecture"
+```
+ARCHITECTURE.md (comprehensive overview)
+  → docs/architecture/infrastructure.md (GCP details)
+  → docs/architecture/storage-strategy.md (data formats)
+  → docs/architecture/interface-contracts.md (APIs)
+  → TERRAFORM.md (infrastructure as code)
+```
+
+### "I need to coordinate with another instance"
+```
+1. Check BOUNDARIES.md (what they own)
+2. Read src/mia_rag/interfaces/contracts.py (their API)
+3. Check their work-logs/instanceX/ (their progress)
+4. Submit RFC if interface change needed
+```
+
+### "I need to test my code"
+```
+PARALLEL-TEST-STRATEGY.md (testing approach)
+  → docs/instances/instanceX/README.md (instance-specific tests)
+  → specs/06-TESTING-VALIDATION-SPEC.md (formal requirements)
+  → tests/unit/instanceX_*/ (write your tests here)
+```
+
+---
+
+## 🚨 Common Questions
+
+**Q: Which doc is the "source of truth" for X?**
+A: See [DOCUMENTATION-CONSISTENCY.md](./DOCUMENTATION-CONSISTENCY.md) (if exists) or:
+- Architecture → `ARCHITECTURE.md`
+- Instance boundaries → `BOUNDARIES.md`
+- Specs → `specs/` directory
+- Infrastructure → `TERRAFORM.md`
+
+**Q: I found duplicate information, which is correct?**
+A: Root-level files are canonical. If conflict exists, follow this precedence:
+1. `ARCHITECTURE.md` (architecture decisions)
+2. `specs/` (formal specifications)
+3. `INSTANCEX-*.md` (instance-specific guidance)
+4. `docs/` (detailed reference)
+
+**Q: Where do I document my work?**
+A:
+- Code → docstrings and type hints
+- Architecture decisions → Submit RFC in `docs/rfc/`
+- Progress → `work-logs/instanceX/`
+- Detailed implementation → `docs/instances/instanceX/`
+
+**Q: How do I propose a change?**
+A:
+1. Small change → Submit PR directly
+2. Interface change → RFC in `docs/rfc/` (24h review)
+3. Architecture change → Discuss in `work-logs/questions.md` first
+
+---
+
+## 📝 Documentation Status
+
+| Category | Count | Status |
+|----------|-------|--------|
+| Instance guides (root) | 6 | ✅ Complete |
+| Instance detailed docs | 6 | 📝 Stubs created |
+| Architecture docs | 1 | ✅ Consolidated |
+| Specs | 7 | 🔄 To be reorganized |
+| Process docs | 1 | 📝 More needed |
+| RFCs | 1 example | ✅ Template exists |
+
+**Legend**:
+- ✅ Complete
+- 🔄 In progress / needs reorganization
+- 📝 Stub / placeholder created
+- ❌ Not started
+
+---
+
+## 🔄 Planned Updates
+
+1. **Reorganize specs/** - Consistent naming (01-06 with hyphens)
+2. **Create detailed architecture docs** - Move content to `docs/architecture/`
+3. **Expand instance docs** - Fill in implementation details as development proceeds
+4. **Delete legacy files** - Remove CLAUDE_ENTERPRISE.md, CLOUD-ARCHITECTURE-PLAN.md, etc. (consolidated into ARCHITECTURE.md)
+
+---
+
+**Questions about documentation?** Check [START_HERE.md](./START_HERE.md) or create an issue.
+
+**Last Updated**: 2025-11-08
