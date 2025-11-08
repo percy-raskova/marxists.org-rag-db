@@ -1,16 +1,18 @@
-# MIA RAG System Architecture (200GB Scale)
+# MIA RAG System Architecture (50GB Optimized)
 
-**Consolidated architecture documentation for the Marxists Internet Archive RAG system at enterprise scale.**
+**Consolidated architecture documentation for the Marxists Internet Archive RAG system - optimized for feasibility.**
 
 ---
 
 ## Executive Summary
 
-- **Scale**: 200GB corpus (5-10 million documents, 126k+ works)
-- **Infrastructure**: Google Cloud Platform with Weaviate vector database
-- **Cost**: ~$40-60 for one-time embedding generation + ~$150/month operational
-- **Development**: 6 parallel Claude Code instances with lock-free coordination
-- **Status**: ✅ Ready for parallel development (195GB downloaded)
+- **Scale**: 50GB corpus (optimized from 200GB through strategic content filtering)
+- **Infrastructure**: Simplified architecture - can use managed services or self-hosted
+- **Cost**: ~$100-150 for one-time embedding generation + ~$30-50/month operational
+- **Development**: Simplified from 6 to 3-4 parallel workstreams
+- **Status**: ✅ Corpus optimized and ready for processing
+
+**Key Decision**: See [ADR-001](docs/adr/ADR-001-corpus-optimization.md) for corpus optimization rationale (75% reduction)
 
 **Quick Navigation**:
 - Instance developers → See `INSTANCE{1-6}-*.md` for your role
@@ -25,38 +27,31 @@
 ### High-Level Data Flow
 
 ```
-Archive Sources (200GB)
+Archive Sources (50GB - optimized)
     ↓
-[Instance 1: Storage & Pipeline]
-  - GCS buckets (gs://mia-processed-markdown/)
-  - HTML/PDF → Markdown conversion
-  - Parquet format with YAML frontmatter
+[Phase 1: Storage & Processing]
+  - Local/Cloud storage options
+  - HTML → Markdown conversion (priority)
+  - Essential PDFs only (~10GB)
+  - Output: Structured markdown with metadata
     ↓
-[Instance 2: Embeddings]
-  - Runpod.io GPU rental (RTX 4090, $0.40/hour)
-  - nomic-embed-text model (768d vectors)
-  - Batch processing with checkpointing
-  - Output: Parquet embedding files
+[Phase 2: Embeddings]
+  - Option A: Runpod.io GPU ($0.40/hr, ~25-30 hours = $100-120)
+  - Option B: Local GPU if available
+  - Option C: CPU embeddings (slower but free)
+  - Model: nomic-embed-text or similar
     ↓
-[Instance 3: Weaviate Vector DB]
-  - GKE cluster (Autopilot, n2-standard-4)
-  - HNSW index (ef=128, maxConnections=64)
-  - Billion-scale vector storage
+[Phase 3: Vector Database]
+  - Option A: Weaviate (production-ready)
+  - Option B: Qdrant (simpler deployment)
+  - Option C: ChromaDB (local development)
+  - Scale: ~1-2 million vectors (manageable)
     ↓
-[Instance 4: Query & API]
-  - FastAPI REST endpoints
-  - Redis caching layer
-  - Rate limiting (100/min per IP)
-    ↓
-[Instance 5: MCP Server]
-  - Model Context Protocol tools
-  - Claude Desktop integration
-  - Resource URIs (marxist://documents/{id})
-    ↓
-[Instance 6: Monitoring]
-  - Prometheus + Grafana
-  - Integration testing
-  - Cost tracking
+[Phase 4: Query Interface]
+  - FastAPI or Flask API
+  - Optional caching with Redis
+  - MCP integration for Claude
+  - Simple rate limiting
 ```
 
 ---

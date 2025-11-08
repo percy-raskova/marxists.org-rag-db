@@ -1,15 +1,15 @@
 # Corpus Analysis Project
 
-**Status**: In Progress (Phase 2)
+**Status**: In Progress (Phase 3)
 **Owner**: Shared across instances
 **Priority**: HIGH
-**Timeline**: 3-4 weeks
+**Timeline**: 1-2 weeks
 
 ---
 
 ## Project Overview
 
-Systematic investigation of the 121GB Marxists Internet Archive to understand structure, extract metadata schemas, and design optimal RAG architecture.
+Systematic investigation of the ~50GB Marxists Internet Archive (optimized from 200GB) to understand structure, extract metadata schemas, and design optimal RAG architecture.
 
 **Goal**: Complete section-specific analyses for all major corpus sections to inform processing pipeline design.
 
@@ -19,6 +19,7 @@ Systematic investigation of the 121GB Marxists Internet Archive to understand st
 
 - ✅ **Phase 1 Complete**: Archive section (4.5GB) fully analyzed
 - ✅ **Phase 2 Complete**: Methodology and overview documentation
+- ✅ **Corpus Optimized**: 200GB → 50GB (75% reduction)
 - 🔄 **Phase 3 In Progress**: Remaining section investigations
 - 📋 **Phase 4 Planned**: Integration specifications
 
@@ -33,17 +34,17 @@ Systematic investigation of the 121GB Marxists Internet Archive to understand st
 | Section | Size | Priority | Status | Owner | Issue |
 |---------|------|----------|--------|-------|-------|
 | Archive (theory) | 4.5GB | HIGH | ✅ Complete | - | - |
-| History (periodicals) | 46GB | HIGH | 📋 Planned | TBD | #TBD |
+| History (core texts) | ~35GB | HIGH | 📋 Planned | TBD | #TBD |
 | Subject (themes) | 9.1GB | HIGH | 📋 Planned | TBD | #TBD |
-| Glossary (encyclopedia) | 62MB | MEDIUM | 📋 Planned | TBD | #TBD |
-| Languages (multilingual) | 28GB | LOW | 📋 Future | - | - |
+| Glossary (encyclopedia) | 62MB | **CRITICAL** | 📋 Planned | TBD | #TBD |
+| Reference | 582MB | MEDIUM | 📋 Planned | TBD | #TBD |
 
 **Deliverables**:
 - ✅ `01-archive-section-analysis.md` (Complete)
-- 📋 `02-history-section-spec.md` (TODO - needs scope decision)
+- 📋 `02-history-section-spec.md` (TODO - ready to start)
 - 📋 `03-subject-section-spec.md` (TODO)
-- 📋 `04-glossary-section-spec.md` (TODO)
-- 📋 `05-language-sections-spec.md` (Future)
+- 📋 `04-glossary-section-spec.md` (TODO - critical priority)
+- 📋 `05-reference-section-spec.md` (TODO)
 
 ### Stream 2: Meta-Documentation ✅ Complete
 
@@ -80,13 +81,11 @@ Systematic investigation of the 121GB Marxists Internet Archive to understand st
 - **Deliverables**: Methodology spec, corpus overview, roadmap
 - **Outcome**: Reproducible framework for remaining investigations, token-efficient approach
 
-### Milestone 3: Remaining Section Analyses 📋 IN PLANNING
-- **Target**: 2-3 weeks
-- **Blockers**:
-  - User decision needed: Include History periodicals (43GB)?
-  - User decision needed: Include Peking Review (8.5GB)?
-- **Deliverables**: Complete analyses for History, Subject, Glossary sections
-- **Outcome**: Full corpus understanding across all sections
+### Milestone 3: Remaining Section Analyses 🔄 IN PROGRESS
+- **Target**: 1-2 weeks
+- **No Blockers**: Scope resolved through 75% size reduction
+- **Deliverables**: Complete analyses for History, Subject, Glossary, Reference sections
+- **Outcome**: Full corpus understanding across all 50GB sections
 
 ### Milestone 4: Integration Specifications 📋 PLANNED
 - **Target**: +1 week after Milestone 3
@@ -103,14 +102,13 @@ Archive Analysis (✅ Complete)
   ↓
 Investigation Methodology (✅ Complete)
   ↓
-[BLOCKER: User Scope Decision]
-  ├─ Include History periodicals? (43GB)
-  └─ Include Peking Review? (8.5GB)
+Corpus Optimization (✅ Complete: 200GB → 50GB)
   ↓
-Remaining Section Analyses (📋 Planned)
-  ├─ History section
-  ├─ Subject section
-  └─ Glossary section
+Remaining Section Analyses (🔄 In Progress)
+  ├─ History section (~35GB)
+  ├─ Subject section (9.1GB)
+  ├─ Glossary section (62MB - CRITICAL)
+  └─ Reference section (582MB)
   ↓
 Integration Specifications (📋 Planned)
   ├─ Unified metadata schema
@@ -118,28 +116,21 @@ Integration Specifications (📋 Planned)
   ├─ Chunking strategies
   └─ Knowledge graph
   ↓
-RAG Implementation (Ready to begin for Archive section)
+RAG Implementation (Ready to begin)
 ```
 
 ---
 
 ## Blockers and Risks
 
-### Critical Blockers
+### ✅ No Critical Blockers
 
-1. **Scope Decision: History Periodicals** (43GB)
-   - **Question**: Include labor periodicals in RAG?
-   - **Impact**: 93% of History section, OCR-intensive
-   - **Options**: Include all, exclude all, or HTML-only
-   - **Recommendation**: Start without, add later if needed
-   - **Decision Needed By**: Before History section investigation
-
-2. **Scope Decision: Peking Review** (8.5GB)
-   - **Question**: Include Peking Review PDFs?
-   - **Impact**: 93% of Subject section
-   - **Dependency**: Check overlap with Archive/Mao content
-   - **Recommendation**: Investigate overlap first
-   - **Decision Needed By**: Before Subject section investigation
+**Scope Resolved**: Through strategic content filtering, we've reduced the corpus by 75%:
+- Removed all audio/video/images
+- Removed duplicate PDFs with HTML equivalents
+- Deferred ETOL/EROL encyclopedias (75GB) for future enhancement
+- Deferred periodicals archives (56GB) for future enhancement
+- Result: ~50GB manageable corpus ready for investigation
 
 ### Medium Risks
 
@@ -185,27 +176,29 @@ RAG Implementation (Ready to begin for Archive section)
 
 ## Resource Allocation
 
-### AI Agent Time
+### AI Agent Time (Reduced by 50%)
 
 - **Archive Analysis**: ~8 hours (✅ Complete)
 - **Methodology Development**: ~4 hours (✅ Complete)
-- **History Investigation**: ~6 hours (📋 Planned)
-- **Subject Investigation**: ~4 hours (📋 Planned)
-- **Glossary Investigation**: ~2 hours (📋 Planned)
-- **Integration Specs**: ~6 hours (📋 Planned)
+- **History Investigation**: ~3 hours (📋 Planned - reduced from 6)
+- **Subject Investigation**: ~2 hours (📋 Planned - reduced from 4)
+- **Glossary Investigation**: ~1 hour (📋 Planned - reduced from 2)
+- **Reference Investigation**: ~1 hour (📋 Planned)
+- **Integration Specs**: ~4 hours (📋 Planned - reduced from 6)
 
-**Total Estimated**: ~30 hours (8 complete, 22 remaining)
+**Total Estimated**: ~23 hours (12 complete, 11 remaining)
 
-### Token Budget
+### Token Budget (Reduced by 40%)
 
 - **Archive Analysis**: ~8,000 tokens (✅ Used)
 - **Methodology + Overview**: ~19,000 tokens (✅ Used)
-- **History Investigation**: ~25,000 tokens (📋 Budgeted)
-- **Subject Investigation**: ~20,000 tokens (📋 Budgeted)
-- **Glossary Investigation**: ~10,000 tokens (📋 Budgeted)
-- **Integration Specs**: ~40,000 tokens (📋 Budgeted)
+- **History Investigation**: ~15,000 tokens (📋 Budgeted - reduced from 25k)
+- **Subject Investigation**: ~12,000 tokens (📋 Budgeted - reduced from 20k)
+- **Glossary Investigation**: ~5,000 tokens (📋 Budgeted - reduced from 10k)
+- **Reference Investigation**: ~5,000 tokens (📋 Budgeted)
+- **Integration Specs**: ~25,000 tokens (📋 Budgeted - reduced from 40k)
 
-**Total Estimated**: ~122,000 tokens (27k used, 95k remaining)
+**Total Estimated**: ~89,000 tokens (27k used, 62k remaining)
 
 ---
 

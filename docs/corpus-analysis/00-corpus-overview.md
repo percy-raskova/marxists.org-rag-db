@@ -1,11 +1,11 @@
 # Marxists Internet Archive: Corpus Overview
 
-**Total Size**: 121GB
-**HTML Files**: 96,637
-**PDF Files**: 21,141
-**Top-Level Directories**: 67
+**Total Size**: **155GB** (English-only, fully extracted)
+**HTML Files**: **64,634** (reduced from 96,637 after language trimming)
+**PDF Files**: **31,280** (increased from 21,141 - more PDFs discovered)
+**Top-Level Directories**: 15 (reduced from 67 - all non-English removed)
 **Investigation Date**: 2025-11-08
-**Status**: Comprehensive structural analysis complete
+**Status**: ✅ Fully extracted and analyzed, language-trimmed to English
 
 ---
 
@@ -23,21 +23,26 @@
 
 ## Executive Summary
 
-The Marxists Internet Archive (MIA) is a **121GB corpus** containing approximately 96,637 HTML files and 21,141 PDFs across 67 top-level directories. The archive is organized into five primary sections:
+The Marxists Internet Archive (MIA) is a **155GB English-only corpus** containing 64,634 HTML files and 31,280 PDFs across 15 directories. Major discovery: The History section is actually **140GB** (not 46GB as initially estimated), containing two massive encyclopedias:
+- **ETOL** (Encyclopedia of Trotskyism On-Line): 61GB
+- **EROL** (Encyclopedia of anti-Revisionism On-Line): 14GB
 
-1. **History Archive** (46GB, 38%) - Historical documents and labor movement periodicals
-2. **Archive by Author** (4.5GB, 4%) - Theoretical works by 411 revolutionary thinkers
-3. **Subject Archive** (9.1GB, 8%) - Thematic collections with expert curation
-4. **Language Directories** (~28GB, 23%) - Content in 40+ languages
-5. **Supporting Content** (~33GB, 27%) - Ebooks, audiobooks, site infrastructure
+The archive is organized into five primary sections:
+
+1. **History Archive** (**140GB, 90%**) - Encyclopedias (ETOL, EROL) and labor periodicals
+2. **Subject Archive** (9.1GB, 6%) - Thematic collections with expert curation
+3. **Archive by Author** (4.5GB, 3%) - Theoretical works by 411 revolutionary thinkers
+4. **Reference** (582MB, <1%) - Reference materials and resources
+5. **Glossary** (62MB, <1%) - Encyclopedia entries (critical for metadata)
 
 ### Critical Insight: Corpus Architecture
 
-**The 200GB estimate appears to include redundant formats and non-processable content.** The actual English-language theoretical and historical content is approximately **60GB**, structured with three distinct content types:
+After full extraction and language trimming, the **actual English-only corpus is 155GB**. The History section alone is 140GB (90% of total), dominated by two massive encyclopedias we hadn't discovered in initial sampling:
 
-1. **Theoretical Works** (Archive section, 4.5GB) - Long-form theory, dense prose, hierarchical structure
-2. **Historical Periodicals** (History section, 46GB) - Journalism, news articles, OCR-heavy PDFs
-3. **Reference Materials** (Subject + Glossary, 9.2GB) - Curated collections, encyclopedia entries
+1. **Theoretical Works** (Archive section, 4.5GB) - Long-form theory by 411 authors
+2. **Encyclopedias** (ETOL 61GB + EROL 14GB = 75GB) - Specialized Trotskyist and Maoist encyclopedias
+3. **Periodicals** (USA pubs, 56GB) - Labor newspapers and magazines
+4. **Reference Materials** (Subject + Glossary, ~10GB) - Curated collections, definitions
 
 Each content type requires different processing strategies, chunking approaches, and metadata schemas.
 
@@ -49,36 +54,65 @@ Each content type requires different processing strategies, chunking approaches,
 
 | Section | Size | % of Total | HTML Count | PDF Count | Content Type |
 |---------|------|------------|------------|-----------|--------------|
-| **History** | 46GB | 38% | ~15,000 | 5,043 | Labor periodicals, historical docs |
-| **Languages** | ~28GB | 23% | ~30,000 | ~8,000 | Non-English translations |
-| **Supporting** | ~33GB | 27% | N/A | N/A | Ebooks, audiobooks, infrastructure |
-| **Subject** | 9.1GB | 8% | 2,259 | 1,412 | Thematic collections |
-| **Archive** | 4.5GB | 4% | 28,962 | 6,637 | Theoretical works by author |
+| **History** | **140GB** | 90% | ~45,000 | ~25,000 | Encyclopedias + periodicals |
+| - ETOL | 61GB | 39% | ~20,000 | ~10,000 | Trotskyist encyclopedia |
+| - EROL | 14GB | 9% | ~5,000 | ~3,000 | Anti-revisionist encyclopedia |
+| - USA pubs | 56GB | 36% | ~15,000 | ~10,000 | Labor periodicals |
+| **Subject** | 9.1GB | 6% | 2,259 | 1,412 | Thematic collections |
+| **Archive** | 4.5GB | 3% | ~15,000 | ~4,000 | Theoretical works by author |
+| **Reference** | 582MB | <1% | ~1,500 | ~800 | Reference materials |
 | **Glossary** | 62MB | <1% | 685 | 0 | Encyclopedia entries |
-| **Other** | ~1GB | <1% | Variable | Variable | Admin, miscellaneous |
+| **Other** | ~1GB | <1% | Variable | Variable | Admin, ebooks, audiobooks |
 
-### English Content Breakdown
+### Content Type Breakdown
 
-**Total English Content**: ~60GB
+**Total English Content**: 155GB (all non-English removed)
 
 | Content Type | Size | Primary Use | Processing Complexity |
 |--------------|------|-------------|----------------------|
-| Theoretical Works (Archive) | 4.5GB | RAG query base | Medium |
-| Historical Periodicals (History) | 46GB | Historical context | High (OCR) |
-| Thematic Collections (Subject) | 9.1GB | Concept navigation | Medium |
-| Reference (Glossary) | 62MB | Entity definitions | Low |
+| ETOL Encyclopedia | 61GB | Trotskyist reference | High (mixed formats) |
+| USA Periodicals | 56GB | Historical journalism | High (OCR) |
+| EROL Encyclopedia | 14GB | Maoist/anti-revisionist | High (mixed formats) |
+| Subject Collections | 9.1GB | Thematic navigation | Medium |
+| Archive (Theory) | 4.5GB | Core theoretical works | Medium |
+| Reference | 582MB | Supporting materials | Low |
+| Glossary | 62MB | Entity definitions | Low (but critical) |
 
 ---
 
 ## Major Sections
 
-### 1. History Archive (46GB)
+### 1. History Archive (140GB) - **MAJOR DISCOVERY**
 
 **Path**: `/history/`
-**Primary Content**: Historical documents, labor movement periodicals
-**Processing Complexity**: HIGH (OCR-intensive)
+**Actual Size**: **140GB** (was estimated at 46GB from partial sampling)
+**Primary Content**: Two massive encyclopedias + labor periodicals
+**Processing Complexity**: HIGH (mixed formats, OCR-intensive)
 
-#### 1.1 USA Publications (43GB - 93% of History Section)
+#### 1.1 ETOL - Encyclopedia of Trotskyism On-Line (61GB) - **NEW DISCOVERY**
+
+**Path**: `/history/etol/`
+**Content**: Comprehensive Trotskyist materials including:
+- Audio materials (21 subdirectories)
+- Books, critiques, documents
+- International Trotskyist publications
+- Newspaper archives
+- Subject-based collections
+
+**Significance**: This is a **complete specialized encyclopedia** we hadn't discovered in initial sampling. It represents the largest single collection of Trotskyist materials online.
+
+#### 1.2 EROL - Encyclopedia of anti-Revisionism On-Line (14GB) - **NEW DISCOVERY**
+
+**Path**: `/history/erol/`
+**Content**: Anti-revisionist (primarily Maoist) materials including:
+- Party documents and publications
+- Theoretical works on revisionism
+- International communist movement materials
+- Primary sources from various anti-revisionist organizations
+
+**Significance**: Represents the Maoist/anti-revisionist perspective, complementing the Trotskyist ETOL.
+
+#### 1.3 USA Publications (56GB - was 43GB)
 
 **Path**: `/history/usa/pubs/`
 **Structure**: Periodical archives organized by publication name
@@ -493,14 +527,14 @@ All sections include:
 | Section | Size | Complexity | In-Scope? | Investigation Priority | RAG Priority | Status |
 |---------|------|------------|-----------|----------------------|--------------|--------|
 | **Archive** (Theory) | 4.5GB | High | ✅ Yes | COMPLETED | **HIGH** | ✅ |
-| **History/USA/Pubs** (Periodicals) | 43GB | Medium | ❓ TBD | **HIGH** | **MEDIUM** | TODO |
-| **Subject/China** (Peking Review) | 8.5GB | Medium | ❓ TBD | **HIGH** | **MEDIUM** | TODO |
+| **Glossary** | 62MB | Low | ✅ Yes | **CRITICAL** | **CRITICAL** | TODO |
+| **ETOL** (Trotskyist) | 61GB | High | ❓ TBD | **HIGH** | **HIGH** | TODO |
+| **EROL** (Maoist) | 14GB | High | ❓ TBD | **HIGH** | **HIGH** | TODO |
+| **USA Pubs** (Periodicals) | 56GB | Medium | ❓ TBD | **HIGH** | **MEDIUM** | TODO |
+| **Subject/Peking Review** | 8.5GB | Medium | ❓ TBD | **MEDIUM** | **MEDIUM** | TODO |
 | **Subject** (Other) | 600MB | Medium | ✅ Yes | MEDIUM | **HIGH** | TODO |
-| **Glossary** | 62MB | Low | ✅ Yes | MEDIUM | **HIGH** | TODO |
-| **Languages/Chinese** | 21GB | Unknown | ❌ No | LOW | LOW | Future |
-| **Languages/Spanish** | 4.2GB | Unknown | ❌ No | LOW | LOW | Future |
-| **Languages** (Other) | ~3GB | Unknown | ❌ No | LOW | LOW | Future |
-| **Supporting** | ~33GB | N/A | ❌ No | N/A | N/A | Skip |
+| **Reference** | 582MB | Low | ✅ Yes | LOW | MEDIUM | TODO |
+| **Languages** | REMOVED | N/A | ❌ No | N/A | N/A | Deleted |
 
 ### Rationale for Priorities
 

@@ -1,6 +1,10 @@
-# Marxists Internet Archive RAG Pipeline (200GB Scale)
+# Marxists Internet Archive RAG Pipeline
 
-> **⚠️ SCALE UPDATE**: This system is designed for **200GB corpus**, not the original 38GB estimate.
+**Author/Lead Developer**: Persephone Raskova
+**Project Philosophy**: Non-sectarian preservation of Marxist history
+**Current Scale**: 50GB (optimized from 200GB - see [ADR-001](docs/adr/ADR-001-corpus-optimization.md))
+
+> **⚠️ OPTIMIZATION UPDATE**: Corpus strategically reduced from 200GB to 50GB for feasibility.
 >
 > **Key Documents for 200GB Scale:**
 >

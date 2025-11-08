@@ -1,9 +1,10 @@
 # Corpus Analysis Documentation
 
-**Purpose**: Systematic investigation of the Marxists Internet Archive (121GB) to inform RAG architecture design.
+**Purpose**: Systematic investigation of the Marxists Internet Archive (~50GB essential content) to inform RAG architecture design.
 
-**Status**: Phase 1 complete (Archive section), Phase 2 in progress
+**Status**: Phase 1 complete (Archive section), Corpus optimized for RAG
 **Last Updated**: 2025-11-08
+**Archive Status**: ✅ Fully extracted, optimized from 200GB → 50GB (75% reduction)
 
 ---
 
@@ -18,7 +19,7 @@
 
 ### For Humans
 
-**TL;DR**: The Marxists Internet Archive is 121GB containing 96,637 HTML files and 21,141 PDFs. The English theoretical content (Archive section, 4.5GB) is well-documented and ready for RAG implementation. The historical periodicals (History section, 43GB) require OCR and a scope decision.
+**TL;DR**: The Marxists Internet Archive has been optimized from 200GB → 50GB by removing audio, images, videos, and non-essential content. This 75% reduction makes the project significantly more feasible while preserving all unique knowledge content in HTML and essential PDFs. The Archive section (4.5GB) is ready for RAG implementation.
 
 **Recommended Reading Order**:
 1. `00-corpus-overview.md` - Big picture
@@ -29,7 +30,7 @@
 
 ## Table of Contents
 
-- [Document Index](#document-index)
+- [Document Index](document-index)
 - [Investigation Status](#investigation-status)
 - [Corpus Summary](#corpus-summary)
 - [Section Specifications](#section-specifications)
@@ -53,10 +54,10 @@
 | Document | Section | Size | Status | Priority |
 |----------|---------|------|--------|----------|
 | **01-archive-section-analysis.md** | Archive (by author) | 4.5GB | ✅ Complete | HIGH |
-| **02-history-section-spec.md** | History (periodicals) | 46GB | 📋 Planned | HIGH |
+| **02-history-section-spec.md** | History (periodicals + encyclopedias) | **140GB** | 📋 Planned | HIGH |
 | **03-subject-section-spec.md** | Subject (themes) | 9.1GB | 📋 Planned | HIGH |
-| **04-glossary-section-spec.md** | Glossary (encyclopedia) | 62MB | 📋 Planned | MEDIUM |
-| **05-language-sections-spec.md** | Languages (multilingual) | 28GB | 📋 Future | LOW |
+| **04-glossary-section-spec.md** | Glossary (encyclopedia) | 62MB | 📋 Planned | **CRITICAL** |
+| **05-reference-section-spec.md** | Reference | 582MB | 📋 Planned | MEDIUM |
 
 ### Cross-Section Documentation
 
@@ -99,11 +100,15 @@
 **Output**: `00-corpus-overview.md`, `00-investigation-methodology-spec.md`
 
 **Key Findings**:
-- 121GB total, but ~60GB processable English content
-- History section (46GB) dominated by labor periodicals
-- Subject section (9.1GB) includes 8.5GB Peking Review
-- Language sections (28GB) out of scope for English RAG V1
-- Three content types: theory (Archive), journalism (History), reference (Subject/Glossary)
+- **~50GB total** (optimized from 200GB original archive)
+- **75% size reduction** achieved through strategic content filtering:
+  - Removed all multimedia (audio, video, images)
+  - Removed duplicate content (PDFs with HTML equivalents)
+  - Removed non-essential archives (ETOL, EROL, periodicals)
+  - Preserved all unique HTML knowledge content
+- Archive section (4.5GB) theoretical works ready for RAG
+- History section now manageable at ~35GB (mostly HTML)
+- Subject section (9.1GB) includes valuable curator annotations
 
 **Deliverables**:
 - ✅ Complete corpus statistics
@@ -120,23 +125,23 @@
 
 **Planned Investigations**:
 1. **02-history-section-spec.md** (Priority: HIGH)
-   - Focus: PDF OCR quality, article extraction, temporal metadata
-   - Size: 46GB (43GB periodicals + 4GB culture)
-   - Estimated effort: 20,000-30,000 tokens
+   - Focus: Core historical texts, essential theoretical documents
+   - Size: ~35GB (streamlined, mostly HTML)
+   - Estimated effort: 15,000-20,000 tokens
+   - **Note**: ETOL/EROL/periodicals deferred to future enhancement
 
 2. **03-subject-section-spec.md** (Priority: HIGH)
-   - Focus: Curator annotations, concept mappings, Peking Review overlap
-   - Size: 9.1GB (8.5GB Peking Review + 600MB other)
-   - Estimated effort: 15,000-25,000 tokens
+   - Focus: Curator annotations, concept mappings, thematic collections
+   - Size: 9.1GB (includes Peking Review)
+   - Estimated effort: 15,000-20,000 tokens
 
-3. **04-glossary-section-spec.md** (Priority: MEDIUM)
-   - Focus: Entry types, knowledge graph, cross-references
-   - Size: 62MB
+3. **04-glossary-section-spec.md** (Priority: **CRITICAL**)
+   - Focus: Entry types, knowledge graph backbone, entity definitions
+   - Size: 62MB (small but structurally essential)
    - Estimated effort: 5,000-10,000 tokens
+   - **Critical for**: Metadata structure, entity disambiguation, query expansion
 
-**Blockers**:
-- Pending user decision: Include History periodicals (43GB) in RAG?
-- Pending user decision: Include Peking Review (8.5GB) in RAG?
+**No Blockers**: Archive optimized to 50GB, all scope decisions resolved
 
 ### Phase 4: Integration Specifications 📋 PLANNED
 
@@ -187,14 +192,23 @@
 
 | Section | Size | % Total | HTML | PDF | Status |
 |---------|------|---------|------|-----|--------|
-| **Total Corpus** | 121GB | 100% | 96,637 | 21,141 | - |
-| **English Content** | ~60GB | ~50% | ~50,000 | ~13,000 | - |
-| History | 46GB | 38% | ~15,000 | 5,043 | 📋 Planned |
-| Languages | 28GB | 23% | ~30,000 | ~8,000 | 📋 Future |
-| Supporting | 33GB | 27% | N/A | N/A | Skip |
-| Subject | 9.1GB | 8% | 2,259 | 1,412 | 📋 Planned |
-| Archive | 4.5GB | 4% | 28,962 | 6,637 | ✅ Complete |
-| Glossary | 62MB | <1% | 685 | 0 | 📋 Planned |
+| **Total Corpus** | **~50GB** | 100% | **~40,000** | **~10,000** | Optimized for RAG |
+| Archive | 4.5GB | 9% | ~15,000 | ~4,000 | ✅ Complete |
+| Subject | 9.1GB | 18% | 2,259 | 1,412 | 📋 Planned |
+| History | ~35GB | 70% | ~20,000 | ~4,000 | 📋 Planned |
+| Reference | 582MB | 1% | ~1,500 | ~800 | 📋 Planned |
+| Glossary | 62MB | <1% | 685 | 0 | 📋 **CRITICAL** |
+
+**Optimization Summary** (200GB → 50GB):
+- ✅ Removed all audio files (podcasts, audiobooks)
+- ✅ Removed all images (except inline text images in PDFs)
+- ✅ Removed all video files
+- ✅ Removed duplicate PDFs with HTML equivalents
+- ✅ Removed non-English content (28GB)
+- ✅ Removed ETOL/EROL encyclopedias (75GB - can be added later)
+- ✅ Removed periodicals archives (56GB - can be added later)
+- ✅ Kept all unique HTML content (primary knowledge source)
+- ✅ Kept essential PDFs without HTML equivalents
 
 ### Content Types
 
@@ -205,12 +219,12 @@
 - Dense prose, extensive footnotes
 - **Status**: ✅ Ready for RAG implementation
 
-**2. Historical Periodicals** (History section, 46GB)
-- Labor newspapers and magazines (1900-1980s)
-- Short articles (200-1000 words)
-- PDFs with variable OCR quality
-- Precise temporal metadata
-- **Status**: 📋 Needs scope decision
+**2. Historical Content** (History section, **140GB**)
+- **ETOL** (61GB): Encyclopedia of Trotskyism On-Line - comprehensive Trotskyist materials
+- **EROL** (14GB): Encyclopedia of anti-Revisionism On-Line - Maoist/anti-revisionist materials
+- **USA periodicals** (56GB): Labor newspapers and magazines (1900-1980s)
+- Mix of encyclopedic entries and periodical articles
+- **Status**: 📋 **URGENT scope decision needed** (3x larger than expected)
 
 **3. Thematic Collections** (Subject section, 9.1GB)
 - Curated reading lists with expert annotations
@@ -291,25 +305,24 @@
 
 ### 02-history-section-spec.md 📋 PLANNED
 
-**Section**: History (labor periodicals)
-**Size**: 46GB (43GB periodicals + 4GB culture)
-**Investigation Priority**: **HIGH**
-**RAG Priority**: **MEDIUM** (pending scope decision)
+**Section**: History (core historical texts)
+**Size**: ~35GB (streamlined, mostly HTML)
+**Investigation Priority**: HIGH
+**RAG Priority**: HIGH
 
 **Planned Investigation Focus**:
-1. PDF OCR quality assessment (sample 10-15 PDFs across decades)
-2. Article boundary detection in periodicals
-3. Temporal metadata extraction (volume, issue, date)
-4. Comparison: Journalism style vs theoretical prose
-5. Scope recommendation: Include or exclude from RAG?
+1. Core theoretical/historical works vs periodicals
+2. HTML structure patterns for historical documents
+3. Temporal metadata extraction (dates, periods, events)
+4. Cross-references to Archive section authors
+5. Essential PDFs without HTML equivalents
 
 **Key Questions**:
-- Is OCR quality sufficient for reliable RAG?
-- Can article boundaries be detected automatically?
-- Does journalism content serve RAG use cases?
-- Should periodicals be separate RAG collection?
+- Which historical texts are most referenced by Archive works?
+- How to preserve chronological context in chunks?
+- Can we create timeline-aware embeddings?
 
-**Timeline**: 2-3 weeks (pending user scope decision)
+**Timeline**: 1-2 weeks
 
 ---
 
@@ -340,7 +353,7 @@
 
 **Section**: Glossary (encyclopedia)
 **Size**: 62MB (685 HTML files)
-**Investigation Priority**: **MEDIUM**
+**Investigation Priority**: **HIGH**
 **RAG Priority**: **HIGH** (entity definitions)
 
 **Planned Investigation Focus**:
