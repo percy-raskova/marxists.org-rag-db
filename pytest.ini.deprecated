@@ -14,32 +14,26 @@ python_classes = Test*
 python_functions = test_*
 
 # Command line options (always applied)
+# Note: INI format does NOT support inline comments after values
 addopts =
-    # Reporting options
-    -ra                          # Show all test outcomes
-    --strict-markers             # Undefined markers are errors
-    --strict-config              # Invalid config is an error
-    --tb=short                   # Shorter tracebacks for readability
-    --maxfail=5                  # Stop after 5 failures
-    -vv                          # Very verbose output
-    --color=yes                  # Colored output
-
-    # Coverage options
-    --cov=src/mia_rag           # Measure coverage for src
-    --cov-branch                 # Branch coverage
-    --cov-report=term-missing   # Show missing lines in terminal
-    --cov-report=html           # Generate HTML report
-    --cov-report=xml            # Generate XML for CI
-    --cov-fail-under=80         # Fail if coverage < 80%
-
-    # Performance
-    --durations=10              # Show 10 slowest tests
-    --timeout=300               # 5-minute timeout per test
-
-    # Output
-    --junit-xml=test-results.xml  # JUnit format for CI
-    --html=test-report.html     # HTML report
-    --self-contained-html       # Single HTML file
+    -ra
+    --strict-markers
+    --strict-config
+    --tb=short
+    --maxfail=5
+    -vv
+    --color=yes
+    --cov=src/mia_rag
+    --cov-branch
+    --cov-report=term-missing
+    --cov-report=html
+    --cov-report=xml
+    --cov-fail-under=80
+    --durations=10
+    --timeout=300
+    --junit-xml=test-results.xml
+    --html=test-report.html
+    --self-contained-html
 
 # Test markers for organization
 markers =
@@ -84,11 +78,11 @@ markers =
 asyncio_mode = auto
 
 # Timeout configuration
-timeout = 300               # Default 5-minute timeout
-timeout_method = thread     # Use thread-based timeout
+timeout = 300
+timeout_method = thread
 
 # Strict mode
-xfail_strict = true        # XFAIL tests must actually fail
+xfail_strict = true
 
 # Logging
 log_cli = true
