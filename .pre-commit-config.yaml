@@ -3,7 +3,7 @@
 # Optimized for AI agents and parallel development
 
 default_language_version:
-  python: python3.10
+  python: python3.13
 
 default_install_hook_types: [pre-commit, commit-msg, pre-push]
 
