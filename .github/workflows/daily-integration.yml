@@ -1,0 +1,467 @@
+name: Daily Integration Test
+
+on:
+  schedule:
+    # Run at 2 AM UTC every day
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      test_level:
+        description: 'Test level to run'
+        required: false
+        default: 'integration'
+        type: choice
+        options:
+          - integration
+          - full
+          - smoke
+
+env:
+  PYTHON_VERSION: '3.10'
+  POETRY_VERSION: '1.7.1'
+  POETRY_HOME: /opt/poetry
+  POETRY_VIRTUALENVS_IN_PROJECT: true
+  POETRY_NO_INTERACTION: 1
+
+jobs:
+  create-integration-branch:
+    name: Create Integration Branch
+    runs-on: ubuntu-latest
+    outputs:
+      branch_name: ${{ steps.create_branch.outputs.branch_name }}
+      merge_report: ${{ steps.merge_branches.outputs.report }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: develop
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure Git
+        run: |
+          git config user.name "MIA RAG Integration Bot"
+          git config user.email "bot@marxist-rag.dev"
+
+      - name: Create integration branch
+        id: create_branch
+        run: |
+          # Generate branch name with date
+          DATE=$(date +%Y%m%d-%H%M%S)
+          BRANCH_NAME="integration/daily-$DATE"
+          echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
+
+          # Create and checkout integration branch
+          git checkout -b "$BRANCH_NAME"
+          echo "Created branch: $BRANCH_NAME"
+
+      - name: Merge instance branches
+        id: merge_branches
+        run: |
+          # Initialize merge report
+          MERGE_REPORT=""
+          CONFLICTS=""
+          SUCCESS_COUNT=0
+          FAIL_COUNT=0
+
+          # Try to merge each instance branch
+          for i in {1..6}; do
+            echo "Checking for instance${i} branches..."
+
+            # Get all remote branches for this instance
+            BRANCHES=$(git branch -r | grep "origin/instance${i}/" | sed 's/origin\///' || true)
+
+            if [ -z "$BRANCHES" ]; then
+              echo "No branches found for instance${i}"
+              continue
+            fi
+
+            for BRANCH in $BRANCHES; do
+              echo "Attempting to merge $BRANCH..."
+
+              # Try to merge the branch
+              if git merge "origin/$BRANCH" --no-ff -m "chore: integrate $BRANCH" 2>&1; then
+                echo "✅ Successfully merged $BRANCH"
+                MERGE_REPORT="$MERGE_REPORT\n✅ $BRANCH"
+                SUCCESS_COUNT=$((SUCCESS_COUNT + 1))
+              else
+                echo "❌ Conflict detected in $BRANCH"
+                CONFLICTS="$CONFLICTS\n❌ $BRANCH (conflict)"
+                FAIL_COUNT=$((FAIL_COUNT + 1))
+
+                # Abort the merge
+                git merge --abort
+
+                # Record conflict details
+                echo "Recording conflict for $BRANCH..."
+                git diff --name-only "origin/$BRANCH" >> conflicts-$i.txt || true
+              fi
+            done
+          done
+
+          # Create merge report
+          echo "## Merge Report" > merge_report.md
+          echo "" >> merge_report.md
+          echo "**Date**: $(date -u +%Y-%m-%d' '%H:%M' UTC')" >> merge_report.md
+          echo "**Successful merges**: $SUCCESS_COUNT" >> merge_report.md
+          echo "**Failed merges**: $FAIL_COUNT" >> merge_report.md
+          echo "" >> merge_report.md
+
+          if [ $SUCCESS_COUNT -gt 0 ]; then
+            echo "### Successfully Merged" >> merge_report.md
+            echo -e "$MERGE_REPORT" >> merge_report.md
+          fi
+
+          if [ $FAIL_COUNT -gt 0 ]; then
+            echo "" >> merge_report.md
+            echo "### Conflicts Detected" >> merge_report.md
+            echo -e "$CONFLICTS" >> merge_report.md
+          fi
+
+          # Output report
+          cat merge_report.md
+
+          # Set output
+          echo "report<<EOF" >> $GITHUB_OUTPUT
+          cat merge_report.md >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Push integration branch
+        run: |
+          git push origin "${{ steps.create_branch.outputs.branch_name }}"
+
+      - name: Upload conflict reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: conflict-reports
+          path: |
+            conflicts-*.txt
+            merge_report.md
+
+  run-integration-tests:
+    name: Run Integration Tests
+    needs: create-integration-branch
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    services:
+      # Weaviate vector database
+      weaviate:
+        image: semitechnologies/weaviate:latest
+        ports:
+          - 8080:8080
+        env:
+          AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED: 'true'
+          PERSISTENCE_DATA_PATH: '/var/lib/weaviate'
+          QUERY_DEFAULTS_LIMIT: '100'
+          CLUSTER_HOSTNAME: 'weaviate-node-1'
+
+      # Redis for API caching
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      # PostgreSQL for monitoring data
+      postgres:
+        image: postgres:15-alpine
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_USER: mia_rag
+          POSTGRES_PASSWORD: test_password
+          POSTGRES_DB: monitoring
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.create-integration-branch.outputs.branch_name }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install Poetry
+        run: |
+          pipx install poetry==${{ env.POETRY_VERSION }}
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Configure Poetry
+        run: |
+          poetry config virtualenvs.in-project true
+          poetry config installer.parallel true
+
+      - name: Cache Poetry dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            .venv
+            ~/.cache/pypoetry
+          key: poetry-integration-${{ runner.os }}-py${{ env.PYTHON_VERSION }}-${{ hashFiles('pyproject.toml', 'poetry.lock') }}
+          restore-keys: |
+            poetry-integration-${{ runner.os }}-py${{ env.PYTHON_VERSION }}-
+
+      - name: Install all dependencies
+        run: |
+          # Install all dependencies for integration testing
+          poetry install --with dev --extras "all"
+
+      - name: Wait for services
+        run: |
+          echo "Waiting for services to be ready..."
+
+          # Wait for Weaviate
+          timeout 30 bash -c 'until curl -f http://localhost:8080/v1/.well-known/ready 2>/dev/null; do sleep 1; done'
+          echo "✅ Weaviate is ready"
+
+          # Wait for Redis
+          timeout 30 bash -c 'until redis-cli -h localhost ping 2>/dev/null; do sleep 1; done'
+          echo "✅ Redis is ready"
+
+          # Wait for PostgreSQL
+          timeout 30 bash -c 'until pg_isready -h localhost -U mia_rag 2>/dev/null; do sleep 1; done'
+          echo "✅ PostgreSQL is ready"
+
+      - name: Set up test environment
+        env:
+          DATABASE_URL: postgresql://mia_rag:test_password@localhost:5432/monitoring
+          REDIS_URL: redis://localhost:6379
+          WEAVIATE_URL: http://localhost:8080
+        run: |
+          # Create test configuration
+          cat > .env.test <<EOF
+          # Test environment configuration
+          DATABASE_URL=$DATABASE_URL
+          REDIS_URL=$REDIS_URL
+          WEAVIATE_URL=$WEAVIATE_URL
+          ENVIRONMENT=test
+          LOG_LEVEL=DEBUG
+          EOF
+
+          # Initialize database schema if needed
+          # poetry run python scripts/init_database.py
+
+      - name: Run integration tests
+        env:
+          TEST_LEVEL: ${{ github.event.inputs.test_level || 'integration' }}
+        run: |
+          echo "Running $TEST_LEVEL tests..."
+
+          # Set test markers based on level
+          case "$TEST_LEVEL" in
+            smoke)
+              MARKERS="integration and not slow"
+              TIMEOUT=300
+              ;;
+            full)
+              MARKERS="integration or contract or scale"
+              TIMEOUT=3600
+              ;;
+            *)
+              MARKERS="integration"
+              TIMEOUT=1800
+              ;;
+          esac
+
+          # Run tests
+          poetry run pytest \
+            -m "$MARKERS" \
+            --timeout=$TIMEOUT \
+            --junit-xml=integration-report.xml \
+            --html=integration-report.html \
+            --self-contained-html \
+            --cov=src/mia_rag \
+            --cov-report=xml \
+            --cov-report=html \
+            --cov-report=term \
+            -v \
+            tests/integration/ \
+            tests/contract/ || TEST_RESULT=$?
+
+          echo "Test exit code: ${TEST_RESULT:-0}"
+
+          # Check coverage for integration tests
+          COVERAGE=$(poetry run coverage report | grep TOTAL | awk '{print $4}' | sed 's/%//')
+          echo "Integration test coverage: $COVERAGE%"
+
+          exit ${TEST_RESULT:-0}
+
+      - name: Run contract tests
+        if: always()
+        run: |
+          # Run contract tests between instances
+          poetry run pytest \
+            -m "contract" \
+            --junit-xml=contract-report.xml \
+            -v \
+            tests/contract/
+
+      - name: Check interface compliance
+        if: always()
+        run: |
+          # Run full interface compliance check
+          poetry run python scripts/check_interfaces.py --full
+
+      - name: Generate integration report
+        if: always()
+        run: |
+          # Create comprehensive integration report
+          python scripts/generate_integration_report.py \
+            --junit integration-report.xml \
+            --coverage coverage.xml \
+            --merge-report "${{ needs.create-integration-branch.outputs.merge_report }}" \
+            --output integration_summary.md
+
+          # Display report
+          cat integration_summary.md
+
+      - name: Upload test artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-test-results
+          path: |
+            integration-report.xml
+            integration-report.html
+            contract-report.xml
+            coverage.xml
+            htmlcov/
+            integration_summary.md
+
+      - name: Upload coverage to Codecov
+        if: always()
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./coverage.xml
+          flags: integration
+          name: integration-coverage
+
+  create-integration-issue:
+    name: Create Integration Report Issue
+    needs: [create-integration-branch, run-integration-tests]
+    if: always()
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: integration-test-results
+
+      - name: Create issue body
+        id: create_body
+        run: |
+          # Read integration summary
+          SUMMARY=$(cat integration_summary.md || echo "No summary available")
+
+          # Create issue body
+          cat > issue_body.md <<EOF
+          # Daily Integration Test Report
+
+          **Date**: $(date -u +%Y-%m-%d)
+          **Branch**: ${{ needs.create-integration-branch.outputs.branch_name }}
+          **Status**: ${{ needs.run-integration-tests.result }}
+
+          ## Merge Report
+          ${{ needs.create-integration-branch.outputs.merge_report }}
+
+          ## Test Results
+          ${SUMMARY}
+
+          ## Actions Required
+          EOF
+
+          # Add action items based on results
+          if [ "${{ needs.run-integration-tests.result }}" = "failure" ]; then
+            cat >> issue_body.md <<EOF
+
+          ### ⚠️ Integration Tests Failed
+
+          The following actions are required:
+          1. Review the test failures in the [workflow run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          2. Check conflict reports if any merges failed
+          3. Coordinate with affected instances to resolve issues
+          4. Re-run integration tests after fixes
+
+          EOF
+          fi
+
+          cat >> issue_body.md <<EOF
+
+          ## Artifacts
+          - [Download test results](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          - Branch: \`${{ needs.create-integration-branch.outputs.branch_name }}\`
+
+          ---
+          *This issue was automatically created by the Daily Integration Test workflow.*
+          EOF
+
+          # Set output
+          echo "body<<EOF" >> $GITHUB_OUTPUT
+          cat issue_body.md >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const date = new Date().toISOString().split('T')[0];
+            const status = '${{ needs.run-integration-tests.result }}' === 'success' ? '✅' : '❌';
+
+            const issue = await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `${status} Daily Integration Test - ${date}`,
+              body: `${{ steps.create_body.outputs.body }}`,
+              labels: ['integration', 'automated', '${{ needs.run-integration-tests.result }}']
+            });
+
+            console.log(`Created issue #${issue.data.number}`);
+
+  cleanup-old-branches:
+    name: Cleanup Old Integration Branches
+    runs-on: ubuntu-latest
+    needs: [create-integration-issue]
+    if: always()
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Clean up old integration branches
+        run: |
+          # Delete integration branches older than 7 days
+          echo "Cleaning up old integration branches..."
+
+          # Get all integration branches
+          BRANCHES=$(git branch -r | grep "origin/integration/daily-" || true)
+
+          # Calculate cutoff date (7 days ago)
+          CUTOFF_DATE=$(date -d '7 days ago' +%Y%m%d)
+
+          for BRANCH in $BRANCHES; do
+            # Extract date from branch name
+            BRANCH_NAME=${BRANCH#origin/}
+            BRANCH_DATE=$(echo $BRANCH_NAME | sed -E 's/integration\/daily-([0-9]{8}).*/\1/')
+
+            if [ "$BRANCH_DATE" -lt "$CUTOFF_DATE" ]; then
+              echo "Deleting old branch: $BRANCH_NAME"
+              git push origin --delete "$BRANCH_NAME" || true
+            fi
+          done
+
+          echo "Cleanup complete"

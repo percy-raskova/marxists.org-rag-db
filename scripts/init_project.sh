@@ -71,17 +71,44 @@ else
     echo "✅ Mise is already installed"
 fi
 
+# Configure Poetry for better compatibility
+echo ""
+echo "⚙️  Configuring Poetry..."
+poetry config virtualenvs.in-project true
+poetry config installer.parallel true
+echo "✅ Poetry configured"
+
 # Install base dependencies
 echo ""
 echo "📦 Installing Python dependencies..."
-poetry install --only main,dev
+# Install base and dev dependencies without extras first
+poetry install --with dev || {
+    echo "⚠️  Initial install failed, trying with --no-ansi flag..."
+    poetry install --with dev --no-ansi
+}
 echo "✅ Dependencies installed"
 
-# Install pre-commit hooks
+# Install pre-commit hooks if available
 echo ""
 echo "🔗 Installing pre-commit hooks..."
-poetry run pre-commit install
-echo "✅ Pre-commit hooks installed"
+if command -v pre-commit &> /dev/null; then
+    pre-commit install || echo "⚠️  Pre-commit hooks installation failed (may need to install pre-commit first)"
+else
+    echo "⚠️  pre-commit not installed yet, installing..."
+    pip install pre-commit
+    pre-commit install
+fi
+echo "✅ Pre-commit hooks configured"
+
+# Install git hooks from our custom directory
+echo ""
+echo "🔗 Installing custom git hooks..."
+if [ -f scripts/install-hooks.sh ]; then
+    bash scripts/install-hooks.sh --quiet
+    echo "✅ Custom git hooks installed"
+else
+    echo "⚠️  Custom hooks script not found"
+fi
 
 # Check for MIA archive
 echo ""

@@ -1,0 +1,377 @@
+name: Instance Tests
+
+on:
+  push:
+    branches:
+      - 'instance*/**'
+      - develop
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+env:
+  PYTHON_VERSION: '3.10'
+  POETRY_VERSION: '1.7.1'
+  POETRY_HOME: /opt/poetry
+  POETRY_VIRTUALENVS_IN_PROJECT: true
+  POETRY_NO_INTERACTION: 1
+
+jobs:
+  detect-changes:
+    name: Detect Changed Instances
+    runs-on: ubuntu-latest
+    outputs:
+      instances: ${{ steps.detect.outputs.instances }}
+      changed_files: ${{ steps.detect.outputs.changed_files }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect changed instances
+        id: detect
+        run: |
+          # Get changed files
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD)
+          else
+            CHANGED_FILES=$(git diff --name-only HEAD~1...HEAD)
+          fi
+
+          echo "Changed files:"
+          echo "$CHANGED_FILES"
+
+          # Initialize empty array
+          INSTANCES='[]'
+
+          # Check each instance
+          if echo "$CHANGED_FILES" | grep -qE "src/mia_rag/(storage|pipeline)/|tests/unit/instance1_"; then
+            INSTANCES=$(echo $INSTANCES | jq '. + ["instance1"]' | jq -c 'unique')
+          fi
+
+          if echo "$CHANGED_FILES" | grep -qE "src/mia_rag/embeddings/|tests/unit/instance2_"; then
+            INSTANCES=$(echo $INSTANCES | jq '. + ["instance2"]' | jq -c 'unique')
+          fi
+
+          if echo "$CHANGED_FILES" | grep -qE "src/mia_rag/vectordb/|tests/unit/instance3_"; then
+            INSTANCES=$(echo $INSTANCES | jq '. + ["instance3"]' | jq -c 'unique')
+          fi
+
+          if echo "$CHANGED_FILES" | grep -qE "src/mia_rag/api/|tests/unit/instance4_"; then
+            INSTANCES=$(echo $INSTANCES | jq '. + ["instance4"]' | jq -c 'unique')
+          fi
+
+          if echo "$CHANGED_FILES" | grep -qE "src/mia_rag/mcp/|tests/unit/instance5_"; then
+            INSTANCES=$(echo $INSTANCES | jq '. + ["instance5"]' | jq -c 'unique')
+          fi
+
+          if echo "$CHANGED_FILES" | grep -qE "src/mia_rag/monitoring/|tests/(integration|scale|contract)/|tests/unit/instance6_"; then
+            INSTANCES=$(echo $INSTANCES | jq '. + ["instance6"]' | jq -c 'unique')
+          fi
+
+          # If common files changed, test all instances
+          if echo "$CHANGED_FILES" | grep -qE "src/mia_rag/(interfaces|common)/|pyproject.toml|poetry.lock"; then
+            INSTANCES='["instance1","instance2","instance3","instance4","instance5","instance6"]'
+          fi
+
+          echo "Detected instances: $INSTANCES"
+          echo "instances=$INSTANCES" >> $GITHUB_OUTPUT
+          echo "changed_files<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGED_FILES" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+  test-instances:
+    name: Test ${{ matrix.instance }}
+    needs: detect-changes
+    if: needs.detect-changes.outputs.instances != '[]'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        instance: ${{ fromJson(needs.detect-changes.outputs.instances) }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Set up Python with caching
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      # Install Poetry using pipx (recommended by Poetry docs for CI)
+      - name: Install Poetry
+        run: |
+          pipx install poetry==${{ env.POETRY_VERSION }}
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      # Configure Poetry
+      - name: Configure Poetry
+        run: |
+          poetry config virtualenvs.in-project true
+          poetry config virtualenvs.create true
+          poetry config installer.parallel true
+          poetry config installer.max-workers 4
+
+      # Cache Poetry virtual environment
+      - name: Cache Poetry virtualenv
+        uses: actions/cache@v4
+        id: cache
+        with:
+          path: |
+            .venv
+            ~/.cache/pypoetry
+          key: poetry-${{ matrix.instance }}-${{ runner.os }}-py${{ env.PYTHON_VERSION }}-${{ hashFiles('pyproject.toml', 'poetry.lock') }}
+          restore-keys: |
+            poetry-${{ matrix.instance }}-${{ runner.os }}-py${{ env.PYTHON_VERSION }}-
+            poetry-${{ matrix.instance }}-${{ runner.os }}-
+
+      # Install dependencies
+      - name: Install dependencies
+        run: |
+          # Set instance for dependency installation
+          echo "${{ matrix.instance }}" > .instance
+
+          # Install base dependencies and dev dependencies
+          poetry install --no-root --with dev
+
+          # Install instance-specific dependencies
+          poetry install --no-root --extras "${{ matrix.instance }}"
+
+          # Install project
+          poetry install
+
+      # Run pre-test checks
+      - name: Run pre-test checks
+        run: |
+          # Check boundaries for this instance
+          poetry run python scripts/check_boundaries.py --instance "${{ matrix.instance }}" --auto
+
+          # Check interface compliance
+          poetry run python scripts/check_interfaces.py --ci
+
+      # Run linting
+      - name: Run Ruff linting
+        run: |
+          # Run linting on instance-specific code
+          case "${{ matrix.instance }}" in
+            instance1)
+              poetry run ruff check src/mia_rag/storage/ src/mia_rag/pipeline/ tests/unit/instance1_*
+              ;;
+            instance2)
+              poetry run ruff check src/mia_rag/embeddings/ tests/unit/instance2_*
+              ;;
+            instance3)
+              poetry run ruff check src/mia_rag/vectordb/ tests/unit/instance3_*
+              ;;
+            instance4)
+              poetry run ruff check src/mia_rag/api/ tests/unit/instance4_*
+              ;;
+            instance5)
+              poetry run ruff check src/mia_rag/mcp/ tests/unit/instance5_*
+              ;;
+            instance6)
+              poetry run ruff check src/mia_rag/monitoring/ tests/integration/ tests/unit/instance6_*
+              ;;
+          esac
+
+      # Run type checking
+      - name: Run mypy type checking
+        continue-on-error: true  # Don't fail on type errors for now
+        run: |
+          case "${{ matrix.instance }}" in
+            instance1)
+              poetry run mypy src/mia_rag/storage/ src/mia_rag/pipeline/
+              ;;
+            instance2)
+              poetry run mypy src/mia_rag/embeddings/
+              ;;
+            instance3)
+              poetry run mypy src/mia_rag/vectordb/
+              ;;
+            instance4)
+              poetry run mypy src/mia_rag/api/
+              ;;
+            instance5)
+              poetry run mypy src/mia_rag/mcp/
+              ;;
+            instance6)
+              poetry run mypy src/mia_rag/monitoring/
+              ;;
+          esac
+
+      # Run tests with coverage
+      - name: Run unit tests
+        env:
+          INSTANCE_ID: ${{ matrix.instance }}
+        run: |
+          # Run tests for this instance with coverage
+          poetry run pytest \
+            -m "${{ matrix.instance }}" \
+            --cov=src/mia_rag \
+            --cov-report=xml \
+            --cov-report=term-missing \
+            --cov-fail-under=80 \
+            --junit-xml=test-results-${{ matrix.instance }}.xml \
+            -v
+
+      # Upload test results
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ matrix.instance }}
+          path: test-results-${{ matrix.instance }}.xml
+
+      # Upload coverage
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./coverage.xml
+          flags: ${{ matrix.instance }}
+          name: ${{ matrix.instance }}-coverage
+          fail_ci_if_error: false
+
+      # Check coverage threshold
+      - name: Check coverage threshold
+        run: |
+          # Extract coverage percentage
+          COVERAGE=$(poetry run coverage report | grep TOTAL | awk '{print $4}' | sed 's/%//')
+
+          echo "Coverage for ${{ matrix.instance }}: $COVERAGE%"
+
+          # Check if coverage meets threshold
+          if (( $(echo "$COVERAGE < 80" | bc -l) )); then
+            echo "❌ Coverage is below 80% threshold"
+            exit 1
+          else
+            echo "✅ Coverage meets 80% threshold"
+          fi
+
+  boundary-validation:
+    name: Validate Instance Boundaries
+    runs-on: ubuntu-latest
+    needs: detect-changes
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install Poetry
+        run: |
+          pipx install poetry==${{ env.POETRY_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          poetry install --only main,dev
+
+      - name: Check boundary violations
+        run: |
+          # Extract branch name to determine instance
+          BRANCH="${{ github.head_ref || github.ref_name }}"
+          echo "Branch: $BRANCH"
+
+          # Extract instance from branch name
+          if [[ $BRANCH =~ ^instance([1-6])/ ]]; then
+            INSTANCE="instance${BASH_REMATCH[1]}"
+            echo "Detected instance: $INSTANCE"
+
+            # Check boundaries for this instance
+            poetry run python scripts/check_boundaries.py \
+              --instance "$INSTANCE" \
+              --strict \
+              --auto
+          else
+            echo "No instance-specific branch detected, skipping boundary check"
+          fi
+
+  interface-validation:
+    name: Validate Interface Contracts
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    if: contains(needs.detect-changes.outputs.changed_files, 'interfaces/')
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install Poetry
+        run: |
+          pipx install poetry==${{ env.POETRY_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          poetry install --only main,dev
+
+      - name: Check interface versions
+        run: |
+          # Check if interface files have version bumps
+          CHANGED_FILES="${{ needs.detect-changes.outputs.changed_files }}"
+          INTERFACE_FILES=$(echo "$CHANGED_FILES" | grep "src/mia_rag/interfaces/" || true)
+
+          if [ ! -z "$INTERFACE_FILES" ]; then
+            echo "Interface files changed:"
+            echo "$INTERFACE_FILES"
+
+            for file in $INTERFACE_FILES; do
+              echo "Checking $file for version bump..."
+
+              # Check if __version__ was modified
+              if ! git diff origin/${{ github.base_ref }}...HEAD -- "$file" | grep -q "__version__"; then
+                echo "❌ Interface file $file modified without version bump!"
+                echo "Please update __version__ in the file"
+                exit 1
+              fi
+            done
+
+            echo "✅ All interface changes include version bumps"
+          fi
+
+      - name: Check for RFC
+        if: contains(needs.detect-changes.outputs.changed_files, 'interfaces/')
+        run: |
+          # Check if PR body contains RFC reference
+          PR_BODY="${{ github.event.pull_request.body }}"
+
+          if ! echo "$PR_BODY" | grep -qE "RFC #[0-9]+|rfc/[0-9]+"; then
+            echo "⚠️ Warning: Interface changes should reference an RFC"
+            echo "Create an RFC in docs/rfcs/ to document the interface change"
+          fi
+
+  test-summary:
+    name: Test Summary
+    runs-on: ubuntu-latest
+    needs: [test-instances, boundary-validation, interface-validation]
+    if: always()
+
+    steps:
+      - name: Check test results
+        run: |
+          echo "## Test Summary"
+          echo ""
+
+          # Check if all required jobs passed
+          if [ "${{ needs.test-instances.result }}" = "success" ] &&
+             [ "${{ needs.boundary-validation.result }}" != "failure" ] &&
+             [ "${{ needs.interface-validation.result }}" != "failure" ]; then
+            echo "✅ All tests passed!"
+            exit 0
+          else
+            echo "❌ Some tests failed:"
+            echo "- Instance tests: ${{ needs.test-instances.result }}"
+            echo "- Boundary validation: ${{ needs.boundary-validation.result }}"
+            echo "- Interface validation: ${{ needs.interface-validation.result }}"
+            exit 1
+          fi

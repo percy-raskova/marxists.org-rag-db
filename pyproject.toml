@@ -18,7 +18,7 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.10"
+python = ">=3.10,<3.14"
 
 # Core dependencies (all instances need these)
 pydantic = "^2.5.0"
@@ -31,7 +31,6 @@ click = "^8.1.7"
 # Instance 1: Storage & Pipeline
 google-cloud-storage = { version = "^2.14.0", optional = true }
 google-cloud-scheduler = { version = "^2.13.0", optional = true }
-apache-arrow = { version = "^14.0.0", optional = true }
 pyarrow = { version = "^14.0.0", optional = true }
 pandas = { version = "^2.1.0", optional = true }
 
@@ -60,7 +59,7 @@ jsonrpc-base = { version = "^2.2.0", optional = true }
 
 # Instance 6: Monitoring
 prometheus-client = { version = "^0.19.0", optional = true }
-grafana-api = { version = "^2.1.0", optional = true }
+grafana-api = { version = "^1.0.3", optional = true }
 psutil = { version = "^5.9.0", optional = true }
 
 # Processing dependencies (from original implementation)
@@ -68,7 +67,7 @@ requests = "^2.31.0"
 beautifulsoup4 = "^4.12.0"
 markdownify = "^0.11.6"
 pymupdf4llm = "^0.0.10"
-lxml = "^4.9.0"
+lxml = "^5.3.0"
 pyyaml = "^6.0"
 tqdm = "^4.66.0"
 
@@ -112,7 +111,7 @@ safety = "^3.0.0"
 
 [tool.poetry.extras]
 # Individual instance extras
-instance1 = ["google-cloud-storage", "google-cloud-scheduler", "apache-arrow", "pyarrow", "pandas"]
+instance1 = ["google-cloud-storage", "google-cloud-scheduler", "pyarrow", "pandas"]
 instance2 = ["runpod", "sentence-transformers", "torch", "transformers", "accelerate", "datasets", "pyarrow"]
 instance3 = ["weaviate-client", "kubernetes"]
 instance4 = ["fastapi", "uvicorn", "redis", "httpx", "pydantic-settings"]
@@ -120,7 +119,7 @@ instance5 = ["mcp", "jsonrpc-base"]
 instance6 = ["prometheus-client", "grafana-api", "psutil"]
 
 # Grouped extras
-storage = ["google-cloud-storage", "google-cloud-scheduler", "apache-arrow", "pyarrow", "pandas"]
+storage = ["google-cloud-storage", "google-cloud-scheduler", "pyarrow", "pandas"]
 embeddings = ["runpod", "sentence-transformers", "torch", "transformers", "accelerate", "datasets"]
 weaviate = ["weaviate-client", "kubernetes"]
 api = ["fastapi", "uvicorn", "redis", "httpx", "pydantic-settings"]
@@ -129,7 +128,7 @@ monitoring = ["prometheus-client", "grafana-api", "psutil"]
 
 # All extras for integration testing
 all = [
-    "google-cloud-storage", "google-cloud-scheduler", "apache-arrow", "pyarrow", "pandas",
+    "google-cloud-storage", "google-cloud-scheduler", "pyarrow", "pandas",
     "runpod", "sentence-transformers", "torch", "transformers", "accelerate", "datasets",
     "weaviate-client", "kubernetes",
     "fastapi", "uvicorn", "redis", "httpx", "pydantic-settings",

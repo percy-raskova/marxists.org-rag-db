@@ -1,0 +1,336 @@
+name: Conflict Detection
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+env:
+  PYTHON_VERSION: '3.10'
+
+jobs:
+  detect-conflicts:
+    name: Detect Boundary Conflicts
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.head_ref }}
+
+      - name: Checkout base branch
+        run: |
+          git fetch origin ${{ github.base_ref }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          pip install click rich pyyaml
+
+      - name: Extract instance from branch name
+        id: extract_instance
+        run: |
+          BRANCH="${{ github.head_ref }}"
+          echo "Branch name: $BRANCH"
+
+          # Extract instance from branch name
+          if [[ $BRANCH =~ ^instance([1-6])/ ]]; then
+            INSTANCE_NUM="${BASH_REMATCH[1]}"
+            INSTANCE_ID="instance${INSTANCE_NUM}"
+            echo "instance_id=$INSTANCE_ID" >> $GITHUB_OUTPUT
+            echo "instance_num=$INSTANCE_NUM" >> $GITHUB_OUTPUT
+            echo "Detected instance: $INSTANCE_ID"
+          elif [[ $BRANCH =~ ^rfc/ ]]; then
+            echo "instance_id=rfc" >> $GITHUB_OUTPUT
+            echo "RFC branch detected"
+          else
+            echo "instance_id=unknown" >> $GITHUB_OUTPUT
+            echo "No instance-specific branch pattern detected"
+          fi
+
+      - name: Get changed files
+        id: changed_files
+        run: |
+          # Get list of changed files
+          CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD)
+
+          echo "Changed files:"
+          echo "$CHANGED_FILES"
+
+          # Save to file for processing
+          echo "$CHANGED_FILES" > changed_files.txt
+
+          # Count changed files
+          FILE_COUNT=$(echo "$CHANGED_FILES" | wc -l)
+          echo "file_count=$FILE_COUNT" >> $GITHUB_OUTPUT
+
+          # Save for later steps
+          echo "changed_files<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGED_FILES" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Check boundary violations
+        id: check_boundaries
+        if: steps.extract_instance.outputs.instance_id != 'unknown' && steps.extract_instance.outputs.instance_id != 'rfc'
+        run: |
+          INSTANCE="${{ steps.extract_instance.outputs.instance_id }}"
+          VIOLATIONS=""
+          HAS_VIOLATIONS=false
+
+          echo "Checking boundaries for $INSTANCE..."
+
+          # Define ownership patterns for each instance
+          case "$INSTANCE" in
+            instance1)
+              ALLOWED_PATTERNS="^src/mia_rag/(storage|pipeline)/|^tests/unit/instance1_"
+              ;;
+            instance2)
+              ALLOWED_PATTERNS="^src/mia_rag/embeddings/|^tests/unit/instance2_"
+              ;;
+            instance3)
+              ALLOWED_PATTERNS="^src/mia_rag/vectordb/|^tests/unit/instance3_"
+              ;;
+            instance4)
+              ALLOWED_PATTERNS="^src/mia_rag/api/|^tests/unit/instance4_"
+              ;;
+            instance5)
+              ALLOWED_PATTERNS="^src/mia_rag/mcp/|^tests/unit/instance5_"
+              ;;
+            instance6)
+              ALLOWED_PATTERNS="^src/mia_rag/monitoring/|^tests/(unit/instance6_|integration/|scale/|contract/)"
+              ;;
+            *)
+              ALLOWED_PATTERNS=".*"
+              ;;
+          esac
+
+          # Check each changed file
+          while IFS= read -r file; do
+            # Skip common files that all instances can modify
+            if [[ "$file" =~ ^(\.github/|docs/|work-logs/|README\.md|CONTRIBUTING\.md|\.gitignore)$ ]]; then
+              continue
+            fi
+
+            # Check if file matches allowed patterns
+            if ! echo "$file" | grep -qE "$ALLOWED_PATTERNS"; then
+              # Check if it's a shared resource
+              if [[ "$file" =~ ^src/mia_rag/(interfaces|common)/ ]]; then
+                echo "⚠️ Warning: Modifying shared resource: $file"
+                echo "This requires coordination with other instances"
+              else
+                echo "❌ Boundary violation: $file"
+                VIOLATIONS="${VIOLATIONS}\n- $file"
+                HAS_VIOLATIONS=true
+              fi
+            fi
+          done < changed_files.txt
+
+          if [ "$HAS_VIOLATIONS" = true ]; then
+            echo "has_violations=true" >> $GITHUB_OUTPUT
+            echo "violations<<EOF" >> $GITHUB_OUTPUT
+            echo -e "$VIOLATIONS" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+          else
+            echo "has_violations=false" >> $GITHUB_OUTPUT
+            echo "✅ No boundary violations detected"
+          fi
+
+      - name: Check for interface changes
+        id: check_interfaces
+        run: |
+          INTERFACE_CHANGES=""
+          HAS_INTERFACE_CHANGES=false
+
+          # Check if any interface files were modified
+          if grep -q "^src/mia_rag/interfaces/" changed_files.txt; then
+            HAS_INTERFACE_CHANGES=true
+            INTERFACE_FILES=$(grep "^src/mia_rag/interfaces/" changed_files.txt)
+
+            echo "Interface files modified:"
+            echo "$INTERFACE_FILES"
+
+            INTERFACE_CHANGES="$INTERFACE_FILES"
+          fi
+
+          echo "has_interface_changes=$HAS_INTERFACE_CHANGES" >> $GITHUB_OUTPUT
+          echo "interface_changes<<EOF" >> $GITHUB_OUTPUT
+          echo "$INTERFACE_CHANGES" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Check for conflicting PRs
+        id: check_conflicting_prs
+        run: |
+          INSTANCE="${{ steps.extract_instance.outputs.instance_id }}"
+          CONFLICTS=""
+          HAS_CONFLICTS=false
+
+          # Get list of open PRs
+          gh pr list --state open --json number,headRefName,files --limit 100 > open_prs.json
+
+          # Check each PR for conflicts with our changes
+          python3 << 'EOF'
+          import json
+          import sys
+
+          with open('open_prs.json', 'r') as f:
+              prs = json.load(f)
+
+          with open('changed_files.txt', 'r') as f:
+              our_files = set(f.read().strip().split('\n'))
+
+          current_pr = ${{ github.event.pull_request.number }}
+          instance = "${{ steps.extract_instance.outputs.instance_id }}"
+          conflicts = []
+
+          for pr in prs:
+              if pr['number'] == current_pr:
+                  continue
+
+              pr_branch = pr['headRefName']
+
+              # Skip if same instance (they can coordinate internally)
+              if pr_branch.startswith(f"{instance}/"):
+                  continue
+
+              # Check for file conflicts
+              pr_files = set(file['path'] for file in pr.get('files', []))
+              common_files = our_files.intersection(pr_files)
+
+              if common_files:
+                  conflicts.append({
+                      'pr': pr['number'],
+                      'branch': pr_branch,
+                      'files': list(common_files)
+                  })
+
+          if conflicts:
+              print("HAS_CONFLICTS=true")
+              print("CONFLICT_DETAILS<<EOF")
+              for conflict in conflicts:
+                  print(f"PR #{conflict['pr']} ({conflict['branch']}):")
+                  for file in conflict['files']:
+                      print(f"  - {file}")
+              print("EOF")
+          else:
+              print("HAS_CONFLICTS=false")
+          EOF > conflict_check.txt
+
+          # Parse output
+          if grep -q "HAS_CONFLICTS=true" conflict_check.txt; then
+            HAS_CONFLICTS=true
+            CONFLICT_DETAILS=$(sed -n '/CONFLICT_DETAILS<<EOF/,/EOF/p' conflict_check.txt | sed '1d;$d')
+          fi
+
+          echo "has_conflicts=$HAS_CONFLICTS" >> $GITHUB_OUTPUT
+          echo "conflict_details<<EOF" >> $GITHUB_OUTPUT
+          echo "$CONFLICT_DETAILS" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Comment PR with analysis
+        uses: actions/github-script@v7
+        if: always()
+        with:
+          script: |
+            const instance = '${{ steps.extract_instance.outputs.instance_id }}';
+            const fileCount = '${{ steps.changed_files.outputs.file_count }}';
+            const hasBoundaryViolations = '${{ steps.check_boundaries.outputs.has_violations }}' === 'true';
+            const hasInterfaceChanges = '${{ steps.check_interfaces.outputs.has_interface_changes }}' === 'true';
+            const hasConflicts = '${{ steps.check_conflicting_prs.outputs.has_conflicts }}' === 'true';
+
+            let comment = '## 🔍 Conflict Detection Report\n\n';
+
+            // Instance detection
+            if (instance === 'unknown') {
+              comment += '⚠️ **Warning**: Branch name does not follow instance naming convention\n';
+              comment += 'Expected format: `instance{N}/{module}-{feature}`\n\n';
+            } else if (instance === 'rfc') {
+              comment += '📋 **RFC Branch Detected**\n';
+              comment += 'This branch is for interface changes requiring review from all instances.\n\n';
+            } else {
+              comment += `✅ **Instance**: ${instance}\n`;
+              comment += `📁 **Files Changed**: ${fileCount}\n\n`;
+            }
+
+            // Boundary violations
+            if (hasBoundaryViolations) {
+              comment += '### ❌ Boundary Violations Detected\n\n';
+              comment += 'You are modifying files outside your instance boundaries:\n';
+              comment += '${{ steps.check_boundaries.outputs.violations }}\n\n';
+              comment += '**Action Required**: Please revert changes to these files or coordinate with the owning instance.\n\n';
+            } else if (instance !== 'unknown' && instance !== 'rfc') {
+              comment += '### ✅ Boundary Check Passed\n\n';
+              comment += 'All modified files are within your instance boundaries.\n\n';
+            }
+
+            // Interface changes
+            if (hasInterfaceChanges) {
+              comment += '### ⚠️ Interface Changes Detected\n\n';
+              comment += 'Modified interface files:\n';
+              comment += '${{ steps.check_interfaces.outputs.interface_changes }}\n\n';
+              comment += '**Requirements for interface changes:**\n';
+              comment += '1. Create RFC document in `docs/rfcs/`\n';
+              comment += '2. Bump version in interface file\n';
+              comment += '3. Allow 24-hour review period\n';
+              comment += '4. Get approval from affected instances\n\n';
+            }
+
+            // Conflicting PRs
+            if (hasConflicts) {
+              comment += '### ⚠️ Potential Conflicts with Other PRs\n\n';
+              comment += 'The following open PRs modify the same files:\n\n';
+              comment += '${{ steps.check_conflicting_prs.outputs.conflict_details }}\n\n';
+              comment += '**Recommendation**: Coordinate with the authors of these PRs to avoid merge conflicts.\n\n';
+            }
+
+            // Summary
+            comment += '### Summary\n\n';
+            if (!hasBoundaryViolations && !hasInterfaceChanges && !hasConflicts) {
+              comment += '✅ **All checks passed!** This PR is ready for review.\n';
+            } else {
+              comment += '⚠️ **Review required** - Please address the issues above.\n';
+            }
+
+            // Footer
+            comment += '\n---\n';
+            comment += '*This analysis was automatically generated by the Conflict Detection workflow.*\n';
+            comment += '*For questions, see [Git Workflow Documentation](docs/processes/git-workflow.md)*';
+
+            // Find existing comment
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const botComment = comments.find(comment =>
+              comment.user.type === 'Bot' &&
+              comment.body.includes('Conflict Detection Report')
+            );
+
+            if (botComment) {
+              // Update existing comment
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: comment
+              });
+            } else {
+              // Create new comment
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: comment
+              });
+            }
+
+      - name: Set check status
+        if: steps.check_boundaries.outputs.has_violations == 'true'
+        run: |
+          echo "❌ Boundary violations detected - PR check will fail"
+          exit 1

@@ -9,10 +9,11 @@ and haven't been broken by recent changes.
 import ast
 import sys
 from pathlib import Path
-from typing import Dict, List, Set, Optional
+
 import click
 from rich.console import Console
 from rich.table import Table
+
 
 console = Console()
 
@@ -24,7 +25,7 @@ class InterfaceChecker(ast.NodeVisitor):
     """AST visitor to extract interface definitions."""
 
     def __init__(self):
-        self.interfaces: Dict[str, Dict[str, List[str]]] = {}
+        self.interfaces: dict[str, dict[str, list[str]]] = {}
         self.current_class = None
 
     def visit_ClassDef(self, node: ast.ClassDef):
@@ -69,10 +70,10 @@ class InterfaceChecker(ast.NodeVisitor):
         self.generic_visit(node)
 
 
-def extract_interfaces(file_path: Path) -> Dict[str, Dict[str, List[str]]]:
+def extract_interfaces(file_path: Path) -> dict[str, dict[str, list[str]]]:
     """Extract interface definitions from a Python file."""
     try:
-        with open(file_path, 'r') as f:
+        with open(file_path) as f:
             tree = ast.parse(f.read())
 
         checker = InterfaceChecker()
@@ -83,7 +84,7 @@ def extract_interfaces(file_path: Path) -> Dict[str, Dict[str, List[str]]]:
         return {}
 
 
-def find_implementations(interface_name: str, search_dir: Path) -> List[Path]:
+def find_implementations(interface_name: str, search_dir: Path) -> list[Path]:
     """Find files that might implement an interface."""
     implementations = []
 
@@ -93,7 +94,7 @@ def find_implementations(interface_name: str, search_dir: Path) -> List[Path]:
             continue
 
         try:
-            with open(py_file, 'r') as f:
+            with open(py_file) as f:
                 content = f.read()
                 # Simple heuristic: look for class that inherits from interface
                 if interface_name in content and "class " in content:
@@ -106,14 +107,14 @@ def find_implementations(interface_name: str, search_dir: Path) -> List[Path]:
 
 def check_implementation(
     interface_name: str,
-    interface_def: Dict[str, List[str]],
+    interface_def: dict[str, list[str]],
     impl_file: Path
-) -> List[str]:
+) -> list[str]:
     """Check if a file properly implements an interface."""
     violations = []
 
     try:
-        with open(impl_file, 'r') as f:
+        with open(impl_file) as f:
             tree = ast.parse(f.read())
 
         # Find classes that inherit from the interface
@@ -122,9 +123,7 @@ def check_implementation(
                 # Check if it inherits from our interface
                 inherits = False
                 for base in node.bases:
-                    if isinstance(base, ast.Name) and base.id == interface_name:
-                        inherits = True
-                    elif isinstance(base, ast.Attribute) and base.attr == interface_name:
+                    if isinstance(base, ast.Name) and base.id == interface_name or isinstance(base, ast.Attribute) and base.attr == interface_name:
                         inherits = True
 
                 if inherits:
@@ -151,7 +150,7 @@ def check_implementation(
 @click.option("--check-all", is_flag=True, help="Check all interfaces")
 @click.option("--interface", help="Check specific interface")
 @click.option("--fix", is_flag=True, help="Suggest fixes for violations")
-def main(check_all: bool, interface: Optional[str], fix: bool):
+def main(check_all: bool, interface: str | None, fix: bool):
     """Check that interface contracts are properly implemented."""
 
     if not INTERFACES_DIR.exists():
@@ -204,7 +203,7 @@ def main(check_all: bool, interface: Optional[str], fix: bool):
         impl_files = find_implementations(interface_name, src_dir)
 
         if not impl_files:
-            console.print(f"  [yellow]No implementations found[/yellow]")
+            console.print("  [yellow]No implementations found[/yellow]")
             continue
 
         for impl_file in impl_files:
@@ -222,8 +221,8 @@ def main(check_all: bool, interface: Optional[str], fix: bool):
 
                     if fix:
                         console.print(
-                            f"    [green]Fix:[/green] Implement missing methods "
-                            f"or update interface if signature changed"
+                            "    [green]Fix:[/green] Implement missing methods "
+                            "or update interface if signature changed"
                         )
             else:
                 console.print(f"  [green]✅ {impl_file.relative_to(PROJECT_ROOT)}[/green]")
@@ -236,7 +235,7 @@ def main(check_all: bool, interface: Optional[str], fix: bool):
         console.print("2. Or update interface if requirements changed (needs RFC)")
         sys.exit(1)
     else:
-        console.print(f"\n[green]✅ All interface contracts are properly implemented![/green]")
+        console.print("\n[green]✅ All interface contracts are properly implemented![/green]")
 
 
 if __name__ == "__main__":

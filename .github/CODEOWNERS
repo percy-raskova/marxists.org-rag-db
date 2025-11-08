@@ -1,0 +1,116 @@
+# GitHub CODEOWNERS File for MIA RAG System
+# This file defines ownership for automated review routing
+# Each instance has clear boundaries to prevent conflicts
+
+# Default owner for repository configuration
+* @percy-raskova
+
+# ========================================
+# Instance 1: Storage & Pipeline
+# ========================================
+/src/mia_rag/storage/ @percy-raskova @instance1-storage
+/src/mia_rag/pipeline/ @percy-raskova @instance1-storage
+/tests/unit/instance1_storage/ @percy-raskova @instance1-storage
+/tests/unit/instance1_pipeline/ @percy-raskova @instance1-storage
+/specs/02-DOCUMENT-PROCESSING-SPEC.md @percy-raskova @instance1-storage
+
+# ========================================
+# Instance 2: Embeddings
+# ========================================
+/src/mia_rag/embeddings/ @percy-raskova @instance2-embeddings
+/tests/unit/instance2_embeddings/ @percy-raskova @instance2-embeddings
+/specs/instance2_embeddings.md @percy-raskova @instance2-embeddings
+
+# ========================================
+# Instance 3: Weaviate Vector Database
+# ========================================
+/src/mia_rag/vectordb/ @percy-raskova @instance3-weaviate
+/tests/unit/instance3_weaviate/ @percy-raskova @instance3-weaviate
+/specs/03-RAG-INGESTION-SPEC.md @percy-raskova @instance3-weaviate
+
+# ========================================
+# Instance 4: API
+# ========================================
+/src/mia_rag/api/ @percy-raskova @instance4-api
+/tests/unit/instance4_api/ @percy-raskova @instance4-api
+/specs/04-QUERY-INTERFACE-SPEC.md @percy-raskova @instance4-api
+
+# ========================================
+# Instance 5: MCP Server
+# ========================================
+/src/mia_rag/mcp/ @percy-raskova @instance5-mcp
+/tests/unit/instance5_mcp/ @percy-raskova @instance5-mcp
+/specs/05-MCP-INTEGRATION-SPEC.md @percy-raskova @instance5-mcp
+
+# ========================================
+# Instance 6: Monitoring & Integration Testing
+# ========================================
+/src/mia_rag/monitoring/ @percy-raskova @instance6-monitoring
+/tests/integration/ @percy-raskova @instance6-monitoring
+/tests/scale/ @percy-raskova @instance6-monitoring
+/tests/contract/ @percy-raskova @instance6-monitoring
+/.github/workflows/ @percy-raskova @instance6-monitoring
+/scripts/generate_integration_report.py @percy-raskova @instance6-monitoring
+
+# ========================================
+# Shared Resources (require all instances)
+# ========================================
+/src/mia_rag/interfaces/ @percy-raskova @instance1-storage @instance2-embeddings @instance3-weaviate @instance4-api @instance5-mcp @instance6-monitoring
+/src/mia_rag/common/ @percy-raskova @instance1-storage @instance2-embeddings @instance3-weaviate @instance4-api @instance5-mcp @instance6-monitoring
+/docs/rfcs/ @percy-raskova @instance1-storage @instance2-embeddings @instance3-weaviate @instance4-api @instance5-mcp @instance6-monitoring
+
+# ========================================
+# Root Configuration Files
+# ========================================
+/pyproject.toml @percy-raskova @instance6-monitoring
+/.mise.toml @percy-raskova @instance6-monitoring
+/.gitignore @percy-raskova @instance6-monitoring
+/.pre-commit-config.yaml @percy-raskova @instance6-monitoring
+/pytest.ini @percy-raskova @instance6-monitoring
+/.env.example @percy-raskova
+
+# ========================================
+# Documentation
+# ========================================
+/README.md @percy-raskova @instance6-monitoring
+/CLAUDE.md @percy-raskova @instance6-monitoring
+/CLAUDE_ENTERPRISE.md @percy-raskova @instance6-monitoring
+/AI-AGENT-INSTRUCTIONS.md @percy-raskova @instance6-monitoring
+/INSTANCE-BOUNDARIES.md @percy-raskova @instance6-monitoring
+/CONTRIBUTING.md @percy-raskova
+/PROJECT_STATUS.md @percy-raskova @instance6-monitoring
+
+# ========================================
+# Scripts and Tools
+# ========================================
+/scripts/init_project.sh @percy-raskova @instance6-monitoring
+/scripts/identify_instance.py @percy-raskova @instance6-monitoring
+/scripts/check_boundaries.py @percy-raskova @instance6-monitoring
+/scripts/check_interfaces.py @percy-raskova @instance6-monitoring
+/scripts/check_todos.py @percy-raskova @instance6-monitoring
+/scripts/emergency_rollback.sh @percy-raskova @instance6-monitoring
+/scripts/instance_recovery.py @percy-raskova @instance6-monitoring
+/scripts/check_conflicts.py @percy-raskova @instance6-monitoring
+/scripts/instance_map.py @percy-raskova @instance6-monitoring
+
+# ========================================
+# Architecture and Specifications
+# ========================================
+/specs/00-ARCHITECTURE-SPEC.md @percy-raskova
+/specs/06-TESTING-VALIDATION-SPEC.md @percy-raskova @instance6-monitoring
+/specs/INDEX.md @percy-raskova
+
+# ========================================
+# Work Logs (instance-specific)
+# ========================================
+/work-logs/instance1*.md @percy-raskova @instance1-storage
+/work-logs/instance2*.md @percy-raskova @instance2-embeddings
+/work-logs/instance3*.md @percy-raskova @instance3-weaviate
+/work-logs/instance4*.md @percy-raskova @instance4-api
+/work-logs/instance5*.md @percy-raskova @instance5-mcp
+/work-logs/instance6*.md @percy-raskova @instance6-monitoring
+
+# ========================================
+# Claude Code Configuration
+# ========================================
+/.claude/ @percy-raskova @instance6-monitoring

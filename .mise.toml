@@ -283,3 +283,155 @@ depends = ["quality", "test:unit", "test:contract"]
 [tasks."ci:integration"]
 description = "Run full CI pipeline"
 depends = ["quality", "test:unit", "test:contract", "test:integration"]
+
+# Git workflow tasks
+[tasks."git:branch"]
+description = "Create instance feature branch"
+run = '''
+#!/usr/bin/env bash
+set -e
+INSTANCE_ID=$(cat .instance 2>/dev/null || echo "unknown")
+if [ "$INSTANCE_ID" = "unknown" ]; then
+  echo "❌ Error: Instance not set. Run: mise run identify"
+  exit 1
+fi
+
+read -p "Feature name (e.g., batch-processor): " FEATURE
+BRANCH="$INSTANCE_ID/${FEATURE//[ ]/-}"
+git checkout -b "$BRANCH"
+echo "✅ Created branch: $BRANCH"
+'''
+
+[tasks."git:sync"]
+description = "Sync with develop branch"
+run = '''
+#!/usr/bin/env bash
+set -e
+echo "🔄 Syncing with develop..."
+git fetch origin develop
+git merge origin/develop --no-edit || {
+    echo "⚠️  Merge conflicts detected. Please resolve manually."
+    exit 1
+}
+echo "✅ Synced with develop"
+'''
+
+[tasks."git:pr"]
+description = "Create pull request for current branch"
+run = '''
+#!/usr/bin/env bash
+set -e
+CURRENT_BRANCH=$(git branch --show-current)
+
+if [[ ! "$CURRENT_BRANCH" =~ ^instance[1-6]/ ]]; then
+    echo "⚠️  Warning: Branch doesn't follow instance naming convention"
+fi
+
+# Check if we have the PR template
+if [ -f .github/pull_request_template.md ]; then
+    gh pr create --base develop --template .github/pull_request_template.md
+else
+    gh pr create --base develop
+fi
+'''
+
+[tasks."git:status"]
+description = "Show detailed git status for instance"
+run = '''
+#!/usr/bin/env bash
+set -e
+INSTANCE_ID=$(cat .instance 2>/dev/null || echo "unknown")
+
+echo "📊 Git Status for $INSTANCE_ID"
+echo "=========================="
+echo ""
+git status --short
+echo ""
+echo "📝 Recent commits:"
+git log --grep="$INSTANCE_ID" --oneline -5 || echo "No recent commits for $INSTANCE_ID"
+echo ""
+echo "🔀 Open PRs:"
+gh pr list --search "$INSTANCE_ID" --limit 5 || echo "No open PRs for $INSTANCE_ID"
+'''
+
+[tasks."git:conflicts"]
+description = "Check for potential conflicts with other instances"
+run = '''
+#!/usr/bin/env bash
+set -e
+INSTANCE=$(cat .instance 2>/dev/null || echo "unknown")
+if [ "$INSTANCE" = "unknown" ]; then
+    echo "⚠️  No instance set. Run: mise run identify"
+    exit 1
+fi
+python scripts/check_conflicts.py --instance "$INSTANCE"
+'''
+
+[tasks."git:rollback"]
+description = "Emergency rollback for instance"
+run = '''
+#!/usr/bin/env bash
+set -e
+INSTANCE_ID=$(cat .instance 2>/dev/null || echo "unknown")
+if [ "$INSTANCE_ID" = "unknown" ]; then
+    echo "❌ No instance set. Run: mise run identify"
+    exit 1
+fi
+
+read -p "Rollback to commit hash: " COMMIT
+read -p "Reason for rollback: " REASON
+bash scripts/emergency_rollback.sh "$INSTANCE_ID" "$COMMIT" "$REASON"
+'''
+
+[tasks."git:hooks"]
+description = "Install git hooks for boundary checking"
+run = "bash scripts/install-hooks.sh"
+
+[tasks."git:diagnose"]
+description = "Diagnose instance git issues"
+run = '''
+#!/usr/bin/env bash
+set -e
+INSTANCE=$(cat .instance 2>/dev/null || echo "unknown")
+if [ "$INSTANCE" = "unknown" ]; then
+    echo "⚠️  No instance set. Run: mise run identify"
+    exit 1
+fi
+python scripts/instance_recovery.py diagnose "$INSTANCE"
+'''
+
+[tasks."git:recover"]
+description = "Recover instance to specific commit"
+run = '''
+#!/usr/bin/env bash
+set -e
+INSTANCE=$(cat .instance 2>/dev/null || echo "unknown")
+if [ "$INSTANCE" = "unknown" ]; then
+    echo "⚠️  No instance set. Run: mise run identify"
+    exit 1
+fi
+read -p "Recover to commit hash: " COMMIT
+python scripts/instance_recovery.py restore "$INSTANCE" "$COMMIT"
+'''
+
+[tasks."git:activity"]
+description = "Show recent activity for instance"
+run = '''
+#!/usr/bin/env bash
+set -e
+INSTANCE=$(cat .instance 2>/dev/null || echo "unknown")
+python scripts/instance_recovery.py activity "$INSTANCE" --days 7
+'''
+
+[tasks."git:health"]
+description = "Run health check for instance"
+run = '''
+#!/usr/bin/env bash
+set -e
+INSTANCE=$(cat .instance 2>/dev/null || echo "unknown")
+python scripts/instance_recovery.py health "$INSTANCE"
+'''
+
+[tasks."git:validate-ownership"]
+description = "Validate file ownership mappings"
+run = "python scripts/instance_map.py --validate"

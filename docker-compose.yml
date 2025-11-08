@@ -1,0 +1,262 @@
+version: '3.8'
+
+# Docker Compose for MIA RAG Local Development
+# Author: Persphone Raskova
+# Repository: https://github.com/percy-raskova/marxists.org-rag-db
+
+services:
+  # ==========================================
+  # Instance 3: Weaviate Vector Database
+  # ==========================================
+  weaviate:
+    image: semitechnologies/weaviate:1.23.0
+    container_name: mia-weaviate
+    ports:
+      - "8080:8080"
+      - "50051:50051"  # gRPC port
+    environment:
+      QUERY_DEFAULTS_LIMIT: 25
+      AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED: 'true'
+      PERSISTENCE_DATA_PATH: '/var/lib/weaviate'
+      DEFAULT_VECTORIZER_MODULE: 'none'  # We provide our own embeddings
+      ENABLE_MODULES: 'text2vec-cohere,text2vec-huggingface,text2vec-openai'
+      CLUSTER_HOSTNAME: 'node1'
+      AUTOSCHEMA_ENABLED: 'false'  # We manage schema explicitly
+      LIMIT_RESOURCES: 'true'
+      # Performance tuning
+      GOGC: 100
+      PROMETHEUS_MONITORING_ENABLED: 'true'
+    volumes:
+      - weaviate_data:/var/lib/weaviate
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/v1/.well-known/ready"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      - mia-network
+
+  # ==========================================
+  # Instance 4: Redis Cache
+  # ==========================================
+  redis:
+    image: redis:7-alpine
+    container_name: mia-redis
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy lru
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      - mia-network
+
+  # ==========================================
+  # Instance 6: Prometheus Monitoring
+  # ==========================================
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: mia-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./configs/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    restart: unless-stopped
+    networks:
+      - mia-network
+
+  # ==========================================
+  # Instance 6: Grafana Dashboards
+  # ==========================================
+  grafana:
+    image: grafana/grafana:latest
+    container_name: mia-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_SECURITY_ADMIN_USER: admin
+      GF_AUTH_ANONYMOUS_ENABLED: 'true'
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+      GF_INSTALL_PLUGINS: redis-datasource
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./configs/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./configs/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+    restart: unless-stopped
+    depends_on:
+      - prometheus
+    networks:
+      - mia-network
+
+  # ==========================================
+  # Development: Adminer (Database UI)
+  # ==========================================
+  adminer:
+    image: adminer:latest
+    container_name: mia-adminer
+    ports:
+      - "8081:8080"
+    restart: unless-stopped
+    networks:
+      - mia-network
+    profiles:
+      - dev
+
+  # ==========================================
+  # Development: MinIO (S3-compatible storage for testing)
+  # ==========================================
+  minio:
+    image: minio/minio:latest
+    container_name: mia-minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"  # Console
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+      MINIO_DEFAULT_BUCKETS: mia-raw,mia-processed,mia-embeddings
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    networks:
+      - mia-network
+    profiles:
+      - dev
+
+  # ==========================================
+  # Development: Jupyter for analysis
+  # ==========================================
+  jupyter:
+    image: jupyter/datascience-notebook:latest
+    container_name: mia-jupyter
+    ports:
+      - "8888:8888"
+    environment:
+      JUPYTER_ENABLE_LAB: 'yes'
+      JUPYTER_TOKEN: 'marxist-rag'
+    volumes:
+      - ./notebooks:/home/jovyan/work
+      - ./data:/home/jovyan/data:ro
+    restart: unless-stopped
+    networks:
+      - mia-network
+    profiles:
+      - analysis
+
+  # ==========================================
+  # Testing: LocalStack (AWS services mock)
+  # ==========================================
+  localstack:
+    image: localstack/localstack:latest
+    container_name: mia-localstack
+    ports:
+      - "4566:4566"  # LocalStack gateway
+      - "4571:4571"  # External services
+    environment:
+      SERVICES: s3,sqs,lambda
+      DEBUG: 1
+      DATA_DIR: /tmp/localstack/data
+      LAMBDA_EXECUTOR: docker
+      DOCKER_HOST: unix:///var/run/docker.sock
+    volumes:
+      - localstack_data:/tmp/localstack
+      - /var/run/docker.sock:/var/run/docker.sock
+    restart: unless-stopped
+    networks:
+      - mia-network
+    profiles:
+      - test
+
+  # ==========================================
+  # Testing: Fake SMTP Server
+  # ==========================================
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: mia-mailhog
+    ports:
+      - "1025:1025"  # SMTP
+      - "8025:8025"  # Web UI
+    restart: unless-stopped
+    networks:
+      - mia-network
+    profiles:
+      - test
+
+# ==========================================
+# Networks
+# ==========================================
+networks:
+  mia-network:
+    driver: bridge
+    name: mia-network
+
+# ==========================================
+# Volumes
+# ==========================================
+volumes:
+  weaviate_data:
+    name: mia-weaviate-data
+  redis_data:
+    name: mia-redis-data
+  prometheus_data:
+    name: mia-prometheus-data
+  grafana_data:
+    name: mia-grafana-data
+  minio_data:
+    name: mia-minio-data
+  localstack_data:
+    name: mia-localstack-data
+
+# ==========================================
+# Usage Instructions:
+# ==========================================
+# Start core services:
+#   docker-compose up -d weaviate redis prometheus grafana
+#
+# Start all services (including dev tools):
+#   docker-compose --profile dev up -d
+#
+# Start with testing tools:
+#   docker-compose --profile test up -d
+#
+# Start with analysis tools:
+#   docker-compose --profile analysis up -d
+#
+# Stop all services:
+#   docker-compose down
+#
+# Remove all data:
+#   docker-compose down -v
+#
+# View logs:
+#   docker-compose logs -f [service-name]
+#
+# Access services:
+#   - Weaviate: http://localhost:8080
+#   - Redis: localhost:6379
+#   - Prometheus: http://localhost:9090
+#   - Grafana: http://localhost:3000 (admin/admin)
+#   - MinIO Console: http://localhost:9001 (minioadmin/minioadmin)
+#   - Jupyter: http://localhost:8888 (token: marxist-rag)
+#   - MailHog: http://localhost:8025
+#   - Adminer: http://localhost:8081

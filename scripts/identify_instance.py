@@ -7,15 +7,15 @@ It creates a .instance file that other scripts and tools can read.
 """
 
 import json
-import os
 import sys
 from pathlib import Path
-from typing import Optional, Dict, Any
+from typing import Any
+
 import click
 from rich.console import Console
-from rich.table import Table
 from rich.panel import Panel
-from rich.syntax import Syntax
+from rich.table import Table
+
 
 console = Console()
 
@@ -25,7 +25,7 @@ INSTANCE_FILE = PROJECT_ROOT / ".instance"
 ASSIGNMENTS_FILE = PROJECT_ROOT / ".claude" / "instance-assignments.json"
 
 
-def load_assignments() -> Dict[str, Any]:
+def load_assignments() -> dict[str, Any]:
     """Load instance assignments configuration."""
     if not ASSIGNMENTS_FILE.exists():
         console.print(
@@ -38,14 +38,14 @@ def load_assignments() -> Dict[str, Any]:
         return json.load(f)
 
 
-def get_current_instance() -> Optional[str]:
+def get_current_instance() -> str | None:
     """Get the currently configured instance."""
     if INSTANCE_FILE.exists():
         return INSTANCE_FILE.read_text().strip()
     return None
 
 
-def display_instance_info(instance_id: str, assignments: Dict[str, Any]):
+def display_instance_info(instance_id: str, assignments: dict[str, Any]):
     """Display detailed information about an instance."""
     instance = assignments["instances"][instance_id]
 
@@ -69,7 +69,7 @@ def display_instance_info(instance_id: str, assignments: Dict[str, Any]):
     console.print(panel)
 
 
-def display_all_instances(assignments: Dict[str, Any]):
+def display_all_instances(assignments: dict[str, Any]):
     """Display table of all instances."""
     table = Table(title="MIA RAG System - Instance Assignments")
 
@@ -112,7 +112,7 @@ def display_all_instances(assignments: Dict[str, Any]):
     is_flag=True,
     help="Auto-detect instance based on recent file modifications"
 )
-def main(set_instance: Optional[str], show: bool, list_all: bool, auto: bool):
+def main(set_instance: str | None, show: bool, list_all: bool, auto: bool):
     """Identify and configure Claude Code instance assignment."""
 
     assignments = load_assignments()

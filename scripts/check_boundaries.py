@@ -6,17 +6,17 @@ This script checks if files being modified respect instance boundaries.
 Used as a pre-commit hook and can be run manually.
 """
 
-import json
 import os
 import subprocess
 import sys
 from pathlib import Path
-from typing import List, Set, Optional
+
 import click
 from rich.console import Console
 from rich.table import Table
 
 from instance_map import get_instance_for_path, is_shared_path
+
 
 console = Console()
 
@@ -24,7 +24,7 @@ PROJECT_ROOT = Path(__file__).parent.parent
 INSTANCE_FILE = PROJECT_ROOT / ".instance"
 
 
-def get_current_instance() -> Optional[str]:
+def get_current_instance() -> str | None:
     """Get the currently configured instance."""
     if INSTANCE_FILE.exists():
         return INSTANCE_FILE.read_text().strip()
@@ -33,7 +33,7 @@ def get_current_instance() -> Optional[str]:
     return os.getenv("INSTANCE_ID")
 
 
-def get_modified_files() -> List[str]:
+def get_modified_files() -> list[str]:
     """Get list of modified files in git."""
     try:
         # Get staged files
@@ -92,7 +92,7 @@ def check_file_ownership(file_path: str, instance_id: str) -> tuple[bool, str]:
 @click.option("--instance", help="Override instance ID")
 @click.option("--strict", is_flag=True, help="Fail on any boundary violation")
 @click.option("--auto", is_flag=True, help="Check git modified files automatically")
-def main(files: tuple, instance: Optional[str], strict: bool, auto: bool):
+def main(files: tuple, instance: str | None, strict: bool, auto: bool):
     """Check if files respect instance boundaries."""
 
     # Get instance ID
@@ -144,7 +144,7 @@ def main(files: tuple, instance: Optional[str], strict: bool, auto: bool):
     console.print(table)
 
     # Summary
-    console.print(f"\n[bold]Summary:[/bold]")
+    console.print("\n[bold]Summary:[/bold]")
     console.print(f"  ✅ OK: {len(ok_files)} files")
     console.print(f"  ⚠️  Warnings: {len(warnings)} files")
     console.print(f"  ❌ Violations: {len(violations)} files")

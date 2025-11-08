@@ -11,9 +11,10 @@ This script ensures all TODO comments have proper context including:
 import re
 import sys
 from pathlib import Path
-from typing import List, Tuple
+
 import click
 from rich.console import Console
+
 
 console = Console()
 
@@ -31,7 +32,7 @@ VALID_TODO_PATTERNS = [
 TODO_PATTERN = r"#\s*(TODO|FIXME|HACK|XXX|NOTE)(\([^)]*\))?:?\s*(.*)$"
 
 
-def check_todo_context(line: str) -> Tuple[bool, str]:
+def check_todo_context(line: str) -> tuple[bool, str]:
     """
     Check if a TODO has proper context.
 
@@ -75,7 +76,7 @@ def check_todo_context(line: str) -> Tuple[bool, str]:
     return True, f"{todo_type} acceptable"
 
 
-def check_file(file_path: Path) -> List[Tuple[int, str, str]]:
+def check_file(file_path: Path) -> list[tuple[int, str, str]]:
     """
     Check all TODOs in a file.
 
@@ -84,7 +85,7 @@ def check_file(file_path: Path) -> List[Tuple[int, str, str]]:
     violations = []
 
     try:
-        with open(file_path, 'r', encoding='utf-8') as f:
+        with open(file_path, encoding='utf-8') as f:
             for line_num, line in enumerate(f, 1):
                 is_valid, reason = check_todo_context(line.rstrip())
                 if not is_valid:
@@ -108,7 +109,7 @@ def main(files: tuple, fix: bool):
         file_path = Path(file_path_str)
 
         # Skip non-Python files
-        if not file_path.suffix in ['.py', '.yaml', '.yml']:
+        if file_path.suffix not in ['.py', '.yaml', '.yml']:
             continue
 
         violations = check_file(file_path)
@@ -130,23 +131,23 @@ def main(files: tuple, fix: bool):
                     # Suggest fix
                     if "missing owner" in reason:
                         console.print(
-                            f"    [green]Suggested:[/green] "
-                            f"# TODO(instanceX): <description> - issue #<num>"
+                            "    [green]Suggested:[/green] "
+                            "# TODO(instanceX): <description> - issue #<num>"
                         )
                     elif "too short" in reason:
                         console.print(
-                            f"    [green]Suggested:[/green] "
-                            f"Add more descriptive context about what needs to be done"
+                            "    [green]Suggested:[/green] "
+                            "Add more descriptive context about what needs to be done"
                         )
                     elif "missing context" in reason:
                         console.print(
-                            f"    [green]Suggested:[/green] "
-                            f"Add '- issue #123' or '- by 2025-01-15'"
+                            "    [green]Suggested:[/green] "
+                            "Add '- issue #123' or '- by 2025-01-15'"
                         )
                     elif "Vague" in reason:
                         console.print(
-                            f"    [green]Suggested:[/green] "
-                            f"# TODO(instanceX): Specific description of what to do - issue #123"
+                            "    [green]Suggested:[/green] "
+                            "# TODO(instanceX): Specific description of what to do - issue #123"
                         )
 
             console.print()
