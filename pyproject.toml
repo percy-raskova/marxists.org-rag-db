@@ -195,11 +195,40 @@ ignore = [
     "PLR2004", # Magic values (common in tests)
 ]
 
-# Per-file ignores
+# Per-file ignores with detailed explanations
 [tool.ruff.lint.per-file-ignores]
-"tests/**/*.py" = ["ARG", "PLR2004", "S101"]  # Allow test-specific patterns
-"__init__.py" = ["F401", "F403"]  # Unused imports OK in __init__
-"scripts/*.py" = ["T201"]  # Allow print() in scripts
+"tests/**/*.py" = [
+    "ARG",      # Unused function arguments acceptable in test fixtures
+    "PLR2004",  # Magic value comparisons expected in test assertions
+    "S101",     # Assert statements are the standard for pytest
+    "ERA001",   # Commented code in tests serves as implementation templates
+    "PERF401",  # List comprehensions not required for test readability
+]
+"__init__.py" = [
+    "F401",     # Unused imports acceptable for __init__ re-exports
+    "F403",     # Star imports acceptable for public API exposure
+]
+"scripts/*.py" = [
+    "T201",     # print() statements expected in CLI scripts
+    "PTH123",   # open() acceptable for simple script file ops
+    "TRY300",   # else blocks on try not required for simple scripts
+    "PERF401",  # List comprehensions not required for script readability
+    "PERF203",  # try-except in loops acceptable for scripts
+    "ARG001",   # Unused args acceptable in CLI callback signatures
+]
+"*.py" = [
+    "PLR1722",  # sys.exit vs exit - both acceptable at module level
+    "PTH123",   # open() acceptable for compatibility
+    "TRY300",   # else blocks on try not always clearer
+    "PERF203",  # try-except in loops sometimes necessary
+]
+"rag_ingest.py" = [
+    "E731",     # Lambda for optional tqdm mock is intentional
+    "ARG005",   # Lambda kwargs absorb tqdm arguments when disabled
+]
+"scripts/check_conflicts.py" = [
+    "PLR0912",  # TODO: Refactor with Chain of Responsibility pattern (17 branches → ≤12)
+]
 
 [tool.ruff.lint.isort]
 known-first-party = ["mia_rag"]

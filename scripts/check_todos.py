@@ -63,17 +63,18 @@ def check_todo_context(line: str) -> tuple[bool, str]:
         if re.search(pattern, line, re.IGNORECASE):
             return True, f"Valid {todo_type}"
 
-    # Check components
+    # Collect validation errors for component checks
     if not owner:
-        return False, f"{todo_type} missing owner (e.g., TODO(instance1):)"
+        error_msg = f"{todo_type} missing owner (e.g., TODO(instance1):)"
+    elif len(description) < 10:
+        error_msg = f"{todo_type} description too short: '{description}'"
+    elif todo_type in ["TODO", "FIXME"] and "-" not in description:
+        error_msg = f"{todo_type} missing context (add '- issue #X' or '- by YYYY-MM-DD')"
+    else:
+        error_msg = None
 
-    if len(description) < 10:
-        return False, f"{todo_type} description too short: '{description}'"
-
-    if todo_type in ["TODO", "FIXME"] and "-" not in description:
-        return False, f"{todo_type} missing context (add '- issue #X' or '- by YYYY-MM-DD')"
-
-    return True, f"{todo_type} acceptable"
+    # Return validation result
+    return (True, f"{todo_type} acceptable") if error_msg is None else (False, error_msg)
 
 
 def check_file(file_path: Path) -> list[tuple[int, str, str]]:
@@ -85,7 +86,7 @@ def check_file(file_path: Path) -> list[tuple[int, str, str]]:
     violations = []
 
     try:
-        with open(file_path, encoding='utf-8') as f:
+        with open(file_path, encoding="utf-8") as f:
             for line_num, line in enumerate(f, 1):
                 is_valid, reason = check_todo_context(line.rstrip())
                 if not is_valid:
@@ -109,7 +110,7 @@ def main(files: tuple, fix: bool):
         file_path = Path(file_path_str)
 
         # Skip non-Python files
-        if file_path.suffix not in ['.py', '.yaml', '.yml']:
+        if file_path.suffix not in [".py", ".yaml", ".yml"]:
             continue
 
         violations = check_file(file_path)
