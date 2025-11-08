@@ -1,0 +1,285 @@
+# Mise configuration for MIA RAG System
+# https://mise.jdx.dev/
+
+[env]
+# Default environment variables
+PYTHONPATH = "."
+ENVIRONMENT = "development"
+LOG_LEVEL = "INFO"
+
+[tools]
+python = "3.10"
+poetry = "latest"
+ruff = "latest"
+mypy = "latest"
+
+[tasks.install]
+description = "Install dependencies for current instance"
+run = """
+#!/usr/bin/env bash
+set -e
+if [ -f .instance ]; then
+    INSTANCE=$(cat .instance)
+    echo "📦 Installing dependencies for $INSTANCE..."
+    poetry install --with dev --extras "$INSTANCE"
+    pre-commit install
+else
+    echo "📦 Installing all dependencies..."
+    poetry install --with dev --all-extras
+    pre-commit install
+fi
+"""
+
+[tasks.identify]
+description = "Identify and configure instance assignment"
+run = "python scripts/identify_instance.py"
+
+[tasks."check:interfaces"]
+description = "Verify interface contracts are honored"
+run = "python scripts/check_interfaces.py"
+
+[tasks."check:boundaries"]
+description = "Check for boundary violations"
+run = "python scripts/check_boundaries.py"
+
+[tasks."show:boundaries"]
+description = "Display instance boundaries and ownership"
+run = """
+#!/usr/bin/env bash
+if [ -f .instance ]; then
+    INSTANCE=$(cat .instance)
+    echo "📋 Boundaries for $INSTANCE:"
+    python scripts/show_boundaries.py --instance "$INSTANCE"
+else
+    echo "⚠️  No instance assignment found. Run: mise run identify"
+fi
+"""
+
+# Testing tasks
+[tasks.test]
+description = "Run tests for current instance"
+run = """
+#!/usr/bin/env bash
+set -e
+if [ -f .instance ]; then
+    INSTANCE=$(cat .instance)
+    echo "🧪 Running tests for $INSTANCE..."
+    pytest tests/unit/${INSTANCE}*/ -v --cov=src/mia_rag
+else
+    echo "🧪 Running all tests..."
+    pytest tests/ -v --cov=src/mia_rag
+fi
+"""
+
+[tasks."test:unit"]
+description = "Run unit tests only"
+run = "pytest tests/unit/ -v"
+
+[tasks."test:contract"]
+description = "Run contract tests to verify interfaces"
+run = "pytest tests/contract/ -v"
+
+[tasks."test:integration"]
+description = "Run integration tests"
+run = "pytest tests/integration/ -v"
+
+[tasks."test:scale"]
+description = "Run scale tests (slow, requires resources)"
+run = "pytest tests/scale/ -v -s"
+
+# Code quality tasks
+[tasks.lint]
+description = "Run linting with Ruff"
+run = """
+#!/usr/bin/env bash
+set -e
+if [ -f .instance ]; then
+    INSTANCE=$(cat .instance)
+    MODULE=$(python -c "from scripts.instance_map import get_module; print(get_module('$INSTANCE'))")
+    echo "🔍 Linting $MODULE..."
+    ruff check src/mia_rag/$MODULE --fix
+else
+    ruff check src/ tests/ --fix
+fi
+"""
+
+[tasks.format]
+description = "Format code with Ruff"
+run = """
+#!/usr/bin/env bash
+set -e
+if [ -f .instance ]; then
+    INSTANCE=$(cat .instance)
+    MODULE=$(python -c "from scripts.instance_map import get_module; print(get_module('$INSTANCE'))")
+    echo "✨ Formatting $MODULE..."
+    ruff format src/mia_rag/$MODULE
+else
+    ruff format src/ tests/
+fi
+"""
+
+[tasks.typecheck]
+description = "Run type checking with mypy"
+run = """
+#!/usr/bin/env bash
+set -e
+if [ -f .instance ]; then
+    INSTANCE=$(cat .instance)
+    MODULE=$(python -c "from scripts.instance_map import get_module; print(get_module('$INSTANCE'))")
+    mypy src/mia_rag/$MODULE --strict
+else
+    mypy src/ --strict
+fi
+"""
+
+[tasks.quality]
+description = "Run all quality checks (lint, format, typecheck)"
+depends = ["lint", "format", "typecheck"]
+
+# Work management tasks
+[tasks."work:start"]
+description = "Start work session and create daily log"
+run = """
+#!/usr/bin/env bash
+set -e
+if [ -f .instance ]; then
+    INSTANCE=$(cat .instance)
+    python scripts/session_start.py --instance "$INSTANCE"
+else
+    echo "⚠️  No instance assignment. Run: mise run identify"
+fi
+"""
+
+[tasks."work:end"]
+description = "End work session and update log"
+run = """
+#!/usr/bin/env bash
+set -e
+if [ -f .instance ]; then
+    INSTANCE=$(cat .instance)
+    python scripts/session_end.py --instance "$INSTANCE"
+else
+    echo "⚠️  No instance assignment. Run: mise run identify"
+fi
+"""
+
+[tasks."work:log"]
+description = "Update work log with current progress"
+run = """
+#!/usr/bin/env bash
+set -e
+if [ -f .instance ]; then
+    INSTANCE=$(cat .instance)
+    python scripts/update_work_log.py --instance "$INSTANCE"
+else
+    echo "⚠️  No instance assignment. Run: mise run identify"
+fi
+"""
+
+[tasks."work:status"]
+description = "Show work status across all instances"
+run = "python scripts/show_status.py"
+
+# Development workflow tasks
+[tasks.pr]
+description = "Create pull request for current branch"
+run = """
+#!/usr/bin/env bash
+set -e
+if [ -f .instance ]; then
+    INSTANCE=$(cat .instance)
+    BRANCH=$(git branch --show-current)
+    gh pr create --title "[$INSTANCE] $1" --label "$INSTANCE"
+else
+    gh pr create --title "$1"
+fi
+"""
+
+[tasks.sync]
+description = "Sync with main branch and check for conflicts"
+run = """
+#!/usr/bin/env bash
+set -e
+git fetch origin main
+git merge origin/main --no-edit
+python scripts/check_conflicts.py
+"""
+
+# Instance-specific tasks
+[tasks."instance1:setup"]
+description = "Setup Instance 1 (Storage & Pipeline)"
+run = """
+echo "instance1" > .instance
+echo "Setting up Instance 1: Storage & Pipeline"
+mise run install
+"""
+
+[tasks."instance2:setup"]
+description = "Setup Instance 2 (Embeddings)"
+run = """
+echo "instance2" > .instance
+echo "Setting up Instance 2: Embeddings"
+mise run install
+"""
+
+[tasks."instance3:setup"]
+description = "Setup Instance 3 (Weaviate)"
+run = """
+echo "instance3" > .instance
+echo "Setting up Instance 3: Weaviate Vector DB"
+mise run install
+"""
+
+[tasks."instance4:setup"]
+description = "Setup Instance 4 (API)"
+run = """
+echo "instance4" > .instance
+echo "Setting up Instance 4: Query & API"
+mise run install
+"""
+
+[tasks."instance5:setup"]
+description = "Setup Instance 5 (MCP)"
+run = """
+echo "instance5" > .instance
+echo "Setting up Instance 5: MCP Integration"
+mise run install
+"""
+
+[tasks."instance6:setup"]
+description = "Setup Instance 6 (Monitoring)"
+run = """
+echo "instance6" > .instance
+echo "Setting up Instance 6: Monitoring & Testing"
+mise run install
+"""
+
+# Utility tasks
+[tasks.clean]
+description = "Clean build artifacts and caches"
+run = """
+#!/usr/bin/env bash
+find . -type d -name "__pycache__" -exec rm -r {} + 2>/dev/null || true
+find . -type d -name ".pytest_cache" -exec rm -r {} + 2>/dev/null || true
+find . -type d -name ".mypy_cache" -exec rm -r {} + 2>/dev/null || true
+find . -type d -name ".ruff_cache" -exec rm -r {} + 2>/dev/null || true
+find . -type f -name "*.pyc" -delete
+find . -type f -name ".coverage" -delete
+rm -rf htmlcov/
+rm -rf dist/
+rm -rf build/
+echo "✨ Cleaned build artifacts and caches"
+"""
+
+[tasks.help]
+description = "Show available Mise tasks"
+run = "mise tasks"
+
+# CI/CD tasks
+[tasks."ci:validate"]
+description = "Run CI validation checks"
+depends = ["quality", "test:unit", "test:contract"]
+
+[tasks."ci:integration"]
+description = "Run full CI pipeline"
+depends = ["quality", "test:unit", "test:contract", "test:integration"]

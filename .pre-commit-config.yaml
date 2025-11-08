@@ -1,0 +1,302 @@
+# Pre-commit hooks for MIA RAG System
+# Ensures code quality and prevents common mistakes
+# Optimized for AI agents and parallel development
+
+default_language_version:
+  python: python3.10
+
+default_install_hook_types: [pre-commit, commit-msg, pre-push]
+
+repos:
+  # ===== Ruff: Fast Python Linter & Formatter =====
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.2.0
+    hooks:
+      # Run the linter
+      - id: ruff
+        name: Ruff Linter
+        args: [--fix, --exit-non-zero-on-fix]
+        types_or: [python, pyi]
+
+      # Run the formatter
+      - id: ruff-format
+        name: Ruff Formatter
+        types_or: [python, pyi]
+
+  # ===== Type Checking with mypy =====
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.8.0
+    hooks:
+      - id: mypy
+        name: Type Checker (mypy)
+        additional_dependencies:
+          - types-redis
+          - types-requests
+          - types-pyyaml
+          - types-tqdm
+          - pydantic>=2.5.0
+          - structlog>=24.1.0
+        args: [--strict, --ignore-missing-imports]
+        exclude: ^(tests/|scripts/|work-logs/)
+
+  # ===== Security: Detect Secrets =====
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.4.0
+    hooks:
+      - id: detect-secrets
+        name: Detect Secrets
+        args: ['--baseline', '.secrets.baseline']
+        exclude: |
+          (?x)^(
+            .*/fixtures/.*|
+            .*\.lock|
+            .*\.example|
+            .*\.md
+          )$
+
+  # ===== General File Quality =====
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: check-yaml
+        name: Check YAML
+        args: [--safe]
+
+      - id: check-toml
+        name: Check TOML
+
+      - id: check-json
+        name: Check JSON
+        exclude: .*/fixtures/.*
+
+      - id: check-xml
+        name: Check XML
+
+      - id: end-of-file-fixer
+        name: Fix End of Files
+        exclude: ^(.*\.(jpg|png|gif|ico|svg|pdf|mp4|zip|tar\.gz))$
+
+      - id: trailing-whitespace
+        name: Trim Trailing Whitespace
+        exclude: ^(.*\.(md|txt))$
+
+      - id: mixed-line-ending
+        name: Fix Line Endings
+        args: [--fix=lf]
+
+      - id: check-added-large-files
+        name: Check Large Files
+        args: ['--maxkb=1000']
+        exclude: |
+          (?x)^(
+            .*\.(parquet|arrow|pkl|joblib)|
+            .*embeddings.*|
+            .*/fixtures/large/.*
+          )$
+
+      - id: check-merge-conflict
+        name: Check Merge Conflicts
+
+      - id: check-case-conflict
+        name: Check Case Conflicts
+
+      - id: check-symlinks
+        name: Check Symlinks
+
+      - id: check-executables-have-shebangs
+        name: Check Script Shebangs
+
+      - id: check-shebang-scripts-are-executable
+        name: Check Script Permissions
+
+      - id: debug-statements
+        name: Check Debug Statements
+
+      - id: check-docstring-first
+        name: Check Docstring Position
+        exclude: ^(tests/|scripts/)
+
+  # ===== Python-specific Checks =====
+  - repo: https://github.com/pre-commit/pygrep-hooks
+    rev: v1.10.0
+    hooks:
+      - id: python-check-blanket-noqa
+        name: Check Blanket noqa
+
+      - id: python-check-blanket-type-ignore
+        name: Check Blanket type:ignore
+
+      - id: python-use-type-annotations
+        name: Check Type Annotations
+
+      - id: python-no-eval
+        name: Check No eval()
+
+      - id: python-no-log-warn
+        name: Check No log.warn()
+
+      - id: text-unicode-replacement-char
+        name: Check Unicode
+
+  # ===== Commit Message Validation =====
+  - repo: https://github.com/commitizen-tools/commitizen
+    rev: v3.13.0
+    hooks:
+      - id: commitizen
+        name: Validate Commit Message
+        stages: [commit-msg]
+
+  # ===== AI-Specific: Check TODOs have context =====
+  - repo: local
+    hooks:
+      - id: check-todos
+        name: Check TODOs Have Context
+        entry: python scripts/check_todos.py
+        language: python
+        types: [python]
+        pass_filenames: true
+        require_serial: false
+        additional_dependencies: [click>=8.1.0]
+
+  # ===== AI-Specific: Check instance boundaries =====
+  - repo: local
+    hooks:
+      - id: check-boundaries
+        name: Check Instance Boundaries
+        entry: python scripts/check_boundaries.py
+        language: python
+        types: [python]
+        pass_filenames: true
+        require_serial: false
+        additional_dependencies: [click>=8.1.0, pydantic>=2.5.0]
+
+  # ===== AI-Specific: Check interface contracts =====
+  - repo: local
+    hooks:
+      - id: check-interfaces
+        name: Check Interface Contracts
+        entry: python scripts/check_interfaces.py
+        language: python
+        types: [python]
+        pass_filenames: false
+        require_serial: true
+        additional_dependencies: [click>=8.1.0, pydantic>=2.5.0]
+
+  # ===== Documentation Quality =====
+  - repo: https://github.com/pycqa/pydocstyle
+    rev: 6.3.0
+    hooks:
+      - id: pydocstyle
+        name: Check Docstrings
+        additional_dependencies: [toml]
+        exclude: ^(tests/|scripts/|work-logs/)
+        args: [--convention=google]
+
+  # ===== Security: Bandit =====
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.7.6
+    hooks:
+      - id: bandit
+        name: Security Check (Bandit)
+        args: [-ll, -x, tests]
+        exclude: ^tests/
+
+  # ===== Import Sorting (backup for Ruff) =====
+  - repo: https://github.com/PyCQA/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort
+        name: Sort Imports (isort)
+        args: [--profile, black, --line-length, "100"]
+
+  # ===== YAML Linting =====
+  - repo: https://github.com/adrienverge/yamllint
+    rev: v1.33.0
+    hooks:
+      - id: yamllint
+        name: Lint YAML
+        args: [-d, "{extends: relaxed, rules: {line-length: {max: 120}}}"]
+
+  # ===== Markdown Linting =====
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.38.0
+    hooks:
+      - id: markdownlint
+        name: Lint Markdown
+        args: [--fix]
+        exclude: work-logs/
+
+  # ===== Shell Script Linting =====
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.9.0.6
+    hooks:
+      - id: shellcheck
+        name: Lint Shell Scripts
+
+  # ===== Dockerfile Linting =====
+  - repo: https://github.com/hadolint/hadolint
+    rev: v2.12.0
+    hooks:
+      - id: hadolint
+        name: Lint Dockerfiles
+
+  # ===== Terraform Formatting =====
+  - repo: https://github.com/antonbabenko/pre-commit-terraform
+    rev: v1.86.0
+    hooks:
+      - id: terraform_fmt
+        name: Format Terraform
+      - id: terraform_validate
+        name: Validate Terraform
+      - id: terraform_docs
+        name: Update Terraform Docs
+        args: [--args=--lockfile=false]
+
+# Configuration for specific file types
+files: |
+  (?x)^(
+    .*\.py|
+    .*\.pyi|
+    .*\.yaml|
+    .*\.yml|
+    .*\.json|
+    .*\.toml|
+    .*\.md|
+    .*\.sh|
+    .*\.tf|
+    Dockerfile.*|
+    .*/Dockerfile
+  )$
+
+# Exclude patterns
+exclude: |
+  (?x)^(
+    \.git/|
+    \.venv/|
+    venv/|
+    __pycache__/|
+    \.pytest_cache/|
+    \.mypy_cache/|
+    \.ruff_cache/|
+    \.coverage|
+    htmlcov/|
+    dist/|
+    build/|
+    .*\.egg-info/|
+    node_modules/|
+    \.terraform/|
+    work-logs/.*\.md|
+    .*\.(pyc|pyo|bak|swp)|
+    .*~
+  )$
+
+# Don't run on tags
+skip: [push-tag]
+
+# Fail fast
+fail_fast: false
+
+# Use CI mode in CI environments
+ci:
+  autofix_prs: false
+  autoupdate_schedule: weekly

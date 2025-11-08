@@ -1,14 +1,23 @@
-# Marxists Internet Archive RAG Pipeline
+# Marxists Internet Archive RAG Pipeline (200GB Scale)
 
-Complete pipeline for converting the Marxists Internet Archive into a queryable RAG system.
+> **⚠️ SCALE UPDATE**: This system is designed for **200GB corpus**, not the original 38GB estimate.
+>
+> **Key Documents for 200GB Scale:**
+> - **[CLOUD-ARCHITECTURE-PLAN.md](./CLOUD-ARCHITECTURE-PLAN.md)** - Complete GCP infrastructure
+> - **[RUNPOD_EMBEDDINGS.md](./RUNPOD_EMBEDDINGS.md)** - GPU rental strategy ($40-60 total!)
+> - **[PARALLEL-DEV-ARCHITECTURE.md](./PARALLEL-DEV-ARCHITECTURE.md)** - 6-instance development plan
+> - **[200GB_SOLUTION_SUMMARY.md](./200GB_SOLUTION_SUMMARY.md)** - Executive summary
+
+Complete enterprise-scale pipeline for converting the **200GB Marxists Internet Archive** into a queryable RAG system on Google Cloud Platform.
 
 ## 🔥 What This Does
 
-Converts 126,000+ pages of Marxist theory (HTML + PDFs) into:
-- Clean markdown with preserved metadata
-- Semantically chunked text
-- Vector embeddings for RAG queries
-- Local, private, fully-owned knowledge base
+Converts **200GB corpus** (5-10M documents) of Marxist theory into:
+- Clean markdown with preserved metadata (GCS storage)
+- Semantically chunked text with Parquet storage
+- Vector embeddings via **Runpod GPU rental ($40-60 total!)**
+- **Weaviate vector database** (handles 10M+ vectors)
+- Enterprise-scale, cloud-hosted knowledge base
 
 Perfect for:
 - Material analysis research
@@ -20,41 +29,64 @@ Perfect for:
 
 ### System Requirements
 - Python 3.9+
-- 20GB+ disk space (50GB+ recommended)
-- Ollama running locally (for embeddings)
+- Google Cloud Platform account
+- Terraform 1.5+
+- **200GB corpus** (torrent or mirror)
+- Runpod.io account with $100 credits
+
+### Cloud Infrastructure Required
+- **GCP Project** with billing enabled
+- **GCS Buckets** for storage (see TERRAFORM-INFRASTRUCTURE.md)
+- **GKE Cluster** for Weaviate (3+ nodes)
+- **Runpod GPU** rental (RTX 4090 recommended)
 
 ### Install Dependencies
 
 ```bash
-# Install Python packages
+# Core Python packages
 pip install -r requirements.txt --break-system-packages
 
-# For Chroma (recommended for simplicity)
-pip install chromadb --break-system-packages
+# Weaviate client (primary for 200GB scale)
+pip install weaviate-client --break-system-packages
 
-# OR for Qdrant (recommended for scale)
-pip install qdrant-client --break-system-packages
+# Google Cloud SDK
+curl https://sdk.cloud.google.com | bash
+gcloud auth application-default login
 
-# Install Ollama (if not already installed)
-curl -fsSL https://ollama.com/install.sh | sh
+# Terraform for infrastructure
+brew install terraform  # macOS
+# or see TERRAFORM-INFRASTRUCTURE.md for other platforms
 
-# Pull embedding model
-ollama pull nomic-embed-text
+# For embeddings (Runpod, not Ollama!)
+pip install sentence-transformers torch
 ```
 
-## 🚀 Quick Start
+## 🚀 Quick Start (200GB Scale)
 
-### Step 1: Get the Archive
+### Step 0: Deploy Cloud Infrastructure
 
-**Option A: Internet Archive Torrent** (126k pages, 38k PDFs - from 2016)
+```bash
+# Deploy GCP infrastructure with Terraform
+cd terraform/environments/prod
+terraform init
+terraform apply
+
+# See TERRAFORM-INFRASTRUCTURE.md for complete setup
+```
+
+### Step 1: Get the 200GB Archive
+
+**Option A: Internet Archive Torrent** (200GB complete archive)
 ```bash
 # Torrent: https://archive.org/details/dump_www-marxists-org
-# Download and extract to ~/Downloads/dump_www-marxists-org/
+# Upload to GCS after download:
+gsutil -m cp -r dump_www-marxists-org/* gs://mia-raw-torrent/
 ```
 
-**Option B: GitHub Mirror** (more recent, HTML only)
+**Option B: GitHub Mirror** (HTML only, smaller)
 ```bash
-git clone https://github.com/emijrp/www.marxists.org.git ~/marxists-mirror/
+git clone https://github.com/emijrp/www.marxists.org.git
+gsutil -m cp -r www.marxists.org/* gs://mia-raw-torrent/
 ```
 
 ### Step 2: Download MIA Metadata

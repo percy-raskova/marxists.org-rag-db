@@ -1,0 +1,108 @@
+{
+  "instances": {
+    "instance1": {
+      "name": "Storage & Pipeline",
+      "modules": ["storage", "pipeline"],
+      "directories": [
+        "src/mia_rag/storage/",
+        "src/mia_rag/pipeline/",
+        "tests/unit/instance1_storage/",
+        "tests/unit/instance1_pipeline/"
+      ],
+      "dependencies": [],
+      "extras": "instance1",
+      "description": "Manages GCS storage, lifecycle policies, and data pipeline orchestration"
+    },
+    "instance2": {
+      "name": "Embeddings",
+      "modules": ["embeddings"],
+      "directories": [
+        "src/mia_rag/embeddings/",
+        "tests/unit/instance2_embeddings/"
+      ],
+      "dependencies": ["instance1"],
+      "extras": "instance2",
+      "description": "Handles Runpod GPU embeddings, batch processing, and Parquet storage"
+    },
+    "instance3": {
+      "name": "Weaviate Vector DB",
+      "modules": ["vectordb"],
+      "directories": [
+        "src/mia_rag/vectordb/",
+        "tests/unit/instance3_weaviate/"
+      ],
+      "dependencies": ["instance2"],
+      "extras": "instance3",
+      "description": "Manages Weaviate deployment, schema, imports, and query optimization"
+    },
+    "instance4": {
+      "name": "Query & API",
+      "modules": ["api"],
+      "directories": [
+        "src/mia_rag/api/",
+        "tests/unit/instance4_api/"
+      ],
+      "dependencies": ["instance3"],
+      "extras": "instance4",
+      "description": "Provides REST API, caching layer, and query interface"
+    },
+    "instance5": {
+      "name": "MCP Integration",
+      "modules": ["mcp"],
+      "directories": [
+        "src/mia_rag/mcp/",
+        "tests/unit/instance5_mcp/"
+      ],
+      "dependencies": ["instance4"],
+      "extras": "instance5",
+      "description": "Implements MCP server for Claude integration with tool handlers"
+    },
+    "instance6": {
+      "name": "Monitoring & Testing",
+      "modules": ["monitoring"],
+      "directories": [
+        "src/mia_rag/monitoring/",
+        "tests/unit/instance6_monitoring/",
+        "tests/integration/",
+        "tests/scale/",
+        "tests/contract/"
+      ],
+      "dependencies": ["instance1", "instance2", "instance3", "instance4", "instance5"],
+      "extras": "instance6",
+      "description": "Provides metrics, dashboards, alerting, and integration testing"
+    }
+  },
+  "shared": {
+    "directories": [
+      "src/mia_rag/interfaces/",
+      "src/mia_rag/common/",
+      "docs/",
+      "scripts/",
+      ".github/",
+      ".claude/"
+    ],
+    "description": "Shared resources that require coordination to modify"
+  },
+  "interfaces": {
+    "storage_to_embeddings": {
+      "owner": "instance1",
+      "consumer": "instance2",
+      "contract": "src/mia_rag/interfaces/storage_contract.py"
+    },
+    "embeddings_to_weaviate": {
+      "owner": "instance2",
+      "consumer": "instance3",
+      "contract": "src/mia_rag/interfaces/embeddings_contract.py"
+    },
+    "weaviate_to_api": {
+      "owner": "instance3",
+      "consumer": "instance4",
+      "contract": "src/mia_rag/interfaces/vectordb_contract.py"
+    },
+    "api_to_mcp": {
+      "owner": "instance4",
+      "consumer": "instance5",
+      "contract": "src/mia_rag/interfaces/api_contract.py"
+    }
+  }
+}

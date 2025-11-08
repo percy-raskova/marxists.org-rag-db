@@ -1,0 +1,35 @@
+{
+  "SessionStart": {
+    "run_commands": [
+      "echo '🚀 Starting Claude Code Instance for MIA RAG System'",
+      "echo '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'",
+      "# Detect instance assignment",
+      "python scripts/identify_instance.py",
+      "echo ''",
+      "# Install Mise if not present",
+      "if ! command -v mise &> /dev/null; then curl https://mise.run | sh && export PATH=\"$HOME/.local/bin:$PATH\"; fi",
+      "# Load Mise environment",
+      "eval \"$(mise activate bash)\"",
+      "# Install dependencies for this instance",
+      "mise run install",
+      "# Check interface contracts",
+      "mise run check:interfaces",
+      "# Display instance boundaries",
+      "mise run show:boundaries",
+      "echo ''",
+      "echo '✅ Environment ready! Use `mise tasks` to see available commands'",
+      "echo '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'"
+    ]
+  },
+  "network": {
+    "allowed_domains": [
+      "github.com",
+      "pypi.org",
+      "python.org",
+      "googleapis.com",
+      "runpod.io",
+      "weaviate.io",
+      "mise.run"
+    ]
+  }
+}

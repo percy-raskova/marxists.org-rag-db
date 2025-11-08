@@ -1,0 +1,158 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Virtual environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Instance-specific environment files
+.env.instance*
+!.env.example
+
+# Instance assignment
+.instance
+
+# Poetry
+poetry.lock
+
+# Testing
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+coverage.xml
+*.cover
+.hypothesis/
+test-results.xml
+test-report.html
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+*.sublime-project
+*.sublime-workspace
+
+# Jupyter
+.ipynb_checkpoints
+*.ipynb
+
+# Logs
+*.log
+logs/
+work-logs/*.md
+!work-logs/.gitkeep
+
+# Data and models
+data/
+*.parquet
+*.arrow
+*.pkl
+*.joblib
+*.h5
+*.hdf5
+*.db
+*.sqlite
+*.sqlite3
+checkpoints/
+models/
+embeddings/
+cache/
+
+# Cloud credentials
+*-key.json
+*-credentials.json
+*.pem
+*.key
+*.crt
+*.p12
+service-account*.json
+
+# Terraform
+*.tfstate
+*.tfstate.backup
+.terraform/
+.terraform.lock.hcl
+*.tfvars
+!*.tfvars.example
+
+# Secrets
+.secrets
+.secrets.baseline
+secrets/
+credentials/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.bak
+*.backup
+*.old
+
+# OS files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Archives
+*.tar
+*.tar.gz
+*.zip
+*.gz
+*.tgz
+*.bz2
+*.rar
+*.7z
+
+# Project specific
+mia_vectordb/
+vector_db/
+marxists-processed/
+dump_www-marxists-org/
+www.marxists.org/
+
+# Status files
+status.json
+checkpoint.json
+
+# Keep these
+!.gitkeep
+!requirements.txt
+!pyproject.toml

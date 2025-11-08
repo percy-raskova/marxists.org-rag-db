@@ -1,20 +1,27 @@
-# MIA RAG System - Specification Index
+# MIA RAG System - Specification Index (200GB Scale)
 
-**Project:** Marxists Internet Archive RAG System  
-**Version:** 1.0  
-**Date:** 2025-11-07  
-**Status:** READY FOR PARALLEL DEVELOPMENT
+**Project:** Marxists Internet Archive RAG System
+**Version:** 2.0
+**Date:** 2025-11-07
+**Scale:** 200GB corpus (not 38GB)
+**Status:** READY FOR 6-INSTANCE PARALLEL DEVELOPMENT
 
-## Quick Start for AI Development Instances
+## Quick Start for 6 Parallel Claude Code Instances
+
+**CRITICAL UPDATES FOR 200GB SCALE:**
+- Read **[CLOUD-ARCHITECTURE-PLAN.md](../CLOUD-ARCHITECTURE-PLAN.md)** for GCP infrastructure
+- Read **[RUNPOD_EMBEDDINGS.md](../RUNPOD_EMBEDDINGS.md)** for GPU embedding strategy ($40-60 total!)
+- Read **[PARALLEL-DEV-ARCHITECTURE.md](../PARALLEL-DEV-ARCHITECTURE.md)** for instance coordination
 
 Each specification document is standalone and can be implemented independently. Follow this workflow:
 
-1. **Choose your module** from the list below
+1. **Choose your instance assignment** (see PARALLEL-DEV-ARCHITECTURE.md)
 2. **Read the architecture spec** (00-ARCHITECTURE-SPEC.md) first
 3. **Read your module's spec** completely before coding
-4. **Implement according to the spec** (data structures, interfaces, acceptance criteria)
-5. **Test against the acceptance criteria**
-6. **Submit for integration**
+4. **Review cloud infrastructure requirements**
+5. **Implement according to the spec** (data structures, interfaces, acceptance criteria)
+6. **Test against the acceptance criteria** using PARALLEL-TEST-STRATEGY.md
+7. **Submit for integration**
 
 ## Specification Documents
 
@@ -80,19 +87,20 @@ Each specification document is standalone and can be implemented independently. 
 
 ---
 
-### 03. RAG Ingestion
-**File:** `03-RAG-INGESTION-SPEC.md`  
-**Dependencies:** Architecture Spec, Document Processing Spec  
-**Estimated Time:** 16-20 hours  
+### 03. RAG Ingestion (200GB Scale)
+**File:** `03-RAG-INGESTION-SPEC.md`
+**Dependencies:** Architecture Spec, Document Processing Spec
+**Estimated Time:** 16-20 hours + 100 hours Runpod GPU time
 **Priority:** **CRITICAL** (blocks query)
 
 **Implements:**
 - Chunking strategies (semantic, section, token)
-- Embedding generation via Ollama
+- **Embedding generation via Runpod.io GPU rental** (not Ollama)
 - Vector DB abstraction layer
-- ChromaDB implementation
-- Qdrant implementation
+- **Weaviate as primary** (enterprise scale)
+- ChromaDB/Qdrant as alternatives
 - Batch processing with checkpointing
+- **Parquet format for embedding storage**
 
 **Key Classes:**
 - `ChunkStrategy` (abstract)
@@ -208,24 +216,21 @@ Each specification document is standalone and can be implemented independently. 
     └─▶ 06-Testing ────────────┴──────────────────────────┘
 ```
 
-### Suggested Team Assignments
+### 6-Instance Parallel Development (REQUIRED for 200GB)
 
-**2-Person Team:**
-- Dev 1: Processing (02) → Ingestion (03)
-- Dev 2: Query (04) → MCP (05) + Testing (06)
+**Instance Assignments (from PARALLEL-DEV-ARCHITECTURE.md):**
+- **Instance 1 (storage):** Storage & Data Pipeline - GCS management, lifecycle policies
+- **Instance 2 (embeddings):** Runpod GPU Embeddings - $40-60 total cost!
+- **Instance 3 (weaviate):** Weaviate Vector DB - 10M+ vectors, GKE deployment
+- **Instance 4 (api):** Query & API Layer - REST API, caching
+- **Instance 5 (mcp):** MCP Integration - Claude tools
+- **Instance 6 (monitoring):** Monitoring & Testing - Prometheus, Grafana, integration tests
 
-**3-Person Team:**
-- Dev 1: Processing (02)
-- Dev 2: Ingestion (03) + Query (04)
-- Dev 3: MCP (05) + Testing (06)
-
-**6-Person Team:**
-- Dev 1: Processing - HTML (02)
-- Dev 2: Processing - PDF (02)
-- Dev 3: Ingestion - Chunking & Embedding (03)
-- Dev 4: Ingestion - Vector DB (03)
-- Dev 5: Query + MCP (04 + 05)
-- Dev 6: Testing (06)
+**Cloud Resources per Instance:**
+- Each instance gets isolated GCS bucket prefix
+- Dedicated Terraform workspace
+- Isolated test environment
+- No resource conflicts (see PARALLEL-DEV-ARCHITECTURE.md)
 
 ### Integration Points
 
@@ -327,16 +332,30 @@ chunk_size: int
 
 ## Configuration Reference
 
-### Environment Variables
+### Environment Variables (200GB Scale)
 ```bash
-MIA_ARCHIVE_PATH="/path/to/archive"
-MIA_OUTPUT_DIR="~/marxists-processed"
-MIA_VECTOR_DB_PATH="./mia_vectordb"
-MIA_DB_TYPE="chroma"  # or "qdrant"
-MIA_EMBEDDING_MODEL="nomic-embed-text"
+# GCP Configuration
+GOOGLE_PROJECT_ID="mia-rag-project"
+GCS_BUCKET_RAW="mia-raw-torrent"
+GCS_BUCKET_MARKDOWN="mia-processed-markdown"
+GCS_BUCKET_EMBEDDINGS="mia-embeddings"
+
+# Processing
+MIA_ARCHIVE_PATH="gs://mia-raw-torrent/dump_www-marxists-org/"
+MIA_OUTPUT_DIR="gs://mia-processed-markdown/"
+
+# Embeddings (Runpod)
+RUNPOD_API_KEY="your-key"
+EMBEDDING_MODEL="BAAI/bge-large-en-v1.5"  # 1024d, beats OpenAI
+EMBEDDINGS_PATH="gs://mia-embeddings/"
+
+# Vector DB (Weaviate)
+WEAVIATE_URL="http://weaviate-cluster:8080"
+WEAVIATE_API_KEY="your-key"
+
+# Configuration
 MIA_CHUNK_SIZE="512"
 MIA_CHUNK_STRATEGY="semantic"
-OLLAMA_HOST="http://localhost:11434"
 ```
 
 ## Dependencies
@@ -385,34 +404,55 @@ If specs are unclear:
 - Integrates with dependent modules
 - Documented any spec deviations
 
-### System Success
-- End-to-end pipeline works
-- Processes 126k HTML + 38k PDFs
-- Query returns relevant results in <500ms
+### System Success (200GB Scale)
+- End-to-end pipeline works on GCP infrastructure
+- **Processes 200GB corpus** (5-10M documents estimated)
+- **Runpod embeddings complete for $40-60 total**
+- **Weaviate handles 10M+ vectors**
+- Query returns relevant results in **<100ms p50, <500ms p99**
 - MCP tools work with Claude
-- Total pipeline completes in <12 hours
+- **Total pipeline completes in ~1 week** (mostly GPU time)
 
-## Timeline Estimate
+## Timeline Estimate (200GB Scale)
 
-**With 3 developers working in parallel:**
-- Week 1: Processing + Ingestion foundations
-- Week 2: Complete Processing + Ingestion, start Query
-- Week 3: Complete Query + MCP, integrate all modules
-- Week 4: Testing, bug fixes, optimization
+**With 6 Claude Code instances working in parallel:**
+- **Week 1:** Infrastructure setup (Terraform, GCP, storage buckets)
+- **Week 2:** Processing pipeline + Start Runpod embeddings
+- **Week 3:** Continue embeddings (24/7), Deploy Weaviate, Build API
+- **Week 4:** Complete embeddings, Load vectors, MCP integration, Testing
 
-**Total: ~4 weeks for complete system**
+**Embedding Timeline:**
+- Runpod RTX 4090: ~100 hours runtime
+- Running 24/7: ~4-5 days
+- Total cost: $40-60
+
+**Total: ~4 weeks for complete system** (embeddings are the bottleneck)
 
 ## Files in This Package
 
+### Original Specs (Updated for 200GB)
 ```
 specs/
-├── 00-ARCHITECTURE-SPEC.md       (READ FIRST - system overview)
+├── 00-ARCHITECTURE-SPEC.md         (READ FIRST - system overview)
 ├── 02-DOCUMENT-PROCESSING-SPEC.md  (Critical path)
-├── 03-RAG-INGESTION-SPEC.md        (Critical path)
+├── 03-RAG-INGESTION-SPEC.md        (Critical path - UPDATED for Runpod)
 ├── 04-QUERY-INTERFACE-SPEC.md      (High priority)
 ├── 05-MCP-INTEGRATION-SPEC.md      (Medium priority)
 ├── 06-TESTING-VALIDATION-SPEC.md   (Parallel with dev)
 └── INDEX.md                        (This file)
+```
+
+### 200GB Scale Documentation (MUST READ)
+```
+project-root/
+├── CLAUDE_ENTERPRISE.md            (200GB architecture overview)
+├── CLOUD-ARCHITECTURE-PLAN.md      (GCP infrastructure details)
+├── TERRAFORM-INFRASTRUCTURE.md     (Complete IaC implementation)
+├── STORAGE-STRATEGY.md             (Storage tiers, Parquet format)
+├── RUNPOD_EMBEDDINGS.md            ($40-60 GPU solution!)
+├── PARALLEL-DEV-ARCHITECTURE.md    (6-instance coordination)
+├── PARALLEL-TEST-STRATEGY.md       (Testing without cloud)
+└── 200GB_SOLUTION_SUMMARY.md       (Executive summary)
 ```
 
 ## Ready to Start?

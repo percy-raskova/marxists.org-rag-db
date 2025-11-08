@@ -1,12 +1,12 @@
-# MIA RAG System Architecture Specification
+# MIA RAG System Architecture Specification (200GB Scale)
 
-**Version:** 1.0  
-**Status:** SPECIFICATION  
+**Version:** 2.0
+**Status:** SPECIFICATION - UPDATED FOR 200GB
 **Last Updated:** 2025-11-07
 
 ## Executive Summary
 
-Complete system for converting Marxists Internet Archive (126k+ pages, 38k PDFs) into a queryable RAG system with local vector database and MCP integration.
+Complete system for converting **200GB Marxists Internet Archive** (5-10M estimated documents) into a queryable RAG system with **Weaviate vector database on GCP** and MCP integration. Uses **Runpod.io GPU rental** for embeddings ($40-60 total cost).
 
 ## System Architecture
 
