@@ -1,0 +1,135 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      increment:
+        description: 'Version increment (auto/major/minor/patch)'
+        required: true
+        default: 'auto'
+        type: choice
+        options:
+          - auto
+          - major
+          - minor
+          - patch
+      prerelease:
+        description: 'Prerelease identifier (leave empty for stable)'
+        required: false
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          pip install commitizen poetry
+          poetry install
+
+      - name: Configure git
+        run: |
+          git config user.name "percy-raskova"
+          git config user.email "103053862+percy-raskova@users.noreply.github.com"
+
+      - name: Run tests before release
+        run: |
+          poetry run pytest --quiet || {
+            echo "::error::Tests failed, cannot create release"
+            exit 1
+          }
+
+      - name: Bump version and update changelog
+        id: bump
+        run: |
+          # Build bump command
+          BUMP_CMD="cz bump --yes"
+
+          if [ "${{ inputs.increment }}" != "auto" ]; then
+            BUMP_CMD="$BUMP_CMD --increment ${{ inputs.increment }}"
+          fi
+
+          if [ -n "${{ inputs.prerelease }}" ]; then
+            BUMP_CMD="$BUMP_CMD --prerelease ${{ inputs.prerelease }}"
+          fi
+
+          echo "Running: $BUMP_CMD"
+          eval $BUMP_CMD
+
+          # Extract new version
+          NEW_VERSION=$(poetry version --short)
+          echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
+          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Extract release notes
+        run: |
+          # Extract just this version's changelog section
+          python scripts/extract_release_notes.py ${{ env.NEW_VERSION }} > .release-notes.md
+
+      - name: Build package
+        run: |
+          poetry build
+
+          # Generate checksums
+          cd dist
+          sha256sum * > SHA256SUMS
+          cd ..
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ env.NEW_VERSION }}
+          name: Release v${{ env.NEW_VERSION }}
+          body_path: .release-notes.md
+          draft: false
+          prerelease: ${{ inputs.prerelease != '' }}
+          files: |
+            dist/*
+            CHANGELOG.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push changes
+        run: |
+          git push --follow-tags
+
+      - name: Create backport PR to develop
+        if: github.ref == 'refs/heads/main'
+        run: |
+          git checkout -b release/v${{ env.NEW_VERSION }}-backport
+          git push origin release/v${{ env.NEW_VERSION }}-backport
+
+          gh pr create \
+            --base develop \
+            --head release/v${{ env.NEW_VERSION }}-backport \
+            --title "chore: backport v${{ env.NEW_VERSION }} to develop" \
+            --body "Automated version bump backport from release v${{ env.NEW_VERSION }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Announce release
+        run: |
+          echo "✅ Released v${{ env.NEW_VERSION }}"
+          echo "📝 Changelog updated"
+          echo "📦 Package built and uploaded"
+          echo "🏷️ Git tag created"
+          echo "🚩 The revolution continues!"

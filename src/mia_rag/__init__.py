@@ -1,23 +1,28 @@
 """
 MIA RAG System - Marxist Internet Archive Retrieval Augmented Generation
 
-A 200GB-scale RAG system for processing and querying the Marxist Internet Archive.
+Translating revolutionary theory into the age of AI.
+A RAG system for processing and querying the Marxist Internet Archive.
 """
 
-__version__ = "2.0.0"
-__author__ = "Persphone Raskova"
+__version__ = "0.1.0"
+__author__ = "Persephone Raskova"
+__email__ = "103053862+percy-raskova@users.noreply.github.com"
+__license__ = "GPL-3.0-or-later"
 
 # Core version info
-VERSION_MAJOR = 2
-VERSION_MINOR = 0
+VERSION_MAJOR = 0
+VERSION_MINOR = 1
 VERSION_PATCH = 0
+VERSION_SUFFIX = ""  # For alpha/beta/rc releases
 
-# System configuration
-CORPUS_SIZE_GB = 200
-ESTIMATED_DOCS = "5-10 million"
-DEPLOYMENT = "Google Cloud Platform"
-VECTOR_DB = "Weaviate"
-EMBEDDING_SERVICE = "Runpod.io"
+# System configuration (optimized from 200GB to 50GB)
+CORPUS_SIZE_GB = 50  # Optimized corpus size
+ORIGINAL_SIZE_GB = 200  # Original before optimization
+ESTIMATED_DOCS = "~1-2 million"
+DEPLOYMENT = "Flexible (GCP/Local/Hybrid)"
+VECTOR_DB = "Weaviate/Qdrant/ChromaDB"
+EMBEDDING_SERVICE = "Runpod/Local/CPU"
 
 
 def get_version() -> str:

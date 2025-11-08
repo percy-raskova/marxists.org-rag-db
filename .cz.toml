@@ -1,0 +1,134 @@
+# Commitizen configuration for semantic versioning and changelog generation
+# This file configures automated version bumping and changelog generation
+# following Conventional Commits and Keep a Changelog standards
+
+[tool.commitizen]
+name = "cz_conventional_commits"
+version = "2.0.0"
+tag_format = "v$version"
+version_scheme = "semver"
+version_provider = "pep621"
+update_changelog_on_bump = true
+major_version_zero = false
+annotated_tag = true
+bump_message = "bump: version $current_version → $new_version\n\n- Update version in pyproject.toml\n- Update version in src/mia_rag/__init__.py\n- Update CHANGELOG.md with new release notes\n\n[skip ci]"
+retry_after_failure = true
+
+# Files that contain version strings to update
+version_files = [
+    "pyproject.toml:version",
+    "src/mia_rag/__init__.py:__version__"
+]
+
+# Changelog configuration
+changelog_file = "CHANGELOG.md"
+changelog_incremental = true
+changelog_start_rev = "v0.1.0"
+changelog_merge_prerelease = true
+
+# Customize commit message format
+[tool.commitizen.customize]
+message_template = "{{change_type}}{% if scope %}({{scope}}){% endif %}: {{subject}}{% if body %}\n\n{{body}}{% endif %}{% if footer %}\n\n{{footer}}{% endif %}"
+example = "feat(instance2): add batch embedding processing for Runpod GPU"
+schema = """
+<type>(<scope>): <subject>
+<BLANK LINE>
+<body>
+<BLANK LINE>
+<footer>
+"""
+
+# Schema pattern for validation
+schema_pattern = "^(build|ci|docs|feat|fix|perf|refactor|style|test|chore|revert)(?:\\(([a-z0-9-]+)\\))?:\\s(.+)"
+
+# Instance-specific commit scopes
+[[tool.commitizen.customize.questions]]
+type = "list"
+name = "change_type"
+message = "Select the type of change you are committing:"
+choices = [
+    {value = "feat", name = "feat:     ✨ A new feature (triggers minor version bump)"},
+    {value = "fix", name = "fix:      🐛 A bug fix (triggers patch version bump)"},
+    {value = "docs", name = "docs:     📚 Documentation only changes"},
+    {value = "style", name = "style:    💎 Code style changes (formatting, white-space, etc)"},
+    {value = "refactor", name = "refactor: 📦 Code refactoring (neither fixes bug nor adds feature)"},
+    {value = "perf", name = "perf:     🚀 Performance improvements"},
+    {value = "test", name = "test:     🚨 Adding or updating tests"},
+    {value = "build", name = "build:    🛠  Build system or dependency changes"},
+    {value = "ci", name = "ci:       ⚙️  CI/CD pipeline changes"},
+    {value = "chore", name = "chore:    ♻️  Other changes that don't modify src or test files"},
+    {value = "revert", name = "revert:   ⏪ Revert a previous commit"}
+]
+
+[[tool.commitizen.customize.questions]]
+type = "list"
+name = "scope"
+message = "What is the scope of this change? (press [enter] to skip)"
+choices = [
+    {value = "", name = "[none]"},
+    {value = "instance1", name = "instance1: Storage & Pipeline"},
+    {value = "instance2", name = "instance2: Embeddings"},
+    {value = "instance3", name = "instance3: Weaviate Vector DB"},
+    {value = "instance4", name = "instance4: Query & API"},
+    {value = "instance5", name = "instance5: MCP Integration"},
+    {value = "instance6", name = "instance6: Monitoring & Testing"},
+    {value = "interfaces", name = "interfaces: Shared contracts between instances"},
+    {value = "docs", name = "docs: Documentation updates"},
+    {value = "deps", name = "deps: Dependency updates"},
+    {value = "ci", name = "ci: CI/CD configuration"},
+    {value = "release", name = "release: Release-specific changes"},
+    {value = "global", name = "global: Cross-cutting changes affecting multiple instances"}
+]
+
+[[tool.commitizen.customize.questions]]
+type = "input"
+name = "subject"
+message = "Write a short, imperative tense description of the change (max 88 chars):\n"
+
+[[tool.commitizen.customize.questions]]
+type = "input"
+name = "body"
+message = "Provide a longer description of the change (press [enter] to skip):\n"
+
+[[tool.commitizen.customize.questions]]
+type = "input"
+name = "footer"
+message = "List any BREAKING CHANGES or issues closed (press [enter] to skip):\n"
+
+# Rules for version bumping
+[tool.commitizen.version_bump_rules]
+major = ["BREAKING CHANGE", "BREAKING-CHANGE", "BREAKING"]  # Triggers major version bump
+minor = ["feat"]  # New features trigger minor version bump
+patch = ["fix", "perf"]  # Bug fixes and performance improvements trigger patch version bump
+
+# Changelog generation settings
+[tool.commitizen.changelog]
+format = "markdown"
+keep_a_changelog = true
+incremental = true
+start_rev = "v0.1.0"
+
+# Define changelog sections based on commit types
+[tool.commitizen.changelog.sections]
+feat = "Added"
+fix = "Fixed"
+docs = "Documentation"
+style = "Style"
+refactor = "Changed"
+perf = "Performance"
+test = "Testing"
+build = "Build System"
+ci = "Continuous Integration"
+chore = "Maintenance"
+revert = "Reverted"
+
+# Pre-bump and post-bump hooks
+[tool.commitizen.hooks]
+pre_bump = [
+    "pytest --quiet",  # Run tests before bumping version
+    "python scripts/check_interfaces.py"  # Verify interface contracts
+]
+post_bump = [
+    "git push",
+    "git push --tags"
+]

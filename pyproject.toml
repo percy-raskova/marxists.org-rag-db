@@ -1,12 +1,14 @@
 [tool.poetry]
 name = "marxist-rag"
-version = "2.0.0"
-description = "200GB Marxist Internet Archive RAG System with 6-instance parallel development"
-authors = ["Persphone Raskova <103053862+percy-raskova@users.noreply.github.com>"]
+version = "0.1.0"
+description = "RAG system for the Marxists Internet Archive - translating revolutionary theory into the age of AI"
+authors = ["Persephone Raskova <103053862+percy-raskova@users.noreply.github.com>"]
 readme = "README.md"
-homepage = "https://github.com/percy-raskova/marxists.org-rag-db"
+homepage = "https://marxism.app"
 repository = "https://github.com/percy-raskova/marxists.org-rag-db"
-keywords = ["rag", "marxism", "embeddings", "weaviate", "gcp"]
+documentation = "https://github.com/percy-raskova/marxists.org-rag-db/tree/main/docs"
+keywords = ["rag", "marxism", "embeddings", "ai", "revolutionary-theory", "vector-database"]
+license = "GPL-3.0-or-later"
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Science/Research",
@@ -412,9 +414,18 @@ skips = ["B101", "B601"]  # Skip assert_used and shell_injection for now
 
 [tool.commitizen]
 name = "cz_conventional_commits"
-version = "2.0.0"
+version = "0.1.0"
 tag_format = "v$version"
+version_scheme = "semver"
+version_provider = "pep621"
+update_changelog_on_bump = true
+major_version_zero = true  # Allow 0.x.x versions
+annotated_tag = true
+bump_message = "bump: version $current_version → $new_version\n\nAutomated version bump by commitizen"
 version_files = [
-    "pyproject.toml:version",
-    "src/mia_rag/__init__.py:__version__"
+    "pyproject.toml:^version",
+    "src/mia_rag/__init__.py:^__version__"
 ]
+changelog_file = "CHANGELOG.md"
+changelog_incremental = true
+changelog_start_rev = "v0.1.0"
