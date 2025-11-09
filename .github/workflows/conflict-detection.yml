@@ -6,7 +6,7 @@ on:
 
 env:
   PYTHON_VERSION: '3.10'
-  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }} #make sure to always add this in env section when using gh cli!
 
 jobs:
   detect-conflicts:
@@ -234,6 +234,10 @@ jobs:
       - name: Comment PR with analysis
         uses: actions/github-script@v7
         if: always()
+        env:
+          VIOLATIONS: ${{ steps.check_boundaries.outputs.violations }}
+          INTERFACE_CHANGES: ${{ steps.check_interfaces.outputs.interface_changes }}
+          CONFLICT_DETAILS: ${{ steps.check_conflicting_prs.outputs.conflict_details }}
         with:
           script: |
             const instance = '${{ steps.extract_instance.outputs.instance_id }}';
@@ -241,6 +245,11 @@ jobs:
             const hasBoundaryViolations = '${{ steps.check_boundaries.outputs.has_violations }}' === 'true';
             const hasInterfaceChanges = '${{ steps.check_interfaces.outputs.has_interface_changes }}' === 'true';
             const hasConflicts = '${{ steps.check_conflicting_prs.outputs.has_conflicts }}' === 'true';
+
+            // Get multiline outputs from environment variables
+            const violations = process.env.VIOLATIONS || '';
+            const interfaceChanges = process.env.INTERFACE_CHANGES || '';
+            const conflictDetails = process.env.CONFLICT_DETAILS || '';
 
             let comment = '## 🔍 Conflict Detection Report\n\n';
 
@@ -260,7 +269,7 @@ jobs:
             if (hasBoundaryViolations) {
               comment += '### ❌ Boundary Violations Detected\n\n';
               comment += 'You are modifying files outside your instance boundaries:\n';
-              comment += '${{ steps.check_boundaries.outputs.violations }}\n\n';
+              comment += violations + '\n\n';
               comment += '**Action Required**: Please revert changes to these files or coordinate with the owning instance.\n\n';
             } else if (instance !== 'unknown' && instance !== 'rfc') {
               comment += '### ✅ Boundary Check Passed\n\n';
@@ -271,7 +280,7 @@ jobs:
             if (hasInterfaceChanges) {
               comment += '### ⚠️ Interface Changes Detected\n\n';
               comment += 'Modified interface files:\n';
-              comment += '${{ steps.check_interfaces.outputs.interface_changes }}\n\n';
+              comment += interfaceChanges + '\n\n';
               comment += '**Requirements for interface changes:**\n';
               comment += '1. Create RFC document in `docs/rfcs/`\n';
               comment += '2. Bump version in interface file\n';
@@ -283,7 +292,7 @@ jobs:
             if (hasConflicts) {
               comment += '### ⚠️ Potential Conflicts with Other PRs\n\n';
               comment += 'The following open PRs modify the same files:\n\n';
-              comment += '${{ steps.check_conflicting_prs.outputs.conflict_details }}\n\n';
+              comment += conflictDetails + '\n\n';
               comment += '**Recommendation**: Coordinate with the authors of these PRs to avoid merge conflicts.\n\n';
             }
 

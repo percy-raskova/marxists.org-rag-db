@@ -9,7 +9,6 @@ Usage:
 """
 
 import argparse
-import hashlib
 import json
 import re
 from dataclasses import asdict, dataclass
