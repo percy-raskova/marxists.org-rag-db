@@ -420,4 +420,4 @@ report = pipeline.generate_coverage_report(processed_documents)
 - Unified Schema: `docs/corpus-analysis/06-metadata-unified-schema.md`
 - Current Implementation: `mia_processor.py:144-182`
 - Refactoring Project: `planning/projects/refactoring-code-complexity.md`
-- Design Pattern: [Strategy Pattern](https://refactoring.guru/design-patterns/strategy)
+- Design Pattern: **Strategy Pattern** — Encapsulates interchangeable algorithms or behaviors behind a common interface, allowing the selection of the appropriate strategy at runtime. Useful for implementing multi-source extraction pipelines.
