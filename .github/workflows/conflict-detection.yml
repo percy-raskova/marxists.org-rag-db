@@ -6,6 +6,7 @@ on:
 
 env:
   PYTHON_VERSION: '3.10'
+  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
   detect-conflicts:
