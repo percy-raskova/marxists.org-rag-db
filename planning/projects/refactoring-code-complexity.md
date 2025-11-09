@@ -1,6 +1,6 @@
 # Code Refactoring Project
 
-**Status**: In Progress (1/9 Complete - Scripts + Metadata Pipeline)
+**Status**: In Progress (2/9 Complete - Scripts + Metadata Pipeline)
 **Owner**: Shared across instances (boundary-respecting)
 **Priority**: HIGH
 **Timeline**: 4-5 weeks
@@ -25,8 +25,8 @@ Refactor scripts and processing pipeline to:
 ## Current Status
 
 ### Scripts Refactoring
-- ✅ **1/5 Scripts Refactored**: `check_boundaries.py` (Specification pattern)
-- 🔄 **4/5 Scripts Remaining**: check_conflicts, instance_map, check_interfaces, instance_recovery
+- ✅ **2/5 Scripts Refactored**: `check_boundaries.py` (Specification pattern), `check_conflicts.py` (Chain of Responsibility)
+- 🔄 **3/5 Scripts Remaining**: instance_map, check_interfaces, instance_recovery
 - ✅ **Pytest Configuration Fixed**: Migrated to pyproject.toml (supports inline comments)
 
 ### Metadata Pipeline Refactoring
@@ -39,22 +39,22 @@ Refactor scripts and processing pipeline to:
 
 ## Work Streams
 
-### Stream 1: Script Refactoring 🔄 1/5 Complete
+### Stream 1: Script Refactoring 🔄 2/5 Complete
 
 **Purpose**: Eliminate complexity violations using design patterns
 
 | Script | Violations | Pattern | Priority | Status | Owner | Issue |
 |--------|-----------|---------|----------|--------|-------|-------|
 | `check_boundaries.py` | 15 branches + 52 statements | Specification | HIGH | ✅ Complete | - | - |
+| `check_conflicts.py` | 17 branches → 7 | Chain of Responsibility | HIGH | ✅ Complete | Wave 1 Agent 1 | planning/issues/refactor-check-conflicts-chain-of-responsibility.md |
 | `instance_map.py` | 21 branches | Command | HIGH | 📋 Planned | TBD | #TBD |
-| `check_conflicts.py` | 17 branches | Chain of Responsibility | HIGH | 📋 Planned | TBD | #TBD |
 | `check_interfaces.py` | 16 branches | Visitor | MEDIUM | 📋 Planned | TBD | #TBD |
 | `instance_recovery.py` | 3 functions × violations | Template Method | MEDIUM | 📋 Planned | TBD | #TBD |
 
 **Design Patterns Applied**:
 - ✅ **Specification Pattern**: Composable business rules with boolean operators
+- ✅ **Chain of Responsibility**: Pass validation through handler chain with short-circuiting
 - 📋 **Command Pattern**: Encapsulate requests as objects
-- 📋 **Chain of Responsibility**: Pass requests through handler chain
 - 📋 **Visitor Pattern**: Separate algorithms from object structure
 - 📋 **Template Method**: Define algorithm skeleton, defer steps to subclasses
 
@@ -127,8 +127,29 @@ Refactor scripts and processing pipeline to:
 - ✅ `tests/unit/test_boundary_specifications.py` - 15 passing tests
 - ✅ Refactored `scripts/check_boundaries.py`
 
-### Milestone 2: Command Pattern (instance_map) 📋 PLANNED
-- **Target**: Week 1
+### Milestone 2: Chain of Responsibility (check_conflicts) ✅ COMPLETE
+- **Completed**: 2025-11-09
+- **Pattern**: Chain of Responsibility for import validation
+- **Script**: `check_conflicts.py` (17 branches → 7 branches)
+- **Violations Eliminated**: PLR0912 (too many branches) - 59% reduction
+- **Actual Effort**: ~2 hours (under estimate of 4-6 hours)
+
+**Deliverables**:
+- ✅ `scripts/patterns/ast_utils.py` - AST-based import extraction (126 lines)
+- ✅ `scripts/patterns/validators.py` - Validator chain classes (232 lines)
+- ✅ `tests/unit/test_import_validators.py` - 18 passing unit tests
+- ✅ Refactored `scripts/check_conflicts.py` - check_imports() method complexity: 17 → 7
+
+**Key Achievements**:
+- AST-based parsing replaces string manipulation for robustness
+- Each validator has single responsibility (OwnedPath, Shared, CrossInstance)
+- 59% complexity reduction (17 branches → 7 branches)
+- 100% test pass rate (18/18 tests)
+- Ready for Wave 1 integration
+- Work log documented: `work-logs/2025-11-09-wave-1-agent-1-refactoring.md`
+
+### Milestone 3: Command Pattern (instance_map) 📋 PLANNED
+- **Target**: Week 1-2
 - **Pattern**: Command pattern for instance operations
 - **Script**: `instance_map.py` (21 branches - worst offender)
 - **Violations**: PLR0912 (too many branches)
@@ -140,19 +161,6 @@ Refactor scripts and processing pipeline to:
 - 📋 `scripts/commands/instance_commands.py` - Concrete commands
 - 📋 `tests/unit/test_instance_commands.py` - Unit tests
 - 📋 Refactored `scripts/instance_map.py`
-
-### Milestone 3: Chain of Responsibility (check_conflicts) 📋 PLANNED
-- **Target**: Week 2
-- **Pattern**: Chain of Responsibility for conflict detection
-- **Script**: `check_conflicts.py` (17 branches)
-- **Violations**: PLR0912 (too many branches)
-- **Estimated Effort**: 6-8 hours
-
-**Planned Deliverables**:
-- 📋 `scripts/patterns/handlers.py` - Handler chain base
-- 📋 `scripts/handlers/conflict_handlers.py` - Concrete handlers
-- 📋 `tests/unit/test_conflict_handlers.py` - Unit tests
-- 📋 Refactored `scripts/check_conflicts.py`
 
 ### Milestone 4: Visitor Pattern (check_interfaces) 📋 PLANNED
 - **Target**: Week 2
@@ -345,8 +353,8 @@ Complete Metadata Pipeline (85%+ author coverage)
 ### Test Coverage (Scripts)
 
 - ✅ `check_boundaries`: 15 unit tests (100% pattern coverage)
+- ✅ `check_conflicts`: 18 unit tests (100% validator coverage, includes AST extraction and integration tests)
 - 📋 `instance_map`: TBD
-- 📋 `check_conflicts`: TBD
 - 📋 `check_interfaces`: TBD
 - 📋 `instance_recovery`: TBD
 
@@ -537,29 +545,49 @@ class AddInstanceCommand(Command):
 - Supports undo/redo
 - Easy to add new operations
 
-### Chain of Responsibility 📋 Planned
+### Chain of Responsibility ✅ Implemented
 
-**Use Case**: Conflict detection with multiple checks
+**Use Case**: Import validation with multiple checks
 
 **Structure**:
 ```python
-class ConflictHandler(ABC):
-    def __init__(self, next_handler=None):
-        self.next_handler = next_handler
+class ImportValidator(ABC):
+    def __init__(self, next_handler: Optional['ImportValidator'] = None):
+        self._next = next_handler
 
-    def handle(self, file_path: Path) -> ConflictResult:
-        result = self.check(file_path)
-        if result.has_conflict:
-            return result
-        if self.next_handler:
-            return self.next_handler.handle(file_path)
-        return ConflictResult.no_conflict()
+    @abstractmethod
+    def validate(self, import_stmt: ImportStatement, ctx: ValidationContext) -> Optional[ImportViolation]:
+        pass
+
+    def handle(self, import_stmt: ImportStatement, ctx: ValidationContext) -> list[ImportViolation]:
+        violations = []
+        if violation := self.validate(import_stmt, ctx):
+            violations.append(violation)
+        if self._next:
+            violations.extend(self._next.handle(import_stmt, ctx))
+        return violations
+
+# Factory function creates chain
+def create_validation_chain() -> ImportValidator:
+    return OwnedPathValidator(
+        SharedImportValidator(
+            CrossInstanceValidator()
+        )
+    )
 ```
 
+**Implementation**:
+- Location: `scripts/patterns/validators.py`
+- Validators: OwnedPathValidator, SharedImportValidator, CrossInstanceValidator
+- AST-based import extraction: `scripts/patterns/ast_utils.py`
+- Tests: 18 unit tests in `tests/unit/test_import_validators.py`
+
 **Benefits**:
-- Decouples senders from receivers
-- Easy to add/remove handlers
-- Each handler has single responsibility
+- Decouples validation logic from detection
+- Easy to add/remove validators
+- Each validator has single responsibility
+- Testable in isolation
+- 59% complexity reduction (17 branches → 7)
 
 ### Visitor Pattern 📋 Planned
 
