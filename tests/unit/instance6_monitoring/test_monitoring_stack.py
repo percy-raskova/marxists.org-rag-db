@@ -9,7 +9,6 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-
 # Future imports when modules are created
 # from src.mia_rag.monitoring.metrics import MetricsCollector
 # from src.mia_rag.monitoring.alerts import AlertManager
@@ -23,14 +22,14 @@ class TestMonitoringStack:
     @pytest.fixture
     def mock_prometheus(self):
         """Mock Prometheus client for testing."""
-        with patch('prometheus_client.CollectorRegistry') as mock_registry:
+        with patch("prometheus_client.CollectorRegistry") as mock_registry:
             mock_registry.return_value = Mock()
             yield mock_registry
 
     @pytest.fixture
     def mock_grafana(self):
         """Mock Grafana API client for testing."""
-        with patch('grafana_api.GrafanaApi') as mock_api:
+        with patch("grafana_api.GrafanaApi") as mock_api:
             mock_api.return_value.dashboard.get_dashboard.return_value = {
                 "dashboard": {"title": "MIA RAG Monitoring"}
             }
@@ -57,7 +56,7 @@ class TestMonitoringStack:
             "memory_percent": 38.4,
             "disk_usage_percent": 62.1,
             "network_bytes_sent": 1234567890,
-            "network_bytes_recv": 9876543210
+            "network_bytes_recv": 9876543210,
         }
 
         # Assert
@@ -78,11 +77,11 @@ class TestMonitoringStack:
             {"stage": "document_fetch", "duration": 1.2, "documents": 100},
             {"stage": "text_processing", "duration": 5.6, "documents": 100},
             {"stage": "embedding_generation", "duration": 45.3, "documents": 100},
-            {"stage": "vector_storage", "duration": 3.2, "documents": 100}
+            {"stage": "vector_storage", "duration": 3.2, "documents": 100},
         ]
 
         # Act
-        for stage in pipeline_stages:
+        for _stage in pipeline_stages:
             # metrics_collector.record_pipeline_stage(**stage)
             pass
 
@@ -91,7 +90,7 @@ class TestMonitoringStack:
             "total_duration": 55.3,
             "documents_per_second": 1.81,
             "slowest_stage": "embedding_generation",
-            "bottleneck_percent": 81.9
+            "bottleneck_percent": 81.9,
         }
 
         # Assert
@@ -115,7 +114,7 @@ class TestMonitoringStack:
             "vectors_count": 1250000,
             "index_size_gb": 45.2,
             "query_latency_p95_ms": 12.5,
-            "query_latency_p99_ms": 45.2
+            "query_latency_p99_ms": 45.2,
         }
 
         # Assert
@@ -136,11 +135,11 @@ class TestMonitoringStack:
             {"endpoint": "/search", "method": "POST", "duration": 0.456, "status": 200},
             {"endpoint": "/search", "method": "POST", "duration": 0.123, "status": 200},
             {"endpoint": "/health", "method": "GET", "duration": 0.001, "status": 200},
-            {"endpoint": "/search", "method": "POST", "duration": 0.567, "status": 429}
+            {"endpoint": "/search", "method": "POST", "duration": 0.567, "status": 429},
         ]
 
         # Act
-        for request in api_requests:
+        for _request in api_requests:
             # metrics_collector.record_api_request(**request)
             pass
 
@@ -151,13 +150,9 @@ class TestMonitoringStack:
                 "success_rate": 0.75,
                 "avg_latency_ms": 345,
                 "p95_latency_ms": 567,
-                "errors_by_code": {"429": 1}
+                "errors_by_code": {"429": 1},
             },
-            "/health": {
-                "total_requests": 1,
-                "success_rate": 1.0,
-                "avg_latency_ms": 1
-            }
+            "/health": {"total_requests": 1, "success_rate": 1.0, "avg_latency_ms": 1},
         }
 
         # Assert
@@ -173,20 +168,8 @@ class TestMonitoringStack:
         Then: Generates appropriate alerts
         """
         # Arrange
-        alert_rules = [
-            {"metric": "cpu_usage", "threshold": 80, "condition": "greater"},
-            {"metric": "memory_percent", "threshold": 90, "condition": "greater"},
-            {"metric": "error_rate", "threshold": 0.05, "condition": "greater"},
-            {"metric": "p99_latency", "threshold": 1000, "condition": "greater"}
-        ]
 
         # Simulate threshold violations
-        current_metrics = {
-            "cpu_usage": 85,
-            "memory_percent": 92,
-            "error_rate": 0.08,
-            "p99_latency": 1200
-        }
 
         # Act
         # alerts = metrics_collector.check_alerts(alert_rules, current_metrics)
@@ -194,7 +177,7 @@ class TestMonitoringStack:
             {"severity": "warning", "metric": "cpu_usage", "value": 85, "threshold": 80},
             {"severity": "critical", "metric": "memory_percent", "value": 92, "threshold": 90},
             {"severity": "warning", "metric": "error_rate", "value": 0.08, "threshold": 0.05},
-            {"severity": "warning", "metric": "p99_latency", "value": 1200, "threshold": 1000}
+            {"severity": "warning", "metric": "p99_latency", "value": 1200, "threshold": 1000},
         ]
 
         # Assert
@@ -238,22 +221,13 @@ mia_query_duration_seconds_bucket{le="+Inf"} 1000
         Then: Creates dashboard via Grafana API
         """
         # Arrange
-        dashboard_config = {
-            "title": "MIA RAG Pipeline Monitoring",
-            "panels": [
-                {"title": "Document Processing Rate", "type": "graph"},
-                {"title": "Embedding Generation", "type": "graph"},
-                {"title": "Query Latency", "type": "heatmap"},
-                {"title": "System Resources", "type": "stat"}
-            ]
-        }
 
         # Act
         # result = metrics_collector.create_grafana_dashboard(dashboard_config)
         result = {
             "dashboard_id": "mia-rag-001",
             "url": "http://localhost:3000/d/mia-rag-001",
-            "status": "created"
+            "status": "created",
         }
 
         # Assert
@@ -278,7 +252,7 @@ mia_query_duration_seconds_bucket{le="+Inf"} 1000
             "weaviate_compute_hours": 720,
             "weaviate_cost": 216.00,
             "total_monthly": 265.60,
-            "cost_per_document": 0.0002125
+            "cost_per_document": 0.0002125,
         }
 
         # Assert
@@ -302,12 +276,7 @@ mia_query_duration_seconds_bucket{le="+Inf"} 1000
             "embedding_coverage": 0.998,
             "null_embeddings": 25,
             "duplicate_documents": 12,
-            "language_distribution": {
-                "en": 0.92,
-                "es": 0.04,
-                "fr": 0.03,
-                "other": 0.01
-            }
+            "language_distribution": {"en": 0.92, "es": 0.04, "fr": 0.03, "other": 0.01},
         }
 
         # Assert
@@ -339,11 +308,9 @@ mia_query_duration_seconds_bucket{le="+Inf"} 1000
         for i in range(5):
             # await metrics_collector.update_metric("cpu_usage", 40 + i * 5)
             # await metrics_collector.update_metric("query_rate", 100 + i * 10)
-            received_updates.append({
-                "metric": "cpu_usage",
-                "value": 40 + i * 5,
-                "timestamp": time.time()
-            })
+            received_updates.append(
+                {"metric": "cpu_usage", "value": 40 + i * 5, "timestamp": time.time()}
+            )
 
         # Assert
         assert len(received_updates) >= 5

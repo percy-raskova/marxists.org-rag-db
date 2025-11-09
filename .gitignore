@@ -271,3 +271,4 @@ prometheus-data/
 package-lock.json
 test-report.html
 test-results.html
+node_modules/

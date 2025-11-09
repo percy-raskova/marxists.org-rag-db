@@ -28,7 +28,13 @@ This massive scale presented several challenges:
 
 **Important**: While the project lead (Persephone Raskova) identifies as a Marxist-Leninist-Maoist Third Worldist, this corpus optimization was conducted with strict ideological neutrality. No content was removed based on ideological tendency, sectarian affiliation, or political perspective.
 
-The decisions to defer ETOL (Trotskyist encyclopedia) and EROL (anti-Revisionist/Maoist encyclopedia) were based purely on technical constraints (size, processing complexity) rather than ideological preference. Both archives are preserved for future inclusion, maintaining the MIA's comprehensive, non-sectarian approach to Marxist history.
+**ETOL and EROL are INCLUDED in Phase 1**: The specialized encyclopedias (ETOL - Trotskyist, EROL - Maoist/anti-revisionist) remain in the corpus with only their multimedia components removed. The complete text content of both encyclopedias (22.3GB combined) is preserved and will be processed in Phase 1. No theoretical works were excluded based on political tendency.
+
+The only content removed was:
+- Technical multimedia (audio, video, images) that requires different processing pipelines
+- Non-English content (deferred to multilingual phases)
+- Labor periodicals (different use case - journalism vs theory)
+- Duplicate formats (PDFs with HTML equivalents)
 
 This project's mission is to faithfully translate historical materials into AI-legible formats, preserving the full spectrum of Marxist thought - from anarcho-communism to Marxism-Leninism, from council communism to Maoism, from Trotskyism to left communism. The goal is historical preservation and accessibility, not ideological curation.
 
@@ -64,11 +70,17 @@ We decided to strategically reduce the corpus from 200GB to ~50GB by:
    - Specifically removed: Russian (1.2GB), Romanian (2.4GB), Chinese (21GB), etc.
    - Can be added back in future phases
 
-6. **Specialized Archives** (Deferred - ~131GB)
-   - ETOL (Encyclopedia of Trotskyism On-Line): 61GB
-   - EROL (Encyclopedia of anti-Revisionism On-Line): 14GB
-   - USA labor periodicals: 56GB
-   - These remain available for future enhancement
+6. **Labor Periodicals** (Deferred - ~56GB)
+   - USA labor newspapers and magazines
+   - Different use case (journalism vs theoretical works)
+   - Deferred to Phase 3
+
+7. **ETOL/EROL Multimedia Only** (~53GB audio removed from ETOL)
+   - Removed 21 audio subdirectories from ETOL
+   - **Kept all text content** from both encyclopedias
+   - ETOL text: 8.3GB (reduced from 61GB)
+   - EROL text: 14GB (multimedia already minimal)
+   - **Total encyclopedia text retained**: 22.3GB
 
 ### What We Kept
 1. **All HTML Content** (~40GB)
@@ -81,12 +93,18 @@ We decided to strategically reduce the corpus from 200GB to ~50GB by:
    - Unique historical documents
    - Important pamphlets and rare texts
 
-3. **Core Sections**
-   - Archive (4.5GB): Theoretical works by author
-   - History (~35GB): Core historical texts
-   - Subject (9.1GB): Thematic collections with curator annotations
-   - Glossary (62MB): Entity definitions and encyclopedia entries
-   - Reference (582MB): Supporting materials
+3. **Core Sections** (~46GB total)
+   - Archive (4.3GB): Theoretical works by 411+ authors
+   - History (33GB): Historical texts + ETOL (8.3GB) + EROL (14GB)
+   - Subject (8.9GB): Thematic collections with curator annotations
+   - Glossary (62MB): Entity definitions and encyclopedia entries (CRITICAL)
+   - Reference (460MB): Supporting materials
+   - Ebooks (57MB): Pre-formatted versions (likely duplicates)
+
+4. **Both Major Encyclopedias** (22.3GB - text only)
+   - ETOL (8.3GB): Comprehensive Trotskyist encyclopedia
+   - EROL (14GB): Comprehensive Maoist/anti-revisionist encyclopedia
+   - **Non-sectarian approach**: All tendencies preserved
 
 ## Consequences
 

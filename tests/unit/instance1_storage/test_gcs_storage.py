@@ -8,7 +8,6 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-
 # These imports will work once the modules are created
 # from src.mia_rag.storage.gcs_storage import GCSStorage
 # from src.mia_rag.storage.models import Document
@@ -21,7 +20,7 @@ class TestGCSStorage:
     @pytest.fixture
     def mock_gcs_client(self):
         """Mock GCS client for testing."""
-        with patch('google.cloud.storage.Client') as mock_client:
+        with patch("google.cloud.storage.Client") as mock_client:
             yield mock_client
 
     @pytest.fixture
@@ -49,8 +48,10 @@ class TestGCSStorage:
 
         # Act
         # documents = storage.list_documents(prefix="marxists/")
-        documents = ["marxists/lenin/1917/state-revolution.html",
-                    "marxists/marx/1867/capital-v1.pdf"]  # Placeholder
+        documents = [
+            "marxists/lenin/1917/state-revolution.html",
+            "marxists/marx/1867/capital-v1.pdf",
+        ]  # Placeholder
 
         # Assert
         assert len(documents) == 2
@@ -64,13 +65,6 @@ class TestGCSStorage:
         Then: Document is uploaded with metadata
         """
         # Arrange
-        document_content = b"# The Communist Manifesto\n\nA spectre is haunting Europe..."
-        metadata = {
-            "author": "Marx, Karl",
-            "year": "1848",
-            "language": "en",
-            "doc_type": "manifesto"
-        }
 
         # Act
         # result = storage.upload_document(
@@ -92,7 +86,7 @@ class TestGCSStorage:
         Then: Document is uploaded in chunks
         """
         # Arrange
-        large_content = b"x" * (10 * 1024 * 1024 + 1)  # 10MB + 1 byte
+        b"x" * (10 * 1024 * 1024 + 1)  # 10MB + 1 byte
 
         # Act & Assert
         # This should not raise an exception
@@ -110,10 +104,7 @@ class TestGCSStorage:
         Then: All documents are uploaded efficiently
         """
         # Arrange
-        documents = [
-            {"path": f"doc_{i}.md", "content": f"Content {i}".encode()}
-            for i in range(100)
-        ]
+        [{"path": f"doc_{i}.md", "content": f"Content {i}".encode()} for i in range(100)]
 
         # Act
         # results = storage.batch_upload(documents, parallel=True)
@@ -136,8 +127,9 @@ class TestGCSStorage:
 
         # Act
         # documents = await storage.fetch_documents_async(paths)
-        documents = [{"path": p, "content": f"Content {i}"}
-                    for i, p in enumerate(paths)]  # Placeholder
+        documents = [
+            {"path": p, "content": f"Content {i}"} for i, p in enumerate(paths)
+        ]  # Placeholder
 
         # Assert
         assert len(documents) == 10
@@ -151,11 +143,7 @@ class TestGCSStorage:
         """
         # Act
         # permissions = storage.validate_permissions()
-        permissions = {
-            "read": True,
-            "write": True,
-            "delete": False
-        }
+        permissions = {"read": True, "write": True, "delete": False}
 
         # Assert
         assert permissions["read"] is True
@@ -170,6 +158,7 @@ class TestGCSStorage:
         """
         # Arrange
         from google.api_core.exceptions import Timeout
+
         mock_gcs_client.side_effect = Timeout("Connection timed out")
 
         # Act & Assert

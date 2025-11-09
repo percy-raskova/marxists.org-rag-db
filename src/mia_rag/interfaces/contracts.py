@@ -12,25 +12,26 @@ Create an RFC in docs/rfcs/ and wait 24 hours for review before changes.
 """
 
 from abc import ABC, abstractmethod
+from collections.abc import AsyncIterator
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, AsyncIterator
+from typing import Any
 
 import pandas as pd
-
 
 # ============================================================================
 # DATA MODELS (Shared across all instances)
 # ============================================================================
 
+
 @dataclass
 class Document:
     """Core document model used throughout the system."""
+
     id: str
     content: str
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
     source_path: str
     processed_date: datetime
     word_count: int
@@ -41,9 +42,10 @@ class Document:
 @dataclass
 class Embedding:
     """Embedding vector with metadata."""
+
     chunk_id: str
-    vector: List[float]
-    metadata: Dict[str, Any]
+    vector: list[float]
+    metadata: dict[str, Any]
     document_id: str
     chunk_index: int
     total_chunks: int
@@ -52,26 +54,29 @@ class Embedding:
 @dataclass
 class SearchResult:
     """Search result from vector database."""
+
     document_id: str
     chunk_id: str
     score: float
     content: str
-    metadata: Dict[str, Any]
-    highlights: Optional[List[str]] = None
+    metadata: dict[str, Any]
+    highlights: list[str] | None = None
 
 
 @dataclass
 class QueryResponse:
     """Response from query API."""
+
     query: str
-    results: List[SearchResult]
+    results: list[SearchResult]
     total_results: int
     query_time_ms: float
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
 
 
 class ProcessingStatus(Enum):
     """Status of document processing."""
+
     PENDING = "pending"
     PROCESSING = "processing"
     COMPLETED = "completed"
@@ -83,6 +88,7 @@ class ProcessingStatus(Enum):
 # INSTANCE 1 → INSTANCE 2: Storage Interface
 # ============================================================================
 
+
 class StorageInterface(ABC):
     """
     Interface for storage operations (Instance 1 → Instance 2).
@@ -93,11 +99,8 @@ class StorageInterface(ABC):
 
     @abstractmethod
     async def list_documents(
-        self,
-        prefix: str = "",
-        limit: int = 1000,
-        offset: int = 0
-    ) -> List[str]:
+        self, prefix: str = "", limit: int = 1000, offset: int = 0
+    ) -> list[str]:
         """
         List document paths in storage.
 
@@ -129,10 +132,8 @@ class StorageInterface(ABC):
 
     @abstractmethod
     async def get_batch(
-        self,
-        paths: List[str],
-        batch_size: int = 100
-    ) -> AsyncIterator[List[Document]]:
+        self, paths: list[str], batch_size: int = 100
+    ) -> AsyncIterator[list[Document]]:
         """
         Retrieve documents in batches.
 
@@ -146,7 +147,7 @@ class StorageInterface(ABC):
         pass
 
     @abstractmethod
-    async def get_processing_status(self) -> Dict[str, Any]:
+    async def get_processing_status(self) -> dict[str, Any]:
         """
         Get overall processing status.
 
@@ -157,10 +158,7 @@ class StorageInterface(ABC):
 
     @abstractmethod
     async def mark_processed(
-        self,
-        path: str,
-        status: ProcessingStatus,
-        metadata: Optional[Dict[str, Any]] = None
+        self, path: str, status: ProcessingStatus, metadata: dict[str, Any] | None = None
     ) -> bool:
         """
         Mark a document as processed.
@@ -180,6 +178,7 @@ class StorageInterface(ABC):
 # INSTANCE 2 → INSTANCE 3: Embeddings Interface
 # ============================================================================
 
+
 class EmbeddingsInterface(ABC):
     """
     Interface for embedding operations (Instance 2 → Instance 3).
@@ -189,10 +188,7 @@ class EmbeddingsInterface(ABC):
     """
 
     @abstractmethod
-    async def list_embedding_files(
-        self,
-        prefix: str = ""
-    ) -> List[str]:
+    async def list_embedding_files(self, prefix: str = "") -> list[str]:
         """
         List all Parquet files containing embeddings.
 
@@ -205,10 +201,7 @@ class EmbeddingsInterface(ABC):
         pass
 
     @abstractmethod
-    async def get_embedding_batch(
-        self,
-        file_path: str
-    ) -> pd.DataFrame:
+    async def get_embedding_batch(self, file_path: str) -> pd.DataFrame:
         """
         Get embeddings from a Parquet file.
 
@@ -221,10 +214,7 @@ class EmbeddingsInterface(ABC):
         pass
 
     @abstractmethod
-    async def stream_embeddings(
-        self,
-        batch_size: int = 1000
-    ) -> AsyncIterator[List[Embedding]]:
+    async def stream_embeddings(self, batch_size: int = 1000) -> AsyncIterator[list[Embedding]]:
         """
         Stream all embeddings in batches.
 
@@ -237,7 +227,7 @@ class EmbeddingsInterface(ABC):
         pass
 
     @abstractmethod
-    async def get_embedding_stats(self) -> Dict[str, Any]:
+    async def get_embedding_stats(self) -> dict[str, Any]:
         """
         Get statistics about embeddings.
 
@@ -247,7 +237,7 @@ class EmbeddingsInterface(ABC):
         pass
 
     @abstractmethod
-    async def get_checkpoint(self) -> Optional[Dict[str, Any]]:
+    async def get_checkpoint(self) -> dict[str, Any] | None:
         """
         Get the last checkpoint for resumable processing.
 
@@ -261,6 +251,7 @@ class EmbeddingsInterface(ABC):
 # INSTANCE 3 → INSTANCE 4: Vector Database Interface
 # ============================================================================
 
+
 class VectorDBInterface(ABC):
     """
     Interface for vector database operations (Instance 3 → Instance 4).
@@ -272,11 +263,11 @@ class VectorDBInterface(ABC):
     @abstractmethod
     async def search(
         self,
-        query_vector: List[float],
+        query_vector: list[float],
         limit: int = 10,
-        filters: Optional[Dict[str, Any]] = None,
-        include_metadata: bool = True
-    ) -> List[SearchResult]:
+        filters: dict[str, Any] | None = None,
+        include_metadata: bool = True,
+    ) -> list[SearchResult]:
         """
         Search for similar vectors.
 
@@ -295,10 +286,10 @@ class VectorDBInterface(ABC):
     async def hybrid_search(
         self,
         query_text: str,
-        query_vector: Optional[List[float]] = None,
+        query_vector: list[float] | None = None,
         limit: int = 10,
-        alpha: float = 0.5
-    ) -> List[SearchResult]:
+        alpha: float = 0.5,
+    ) -> list[SearchResult]:
         """
         Hybrid text + vector search.
 
@@ -314,7 +305,7 @@ class VectorDBInterface(ABC):
         pass
 
     @abstractmethod
-    async def get_by_id(self, document_id: str) -> Optional[Document]:
+    async def get_by_id(self, document_id: str) -> Document | None:
         """
         Get document by ID.
 
@@ -327,7 +318,7 @@ class VectorDBInterface(ABC):
         pass
 
     @abstractmethod
-    async def get_collection_stats(self) -> Dict[str, Any]:
+    async def get_collection_stats(self) -> dict[str, Any]:
         """
         Get collection statistics.
 
@@ -351,6 +342,7 @@ class VectorDBInterface(ABC):
 # INSTANCE 4 → INSTANCE 5: API Interface
 # ============================================================================
 
+
 class APIInterface(ABC):
     """
     Interface for API operations (Instance 4 → Instance 5).
@@ -364,8 +356,8 @@ class APIInterface(ABC):
         self,
         text: str,
         limit: int = 5,
-        filters: Optional[Dict[str, Any]] = None,
-        include_context: bool = True
+        filters: dict[str, Any] | None = None,
+        include_context: bool = True,
     ) -> QueryResponse:
         """
         Query the RAG system.
@@ -382,10 +374,7 @@ class APIInterface(ABC):
         pass
 
     @abstractmethod
-    async def get_document_metadata(
-        self,
-        document_id: str
-    ) -> Optional[Dict[str, Any]]:
+    async def get_document_metadata(self, document_id: str) -> dict[str, Any] | None:
         """
         Get document metadata.
 
@@ -398,11 +387,7 @@ class APIInterface(ABC):
         pass
 
     @abstractmethod
-    async def search_by_author(
-        self,
-        author: str,
-        limit: int = 10
-    ) -> List[Dict[str, Any]]:
+    async def search_by_author(self, author: str, limit: int = 10) -> list[dict[str, Any]]:
         """
         Search documents by author.
 
@@ -417,11 +402,8 @@ class APIInterface(ABC):
 
     @abstractmethod
     async def search_by_date_range(
-        self,
-        start_date: datetime,
-        end_date: datetime,
-        limit: int = 10
-    ) -> List[Dict[str, Any]]:
+        self, start_date: datetime, end_date: datetime, limit: int = 10
+    ) -> list[dict[str, Any]]:
         """
         Search documents by date range.
 
@@ -436,7 +418,7 @@ class APIInterface(ABC):
         pass
 
     @abstractmethod
-    async def get_api_stats(self) -> Dict[str, Any]:
+    async def get_api_stats(self) -> dict[str, Any]:
         """
         Get API usage statistics.
 
@@ -450,6 +432,7 @@ class APIInterface(ABC):
 # INSTANCE 6: Monitoring Interface (All instances implement)
 # ============================================================================
 
+
 class MonitoringInterface(ABC):
     """
     Interface for monitoring operations.
@@ -459,7 +442,7 @@ class MonitoringInterface(ABC):
     """
 
     @abstractmethod
-    async def get_metrics(self) -> Dict[str, Any]:
+    async def get_metrics(self) -> dict[str, Any]:
         """
         Get current metrics for monitoring.
 
@@ -469,7 +452,7 @@ class MonitoringInterface(ABC):
         pass
 
     @abstractmethod
-    async def get_health(self) -> Dict[str, Any]:
+    async def get_health(self) -> dict[str, Any]:
         """
         Get health status.
 
@@ -479,11 +462,7 @@ class MonitoringInterface(ABC):
         pass
 
     @abstractmethod
-    async def get_logs(
-        self,
-        level: str = "INFO",
-        limit: int = 100
-    ) -> List[Dict[str, Any]]:
+    async def get_logs(self, level: str = "INFO", limit: int = 100) -> list[dict[str, Any]]:
         """
         Get recent logs.
 
@@ -501,12 +480,14 @@ class MonitoringInterface(ABC):
 # VERSION MANAGEMENT
 # ============================================================================
 
+
 class InterfaceVersion:
     """
     Version information for interface contracts.
 
     Update this when making changes to interfaces.
     """
+
     MAJOR = 1  # Breaking changes
     MINOR = 0  # New features (backward compatible)
     PATCH = 0  # Bug fixes
@@ -530,11 +511,11 @@ class InterfaceVersion:
         req_major, req_minor, req_patch = map(int, required.split("."))
 
         # Major version must match exactly
-        if cls.MAJOR != req_major:
+        if req_major != cls.MAJOR:
             return False
 
         # Minor version must be >= required
-        if cls.MINOR < req_minor:
+        if req_minor > cls.MINOR:
             return False
 
         # Patch version doesn't affect compatibility
@@ -568,6 +549,6 @@ def get_interface(name: str) -> type:
     return INTERFACE_REGISTRY.get(name)
 
 
-def get_dependencies(instance: str) -> List[str]:
+def get_dependencies(instance: str) -> list[str]:
     """Get interface dependencies for an instance."""
     return INTERFACE_DEPENDENCIES.get(instance, [])

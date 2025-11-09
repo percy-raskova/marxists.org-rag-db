@@ -9,7 +9,6 @@ from unittest.mock import Mock, patch
 import numpy as np
 import pytest
 
-
 # Future imports when modules are created
 # from src.mia_rag.embeddings.batch_processor import BatchProcessor
 # from src.mia_rag.embeddings.models import EmbeddingRequest, EmbeddingResponse
@@ -22,10 +21,10 @@ class TestBatchProcessor:
     @pytest.fixture
     def mock_runpod_client(self):
         """Mock Runpod API client."""
-        with patch('runpod.API') as mock_api:
+        with patch("runpod.API") as mock_api:
             mock_api.return_value.run.return_value = {
                 "status": "success",
-                "output": np.random.rand(768).tolist()
+                "output": np.random.rand(768).tolist(),
             }
             yield mock_api
 
@@ -47,7 +46,6 @@ class TestBatchProcessor:
         Then: Returns 768-dimensional embedding
         """
         # Arrange
-        text = "The history of all hitherto existing society is the history of class struggles."
 
         # Act
         # embedding = processor.process_text(text)
@@ -65,7 +63,7 @@ class TestBatchProcessor:
         Then: Documents are processed in batches of 32
         """
         # Arrange
-        documents = [f"Document {i}: " + "x" * 500 for i in range(100)]
+        [f"Document {i}: " + "x" * 500 for i in range(100)]
 
         # Act
         # embeddings = processor.process_batch(documents)
@@ -85,8 +83,8 @@ class TestBatchProcessor:
         Then: Continues from last processed document
         """
         # Arrange
-        documents = [f"Doc {i}" for i in range(1000)]
-        checkpoint_file = tmp_path / "checkpoint.json"
+        [f"Doc {i}" for i in range(1000)]
+        tmp_path / "checkpoint.json"
 
         # Simulate failure at document 500
         # processor.process_batch(documents[:500])
@@ -108,7 +106,7 @@ class TestBatchProcessor:
         Then: Automatically reduces batch size
         """
         # Arrange
-        large_documents = ["x" * 10000 for _ in range(100)]  # Very long texts
+        ["x" * 10000 for _ in range(100)]  # Very long texts
 
         # Mock GPU OOM error
         # processor.client.run.side_effect = [
@@ -131,22 +129,20 @@ class TestBatchProcessor:
         Then: Similar texts have high cosine similarity
         """
         # Arrange
-        similar_texts = [
-            "The workers have nothing to lose but their chains.",
-            "The proletariat has nothing to lose but their chains."
-        ]
-        different_text = "Capital is dead labor that vampire-like lives by sucking living labor."
 
         # Act
         # embeddings = processor.process_batch(similar_texts + [different_text])
-        embeddings = np.array([
-            [0.1, 0.2, 0.3],  # Mock embeddings
-            [0.1, 0.21, 0.29],
-            [0.8, 0.1, 0.05]
-        ])
+        embeddings = np.array(
+            [
+                [0.1, 0.2, 0.3],  # Mock embeddings
+                [0.1, 0.21, 0.29],
+                [0.8, 0.1, 0.05],
+            ]
+        )
 
         # Calculate cosine similarities
         from sklearn.metrics.pairwise import cosine_similarity
+
         similarities = cosine_similarity(embeddings)
 
         # Assert
@@ -165,7 +161,7 @@ class TestBatchProcessor:
         batches = [
             [f"Batch1_Doc{i}" for i in range(32)],
             [f"Batch2_Doc{i}" for i in range(32)],
-            [f"Batch3_Doc{i}" for i in range(32)]
+            [f"Batch3_Doc{i}" for i in range(32)],
         ]
 
         # Act
@@ -184,7 +180,7 @@ class TestBatchProcessor:
         Then: Metrics are available
         """
         # Arrange
-        documents = ["Doc " + str(i) for i in range(100)]
+        ["Doc " + str(i) for i in range(100)]
 
         # Act
         # processor.process_batch(documents)
@@ -194,7 +190,7 @@ class TestBatchProcessor:
             "processing_time": 45.2,
             "docs_per_second": 2.21,
             "gpu_utilization": 0.85,
-            "batch_size_used": 32
+            "batch_size_used": 32,
         }
 
         # Assert
@@ -213,7 +209,7 @@ class TestBatchProcessor:
         mock_runpod_client.return_value.run.side_effect = [
             ConnectionError("API unavailable"),
             ConnectionError("API unavailable"),
-            {"status": "success", "output": np.random.rand(768).tolist()}
+            {"status": "success", "output": np.random.rand(768).tolist()},
         ]
 
         # Act

@@ -9,7 +9,6 @@ from unittest.mock import Mock, patch
 import numpy as np
 import pytest
 
-
 # Future imports when modules are created
 # from src.mia_rag.weaviate.client import WeaviateClient
 # from src.mia_rag.weaviate.models import VectorDocument, QueryResult
@@ -22,7 +21,7 @@ class TestWeaviateClient:
     @pytest.fixture
     def mock_weaviate_client(self):
         """Mock Weaviate client for testing."""
-        with patch('weaviate.Client') as mock_client:
+        with patch("weaviate.Client") as mock_client:
             # Mock schema operations
             mock_client.return_value.schema.get.return_value = {
                 "classes": [{"class": "MarxistTheory"}]
@@ -67,15 +66,17 @@ class TestWeaviateClient:
         # Arrange
         documents = []
         for i in range(1000):
-            documents.append({
-                "content": f"Document {i}",
-                "embedding": np.random.rand(768).tolist(),
-                "metadata": {
-                    "author": "Marx",
-                    "year": 1867 + i % 20,
-                    "work": f"Work {i // 100}"
+            documents.append(
+                {
+                    "content": f"Document {i}",
+                    "embedding": np.random.rand(768).tolist(),
+                    "metadata": {
+                        "author": "Marx",
+                        "year": 1867 + i % 20,
+                        "work": f"Work {i // 100}",
+                    },
                 }
-            })
+            )
 
         # Act
         # result = client.batch_import(documents, batch_size=100)
@@ -94,19 +95,16 @@ class TestWeaviateClient:
         Then: Returns ranked results with scores
         """
         # Arrange
-        query_embedding = np.random.rand(768)
+        np.random.rand(768)
         mock_results = {
             "data": {
                 "Get": {
                     "MarxistTheory": [
                         {
                             "content": "The wealth of those societies...",
-                            "_additional": {"distance": 0.15}
+                            "_additional": {"distance": 0.15},
                         },
-                        {
-                            "content": "Capital is dead labor...",
-                            "_additional": {"distance": 0.22}
-                        }
+                        {"content": "Capital is dead labor...", "_additional": {"distance": 0.22}},
                     ]
                 }
             }
@@ -117,7 +115,7 @@ class TestWeaviateClient:
         # results = client.vector_search(query_embedding, limit=10)
         results = [
             {"content": "The wealth of those societies...", "score": 0.85},
-            {"content": "Capital is dead labor...", "score": 0.78}
+            {"content": "Capital is dead labor...", "score": 0.78},
         ]
 
         # Assert
@@ -133,7 +131,6 @@ class TestWeaviateClient:
         Then: Returns results combining BM25 and vector similarity
         """
         # Arrange
-        query = "surplus value extraction capitalist production"
 
         # Act
         # results = client.hybrid_search(
@@ -143,7 +140,7 @@ class TestWeaviateClient:
         # )
         results = [
             {"content": "Surplus value is...", "score": 0.92},
-            {"content": "The extraction of surplus...", "score": 0.89}
+            {"content": "The extraction of surplus...", "score": 0.89},
         ]
 
         # Assert
@@ -161,7 +158,7 @@ class TestWeaviateClient:
         mock_weaviate_client.side_effect = [
             ConnectionError("Connection refused"),
             ConnectionError("Connection refused"),
-            Mock()  # Success on third attempt
+            Mock(),  # Success on third attempt
         ]
 
         # Act & Assert
@@ -196,12 +193,6 @@ class TestWeaviateClient:
         Then: Raises validation error
         """
         # Arrange
-        invalid_documents = [
-            {
-                "content": "Test",
-                "embedding": [0.1, 0.2, 0.3],  # Wrong dimension (3 instead of 768)
-            }
-        ]
 
         # Act & Assert
         with pytest.raises(ValueError, match="Expected 768 dimensions"):
@@ -216,10 +207,6 @@ class TestWeaviateClient:
         Then: Returns only matching documents
         """
         # Arrange
-        filters = {
-            "author": "Lenin",
-            "year": {"gte": 1917, "lte": 1924}
-        }
 
         # Act
         # results = client.search_with_filters(
@@ -228,7 +215,7 @@ class TestWeaviateClient:
         # )
         results = [
             {"content": "State and Revolution...", "author": "Lenin", "year": 1917},
-            {"content": "What Is To Be Done?", "author": "Lenin", "year": 1902}
+            {"content": "What Is To Be Done?", "author": "Lenin", "year": 1902},
         ]
         # Filter results manually for placeholder
         results = [r for r in results if 1917 <= r["year"] <= 1924]
@@ -252,7 +239,7 @@ class TestWeaviateClient:
             "documents": 1250000,
             "shards": 12,
             "memory_usage": 0.72,
-            "cpu_usage": 0.45
+            "cpu_usage": 0.45,
         }
 
         # Assert
@@ -269,9 +256,11 @@ class TestWeaviateClient:
         Then: Batches are processed concurrently
         """
         # Arrange
-        batches = [
-            [{"content": f"Batch{b}_Doc{i}", "embedding": np.random.rand(768).tolist()}
-             for i in range(100)]
+        [
+            [
+                {"content": f"Batch{b}_Doc{i}", "embedding": np.random.rand(768).tolist()}
+                for i in range(100)
+            ]
             for b in range(10)
         ]
 

@@ -9,7 +9,6 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-
 # Future imports when modules are created
 # from src.mia_rag.api.server import app, APIServer
 # from src.mia_rag.api.models import QueryRequest, QueryResponse
@@ -22,7 +21,7 @@ class TestAPIServer:
     @pytest.fixture
     def mock_redis(self):
         """Mock Redis client for testing."""
-        with patch('redis.Redis') as mock_redis:
+        with patch("redis.Redis") as mock_redis:
             mock_redis.return_value.get.return_value = None
             mock_redis.return_value.setex.return_value = True
             yield mock_redis
@@ -31,9 +30,7 @@ class TestAPIServer:
     def mock_weaviate(self):
         """Mock Weaviate client for testing."""
         mock = Mock()
-        mock.search.return_value = [
-            {"content": "Test result", "score": 0.95}
-        ]
+        mock.search.return_value = [{"content": "Test result", "score": 0.95}]
         return mock
 
     @pytest.fixture
@@ -53,10 +50,6 @@ class TestAPIServer:
         Then: Returns relevant results
         """
         # Arrange
-        query = {
-            "query": "What is surplus value?",
-            "limit": 10
-        }
 
         # Act
         # response = client.post("/search", json=query)
@@ -65,11 +58,11 @@ class TestAPIServer:
                 {
                     "content": "Surplus value is the difference...",
                     "score": 0.92,
-                    "metadata": {"author": "Marx", "work": "Capital Vol 1"}
+                    "metadata": {"author": "Marx", "work": "Capital Vol 1"},
                 }
             ],
             "query": "What is surplus value?",
-            "processing_time": 0.234
+            "processing_time": 0.234,
         }
 
         # Assert
@@ -88,10 +81,7 @@ class TestAPIServer:
         Then: Second search uses cached results
         """
         # Arrange
-        query = {"query": "dialectical materialism", "limit": 5}
-        cached_result = json.dumps({
-            "results": [{"content": "Cached result", "score": 0.88}]
-        })
+        cached_result = json.dumps({"results": [{"content": "Cached result", "score": 0.88}]})
 
         # Act - First request (cache miss)
         mock_redis.return_value.get.return_value = None
@@ -121,7 +111,7 @@ class TestAPIServer:
         ]
 
         # Act & Assert
-        for invalid_query in invalid_queries:
+        for _invalid_query in invalid_queries:
             # response = client.post("/search", json=invalid_query)
             # assert response.status_code == 422
             pass
@@ -134,31 +124,13 @@ class TestAPIServer:
         Then: Returns filtered results
         """
         # Arrange
-        advanced_query = {
-            "query": "revolution",
-            "filters": {
-                "author": ["Lenin", "Trotsky"],
-                "year_from": 1917,
-                "year_to": 1924,
-                "language": "en"
-            },
-            "limit": 20
-        }
 
         # Act
         # response = client.post("/search/advanced", json=advanced_query)
         response_data = {
             "results": [
-                {
-                    "content": "The State and Revolution...",
-                    "author": "Lenin",
-                    "year": 1917
-                },
-                {
-                    "content": "Results and Prospects...",
-                    "author": "Trotsky",
-                    "year": 1919
-                }
+                {"content": "The State and Revolution...", "author": "Lenin", "year": 1917},
+                {"content": "Results and Prospects...", "author": "Trotsky", "year": 1919},
             ]
         }
 
@@ -178,28 +150,13 @@ class TestAPIServer:
         Then: Returns paginated results with proper metadata
         """
         # Arrange
-        query_page1 = {
-            "query": "capital",
-            "page": 1,
-            "page_size": 10
-        }
-        query_page2 = {
-            "query": "capital",
-            "page": 2,
-            "page_size": 10
-        }
 
         # Act
         # response1 = client.post("/search", json=query_page1)
         # response2 = client.post("/search", json=query_page2)
         response1_data = {
             "results": [f"Result {i}" for i in range(10)],
-            "pagination": {
-                "page": 1,
-                "page_size": 10,
-                "total_results": 245,
-                "total_pages": 25
-            }
+            "pagination": {"page": 1, "page_size": 10, "total_results": 245, "total_pages": 25},
         }
 
         # Assert
@@ -218,7 +175,6 @@ class TestAPIServer:
         Then: Returns 429 Too Many Requests
         """
         # Arrange
-        query = {"query": "test", "limit": 5}
 
         # Act - Make 11 requests (limit is 10 per minute)
         responses = []
@@ -243,12 +199,8 @@ class TestAPIServer:
         response_data = {
             "status": "healthy",
             "version": "2.0.0",
-            "services": {
-                "weaviate": "connected",
-                "redis": "connected",
-                "embeddings": "available"
-            },
-            "uptime_seconds": 3600
+            "services": {"weaviate": "connected", "redis": "connected", "embeddings": "available"},
+            "uptime_seconds": 3600,
         }
 
         # Assert
@@ -256,8 +208,7 @@ class TestAPIServer:
         # data = response.json()
         data = response_data
         assert data["status"] == "healthy"
-        assert all(v == "connected" or v == "available"
-                  for v in data["services"].values())
+        assert all(v in ("connected", "available") for v in data["services"].values())
 
     @pytest.mark.asyncio
     async def test_async_batch_queries(self, client):
@@ -268,13 +219,6 @@ class TestAPIServer:
         Then: Processes queries concurrently
         """
         # Arrange
-        batch_request = {
-            "queries": [
-                {"query": "surplus value", "limit": 5},
-                {"query": "dialectical materialism", "limit": 5},
-                {"query": "class struggle", "limit": 5}
-            ]
-        }
 
         # Act
         # response = await client.post("/search/batch", json=batch_request)
@@ -282,9 +226,9 @@ class TestAPIServer:
             "batch_results": [
                 {"query": "surplus value", "results": ["..."]},
                 {"query": "dialectical materialism", "results": ["..."]},
-                {"query": "class struggle", "results": ["..."]}
+                {"query": "class struggle", "results": ["..."]},
             ],
-            "processing_time": 0.456
+            "processing_time": 0.456,
         }
 
         # Assert

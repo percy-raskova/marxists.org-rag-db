@@ -8,7 +8,6 @@ from unittest.mock import AsyncMock, Mock
 
 import pytest
 
-
 # Future imports when modules are created
 # from src.mia_rag.mcp.server import MCPServer
 # from src.mia_rag.mcp.tools import MarxistTools
@@ -24,20 +23,14 @@ class TestMCPServer:
         """Mock MCP transport for testing."""
         transport = AsyncMock()
         transport.send.return_value = None
-        transport.receive.return_value = {
-            "jsonrpc": "2.0",
-            "method": "tools/list",
-            "id": 1
-        }
+        transport.receive.return_value = {"jsonrpc": "2.0", "method": "tools/list", "id": 1}
         return transport
 
     @pytest.fixture
     def mock_weaviate(self):
         """Mock Weaviate client for MCP tools."""
         mock = Mock()
-        mock.search.return_value = [
-            {"content": "Test content", "score": 0.9}
-        ]
+        mock.search.return_value = [{"content": "Test content", "score": 0.9}]
         return mock
 
     @pytest.fixture
@@ -66,9 +59,9 @@ class TestMCPServer:
                     "type": "object",
                     "properties": {
                         "query": {"type": "string"},
-                        "n_results": {"type": "integer", "default": 5}
-                    }
-                }
+                        "n_results": {"type": "integer", "default": 5},
+                    },
+                },
             },
             {
                 "name": "find_by_author",
@@ -77,21 +70,18 @@ class TestMCPServer:
                     "type": "object",
                     "properties": {
                         "author": {"type": "string"},
-                        "work_title": {"type": "string", "optional": True}
-                    }
-                }
+                        "work_title": {"type": "string", "optional": True},
+                    },
+                },
             },
             {
                 "name": "get_historical_context",
                 "description": "Get historical context for a period",
                 "inputSchema": {
                     "type": "object",
-                    "properties": {
-                        "time_period": {"type": "string"},
-                        "topic": {"type": "string"}
-                    }
-                }
-            }
+                    "properties": {"time_period": {"type": "string"}, "topic": {"type": "string"}},
+                },
+            },
         ]
 
         # Assert
@@ -110,18 +100,6 @@ class TestMCPServer:
         Then: Executes tool and returns result
         """
         # Arrange
-        request = {
-            "jsonrpc": "2.0",
-            "method": "tools/invoke",
-            "params": {
-                "name": "search_marxist_theory",
-                "arguments": {
-                    "query": "What is dialectical materialism?",
-                    "n_results": 3
-                }
-            },
-            "id": 2
-        }
 
         # Act
         # response = await server.handle_request(request)
@@ -129,13 +107,10 @@ class TestMCPServer:
             "jsonrpc": "2.0",
             "result": {
                 "content": [
-                    {
-                        "type": "text",
-                        "text": "Found 3 results:\n\n1. Dialectical materialism is..."
-                    }
+                    {"type": "text", "text": "Found 3 results:\n\n1. Dialectical materialism is..."}
                 ]
             },
-            "id": 2
+            "id": 2,
         }
 
         # Assert
@@ -151,18 +126,6 @@ class TestMCPServer:
         Then: Returns validation error
         """
         # Arrange
-        invalid_request = {
-            "jsonrpc": "2.0",
-            "method": "tools/invoke",
-            "params": {
-                "name": "search_marxist_theory",
-                "arguments": {
-                    "query": "",  # Empty query
-                    "n_results": -1  # Invalid count
-                }
-            },
-            "id": 3
-        }
 
         # Act
         # response = await server.handle_request(invalid_request)
@@ -171,12 +134,9 @@ class TestMCPServer:
             "error": {
                 "code": -32602,
                 "message": "Invalid params",
-                "data": {
-                    "query": "Query cannot be empty",
-                    "n_results": "Must be positive integer"
-                }
+                "data": {"query": "Query cannot be empty", "n_results": "Must be positive integer"},
             },
-            "id": 3
+            "id": 3,
         }
 
         # Assert
@@ -191,11 +151,6 @@ class TestMCPServer:
         Then: Returns comprehensive results with context
         """
         # Arrange
-        complex_query = {
-            "query": "How does the tendency of the rate of profit to fall relate to technological advancement?",
-            "n_results": 5,
-            "include_context": True
-        }
 
         # Act
         # result = server.tools.search_marxist_theory(**complex_query)
@@ -205,15 +160,15 @@ class TestMCPServer:
                     "content": "In Capital Vol 3, Marx explains...",
                     "work": "Capital Volume III",
                     "chapter": "Ch. 13",
-                    "context": "Discussion of organic composition of capital"
+                    "context": "Discussion of organic composition of capital",
                 },
                 {
                     "content": "The tendency of the rate of profit...",
                     "work": "Grundrisse",
-                    "context": "Fragment on Machines"
-                }
+                    "context": "Fragment on Machines",
+                },
             ],
-            "synthesis": "Marx argues that technological advancement..."
+            "synthesis": "Marx argues that technological advancement...",
         }
 
         # Assert
@@ -230,18 +185,6 @@ class TestMCPServer:
         Then: Streams response in chunks
         """
         # Arrange
-        streaming_request = {
-            "jsonrpc": "2.0",
-            "method": "tools/invoke",
-            "params": {
-                "name": "get_full_work",
-                "arguments": {
-                    "work": "Capital Volume I",
-                    "stream": True
-                }
-            },
-            "id": 4
-        }
 
         # Act
         chunks = []
@@ -251,7 +194,7 @@ class TestMCPServer:
             {"type": "stream_start", "total_size": 500000},
             {"type": "stream_chunk", "content": "Chapter 1..."},
             {"type": "stream_chunk", "content": "Chapter 2..."},
-            {"type": "stream_end", "chunks_sent": 50}
+            {"type": "stream_end", "chunks_sent": 50},
         ]
 
         # Assert
@@ -267,10 +210,6 @@ class TestMCPServer:
         Then: Returns chronological list of works
         """
         # Arrange
-        request = {
-            "author": "Lenin",
-            "include_historical_events": True
-        }
 
         # Act
         # result = server.tools.get_author_timeline(**request)
@@ -280,9 +219,9 @@ class TestMCPServer:
                 {"year": 1902, "work": "What Is To Be Done?", "event": None},
                 {"year": 1905, "work": None, "event": "1905 Revolution"},
                 {"year": 1917, "work": "State and Revolution", "event": "October Revolution"},
-                {"year": 1920, "work": "Left-Wing Communism", "event": None}
+                {"year": 1920, "work": "Left-Wing Communism", "event": None},
             ],
-            "total_works": 45
+            "total_works": 45,
         }
 
         # Assert
@@ -298,10 +237,6 @@ class TestMCPServer:
         Then: Returns comparative analysis
         """
         # Arrange
-        request = {
-            "authors": ["Marx", "Engels", "Lenin"],
-            "topic": "the state"
-        }
 
         # Act
         # result = server.tools.cross_reference(**request)
@@ -310,10 +245,10 @@ class TestMCPServer:
             "perspectives": {
                 "Marx": "The state is the executive committee...",
                 "Engels": "The state arose from the need...",
-                "Lenin": "The state is a special organization..."
+                "Lenin": "The state is a special organization...",
             },
             "similarities": ["All view state as class instrument"],
-            "differences": ["Lenin emphasizes revolutionary seizure"]
+            "differences": ["Lenin emphasizes revolutionary seizure"],
         }
 
         # Assert
@@ -329,7 +264,6 @@ class TestMCPServer:
         Then: Returns comprehensive definition with sources
         """
         # Arrange
-        request = {"concept": "alienation"}
 
         # Act
         # result = server.tools.define_concept(**request)
@@ -343,11 +277,11 @@ class TestMCPServer:
                         "Alienation from product",
                         "Alienation from act of production",
                         "Alienation from species-being",
-                        "Alienation from other workers"
-                    ]
+                        "Alienation from other workers",
+                    ],
                 }
             ],
-            "related_concepts": ["commodity fetishism", "reification"]
+            "related_concepts": ["commodity fetishism", "reification"],
         }
 
         # Assert
@@ -380,15 +314,16 @@ class TestMCPServer:
         # Arrange
         requests = []
         for i in range(101):  # Assuming limit is 100/minute
-            requests.append({
-                "jsonrpc": "2.0",
-                "method": "tools/invoke",
-                "params": {"name": "search_marxist_theory", "arguments": {"query": f"test{i}"}},
-                "id": i
-            })
+            requests.append(
+                {
+                    "jsonrpc": "2.0",
+                    "method": "tools/invoke",
+                    "params": {"name": "search_marxist_theory", "arguments": {"query": f"test{i}"}},
+                    "id": i,
+                }
+            )
 
         # Act
-        responses = []
         # for req in requests:
         #     responses.append(await server.handle_request(req))
 
