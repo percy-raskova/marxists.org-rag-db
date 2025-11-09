@@ -5,12 +5,14 @@ Instance mapping utilities for MIA RAG System.
 This module provides functions to map instances to their modules and directories.
 Used by Mise tasks, GitHub Actions, and other scripts.
 Can be used as a library or CLI tool.
+
+Refactored using Command pattern for reduced complexity.
 """
 
 import sys
-from pathlib import Path
 
 import click
+from scripts.patterns.instance_commands import InstanceCommandFactory
 
 
 # Instance to module mapping
@@ -130,69 +132,82 @@ def is_shared_path(path: str) -> bool:
 @click.option("--validate", is_flag=True, help="Validate all ownership mappings")
 def main(file, check, dirs, instance, validate):
     """Instance mapping tool for file ownership."""
+    # Create command invoker
+    invoker = InstanceCommandFactory.create_command_invoker()
+
+    # Determine which command to execute and create context
+    command_name, context = _select_command(file, check, dirs, instance, validate)
+
+    # Execute command
+    result = invoker.execute(command_name, context)
+
+    # Print result and exit
+    if result.message:
+        print(result.message)
+    sys.exit(result.exit_code)
+
+
+def _select_command(file, check, dirs, instance, validate):
+    """
+    Select appropriate command based on CLI options.
+
+    Complexity: 5 branches (within limit of 12)
+    """
+    # Create base context with mappings
+    shared_paths = {
+        "interfaces": SHARED_RESOURCES["interfaces"],
+        "configuration": SHARED_RESOURCES["configuration"],
+        "documentation": SHARED_RESOURCES["documentation"],
+    }
 
     if file or check:
-        filepath = file or check
-        owner = get_instance_for_path(filepath)
+        # Check file ownership
+        context = InstanceCommandFactory.create_context(
+            INSTANCE_MODULES,
+            INSTANCE_DIRECTORIES,
+            shared_paths,
+            filepath=file or check,
+        )
+        return "check_ownership", context
 
-        if owner:
-            print(f"Owner: {owner}")
-        elif is_shared_path(filepath):
-            print("Owner: shared")
-            print("Requires coordination: Yes")
-        else:
-            print("Owner: none (unrestricted)")
+    if dirs:
+        # Get directories (space-separated)
+        context = InstanceCommandFactory.create_context(
+            INSTANCE_MODULES,
+            INSTANCE_DIRECTORIES,
+            shared_paths,
+            instance_name=dirs,
+        )
+        return "get_directories", context
 
-    elif dirs:
-        # Get directories for an instance (space-separated for shell scripts)
-        paths = get_directories(dirs)
-        if paths:
-            print(" ".join(paths))
-        else:
-            print(f"Error: Unknown instance {dirs}", file=sys.stderr)
-            sys.exit(1)
+    if instance:
+        # Get paths (newline-separated)
+        context = InstanceCommandFactory.create_context(
+            INSTANCE_MODULES,
+            INSTANCE_DIRECTORIES,
+            shared_paths,
+            instance_name=instance,
+        )
+        return "get_paths", context
 
-    elif instance:
-        # Get all paths for an instance (newline-separated)
-        paths = get_directories(instance)
-        if paths:
-            for path in paths:
-                print(path)
-        else:
-            print(f"Error: Unknown instance {instance}", file=sys.stderr)
-            sys.exit(1)
+    if validate:
+        # Validate mappings
+        context = InstanceCommandFactory.create_context(
+            INSTANCE_MODULES,
+            INSTANCE_DIRECTORIES,
+            shared_paths,
+        )
+        return "validate_mappings", context
 
-    elif validate:
-        # Validate that mappings are consistent
-        all_valid = True
-        all_paths: set[str] = set()
-
-        print("Validating instance ownership mappings...")
-
-        # Check instance paths
-        for instance_name, directories in INSTANCE_DIRECTORIES.items():
-            print(f"\n{instance_name}:")
-            for path in directories:
-                if path in all_paths:
-                    print(f"  ❌ {path} - DUPLICATE OWNERSHIP")
-                    all_valid = False
-                else:
-                    all_paths.add(path)
-                    if Path(path).exists():
-                        print(f"  ✅ {path}")
-                    else:
-                        print(f"  ⚠️  {path} - does not exist yet")
-
-        if all_valid:
-            print("\n✅ All mappings are valid")
-        else:
-            print("\n❌ Issues found in mappings")
-            sys.exit(1)
-
-    else:
-        # Show help if no options provided
-        ctx = click.get_current_context()
-        click.echo(ctx.get_help())
+    # Show help (default)
+    click_ctx = click.get_current_context()
+    context = InstanceCommandFactory.create_context(
+        INSTANCE_MODULES,
+        INSTANCE_DIRECTORIES,
+        shared_paths,
+        help_text=click_ctx.get_help(),
+    )
+    return "show_help", context
 
 
 if __name__ == "__main__":
