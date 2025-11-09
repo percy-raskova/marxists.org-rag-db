@@ -18,6 +18,12 @@ from datetime import datetime
 from pathlib import Path
 from typing import ClassVar
 
+from patterns.ast_utils import extract_imports
+from patterns.validators import (
+    ValidationContext,
+    create_validation_chain,
+)
+
 
 @dataclass
 class BoundaryViolation:
@@ -248,9 +254,21 @@ class BoundaryChecker:
         )
 
     def check_imports(self, file_path: Path, instance: str) -> list[BoundaryViolation]:
-        """Check if Python file has valid imports."""
+        """Check if Python file has valid imports using AST-based validation.
+
+        This method uses the Chain of Responsibility pattern to validate imports,
+        replacing the previous string-based approach with AST parsing.
+
+        Args:
+            file_path: Path to the Python file to check
+            instance: Instance ID doing the import
+
+        Returns:
+            List of BoundaryViolation objects for any invalid imports
+        """
         violations = []
 
+        # Skip non-Python files
         if file_path.suffix != ".py":
             return violations
 
@@ -258,55 +276,52 @@ class BoundaryChecker:
             return violations
 
         try:
-            content = file_path.read_text()
+            # Extract imports using AST
+            imports = extract_imports(file_path)
+
+            # Build validation context
             instance_config = self.INSTANCE_BOUNDARIES.get(instance, {})
-            allowed_imports = instance_config.get("allowed_imports", [])
-            owned_paths = instance_config.get("owned_paths", [])
+            all_boundaries = {
+                inst: config.get("owned_paths", [])
+                for inst, config in self.INSTANCE_BOUNDARIES.items()
+            }
 
-            for raw_line in content.split("\n"):
-                line = raw_line.strip()
+            ctx = ValidationContext(
+                instance_id=instance,
+                owned_paths=set(instance_config.get("owned_paths", [])),
+                allowed_imports=set(instance_config.get("allowed_imports", [])),
+                all_instance_boundaries=all_boundaries,
+            )
 
-                # Check import statements (only "from" imports checked for boundaries)
-                if line.startswith("from "):
-                    parts = line.split(" ")
-                    if len(parts) > 1 and parts[1].split(".")[0] == "src":
-                        module_path = parts[1].replace(".", "/") + "/"
+            # Create validation chain
+            validator = create_validation_chain()
 
-                        # Check if import is allowed
-                        is_allowed = False
+            # Validate each import
+            for import_stmt in imports:
+                import_violations = validator.handle(import_stmt, ctx)
 
-                        # Can import from owned paths
-                        for owned in owned_paths:
-                            if module_path.startswith(owned):
-                                is_allowed = True
-                                break
+                # Convert ImportViolation to BoundaryViolation
+                for import_violation in import_violations:
+                    violations.append(
+                        BoundaryViolation(
+                            instance=instance,
+                            file_path=str(file_path),
+                            violation_type="import",
+                            severity=import_violation.severity,
+                            message=import_violation.message,
+                        )
+                    )
 
-                        # Can import from allowed paths
-                        if not is_allowed:
-                            for allowed in allowed_imports:
-                                if module_path.startswith(allowed):
-                                    is_allowed = True
-                                    break
-
-                        if not is_allowed:
-                            # Check if importing from another instance
-                            for other_instance, config in self.INSTANCE_BOUNDARIES.items():
-                                if other_instance == instance:
-                                    continue
-
-                                for other_path in config.get("owned_paths", []):
-                                    if module_path.startswith(other_path):
-                                        violations.append(
-                                            BoundaryViolation(
-                                                instance=instance,
-                                                file_path=str(file_path),
-                                                violation_type="import",
-                                                severity="error",
-                                                message=f"Cannot import from {other_instance}'s module: {line}",
-                                            )
-                                        )
-                                        break
-
+        except SyntaxError as e:
+            violations.append(
+                BoundaryViolation(
+                    instance=instance,
+                    file_path=str(file_path),
+                    violation_type="parse_error",
+                    severity="warning",
+                    message=f"Syntax error in file: {e}",
+                )
+            )
         except Exception as e:
             violations.append(
                 BoundaryViolation(
