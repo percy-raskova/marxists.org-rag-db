@@ -29,8 +29,7 @@ def load_assignments() -> dict[str, Any]:
     """Load instance assignments configuration."""
     if not ASSIGNMENTS_FILE.exists():
         console.print(
-            "[red]Error:[/red] Instance assignments file not found at:",
-            str(ASSIGNMENTS_FILE)
+            "[red]Error:[/red] Instance assignments file not found at:", str(ASSIGNMENTS_FILE)
         )
         sys.exit(1)
 
@@ -64,7 +63,7 @@ def display_instance_info(instance_id: str, assignments: dict[str, Any]):
 [yellow]Poetry Extras:[/yellow] {instance['extras']}
         """,
         title=f"🤖 {instance_id.upper()}",
-        border_style="cyan"
+        border_style="cyan",
     )
     console.print(panel)
 
@@ -83,7 +82,7 @@ def display_all_instances(assignments: dict[str, Any]):
             instance_id,
             info["name"],
             ", ".join(info["modules"]),
-            ", ".join(info["dependencies"]) if info["dependencies"] else "None"
+            ", ".join(info["dependencies"]) if info["dependencies"] else "None",
         )
 
     console.print(table)
@@ -93,24 +92,15 @@ def display_all_instances(assignments: dict[str, Any]):
 @click.option(
     "--set",
     "set_instance",
-    type=click.Choice(["instance1", "instance2", "instance3", "instance4", "instance5", "instance6"]),
-    help="Set the instance assignment"
+    type=click.Choice(
+        ["instance1", "instance2", "instance3", "instance4", "instance5", "instance6"]
+    ),
+    help="Set the instance assignment",
 )
+@click.option("--show", is_flag=True, help="Show current instance assignment")
+@click.option("--list", "list_all", is_flag=True, help="List all available instances")
 @click.option(
-    "--show",
-    is_flag=True,
-    help="Show current instance assignment"
-)
-@click.option(
-    "--list",
-    "list_all",
-    is_flag=True,
-    help="List all available instances"
-)
-@click.option(
-    "--auto",
-    is_flag=True,
-    help="Auto-detect instance based on recent file modifications"
+    "--auto", is_flag=True, help="Auto-detect instance based on recent file modifications"
 )
 def main(set_instance: str | None, show: bool, list_all: bool, auto: bool):
     """Identify and configure Claude Code instance assignment."""

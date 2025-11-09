@@ -13,13 +13,14 @@ import argparse
 import json
 import sys
 from pathlib import Path
+from typing import ClassVar
 
 
 class BoundaryViewer:
     """View and explore instance boundaries."""
 
     # Instance information with emojis for visual distinction
-    INSTANCE_INFO = {
+    INSTANCE_INFO: ClassVar[dict[str, dict]] = {
         "instance1": {
             "name": "Storage & Pipeline",
             "emoji": "💾",
@@ -31,8 +32,8 @@ class BoundaryViewer:
                 "Process HTML/PDF to clean markdown",
                 "Manage data pipeline workflows",
                 "Handle batch processing jobs",
-                "Implement data versioning"
-            ]
+                "Implement data versioning",
+            ],
         },
         "instance2": {
             "name": "Embeddings",
@@ -45,8 +46,8 @@ class BoundaryViewer:
                 "Manage GPU resource allocation",
                 "Implement batch processing for efficiency",
                 "Handle checkpoint/resume for long jobs",
-                "Optimize embedding models"
-            ]
+                "Optimize embedding models",
+            ],
         },
         "instance3": {
             "name": "Weaviate",
@@ -59,8 +60,8 @@ class BoundaryViewer:
                 "Implement semantic search",
                 "Manage Weaviate schema",
                 "Handle backup and recovery",
-                "Optimize query performance"
-            ]
+                "Optimize query performance",
+            ],
         },
         "instance4": {
             "name": "API",
@@ -73,8 +74,8 @@ class BoundaryViewer:
                 "Implement caching layer",
                 "Handle rate limiting",
                 "Manage authentication",
-                "Provide API documentation"
-            ]
+                "Provide API documentation",
+            ],
         },
         "instance5": {
             "name": "MCP",
@@ -87,8 +88,8 @@ class BoundaryViewer:
                 "Handle tool invocation",
                 "Manage streaming responses",
                 "Implement context management",
-                "Provide tool discovery"
-            ]
+                "Provide tool discovery",
+            ],
         },
         "instance6": {
             "name": "Monitoring",
@@ -101,155 +102,88 @@ class BoundaryViewer:
                 "Create monitoring dashboards",
                 "Implement alerting rules",
                 "Track performance KPIs",
-                "Generate cost reports"
-            ]
-        }
+                "Generate cost reports",
+            ],
+        },
     }
 
     # Detailed file ownership
-    FILE_OWNERSHIP = {
+    FILE_OWNERSHIP: ClassVar[dict[str, dict]] = {
         "instance1": {
-            "src": [
-                "src/mia_rag/storage/",
-                "src/mia_rag/pipeline/"
-            ],
-            "tests": [
-                "tests/unit/instance1_storage/",
-                "tests/integration/storage_pipeline/"
-            ],
-            "docs": [
-                "docs/instance1-storage.md",
-                "docs/architecture/storage.md"
-            ],
-            "configs": [
-                "configs/gcs.yaml",
-                "configs/pipeline.yaml"
-            ]
+            "src": ["src/mia_rag/storage/", "src/mia_rag/pipeline/"],
+            "tests": ["tests/unit/instance1_storage/", "tests/integration/storage_pipeline/"],
+            "docs": ["docs/instance1-storage.md", "docs/architecture/storage.md"],
+            "configs": ["configs/gcs.yaml", "configs/pipeline.yaml"],
         },
         "instance2": {
-            "src": [
-                "src/mia_rag/embeddings/"
-            ],
-            "tests": [
-                "tests/unit/instance2_embeddings/",
-                "tests/integration/embeddings/"
-            ],
-            "docs": [
-                "docs/instance2-embeddings.md",
-                "docs/architecture/embeddings.md"
-            ],
-            "configs": [
-                "configs/runpod.yaml",
-                "configs/models.yaml"
-            ]
+            "src": ["src/mia_rag/embeddings/"],
+            "tests": ["tests/unit/instance2_embeddings/", "tests/integration/embeddings/"],
+            "docs": ["docs/instance2-embeddings.md", "docs/architecture/embeddings.md"],
+            "configs": ["configs/runpod.yaml", "configs/models.yaml"],
         },
         "instance3": {
-            "src": [
-                "src/mia_rag/weaviate/"
-            ],
-            "tests": [
-                "tests/unit/instance3_weaviate/",
-                "tests/integration/weaviate/"
-            ],
-            "docs": [
-                "docs/instance3-weaviate.md",
-                "docs/architecture/weaviate.md"
-            ],
-            "configs": [
-                "configs/weaviate.yaml",
-                "configs/schema.json"
-            ]
+            "src": ["src/mia_rag/weaviate/"],
+            "tests": ["tests/unit/instance3_weaviate/", "tests/integration/weaviate/"],
+            "docs": ["docs/instance3-weaviate.md", "docs/architecture/weaviate.md"],
+            "configs": ["configs/weaviate.yaml", "configs/schema.json"],
         },
         "instance4": {
-            "src": [
-                "src/mia_rag/api/"
-            ],
-            "tests": [
-                "tests/unit/instance4_api/",
-                "tests/integration/api/"
-            ],
-            "docs": [
-                "docs/instance4-api.md",
-                "docs/api-reference.md"
-            ],
-            "configs": [
-                "configs/api.yaml",
-                "configs/redis.yaml"
-            ]
+            "src": ["src/mia_rag/api/"],
+            "tests": ["tests/unit/instance4_api/", "tests/integration/api/"],
+            "docs": ["docs/instance4-api.md", "docs/api-reference.md"],
+            "configs": ["configs/api.yaml", "configs/redis.yaml"],
         },
         "instance5": {
-            "src": [
-                "src/mia_rag/mcp/"
-            ],
-            "tests": [
-                "tests/unit/instance5_mcp/",
-                "tests/integration/mcp/"
-            ],
-            "docs": [
-                "docs/instance5-mcp.md",
-                "docs/mcp-tools.md"
-            ],
-            "configs": [
-                "configs/mcp.yaml"
-            ]
+            "src": ["src/mia_rag/mcp/"],
+            "tests": ["tests/unit/instance5_mcp/", "tests/integration/mcp/"],
+            "docs": ["docs/instance5-mcp.md", "docs/mcp-tools.md"],
+            "configs": ["configs/mcp.yaml"],
         },
         "instance6": {
-            "src": [
-                "src/mia_rag/monitoring/"
-            ],
-            "tests": [
-                "tests/unit/instance6_monitoring/",
-                "tests/integration/monitoring/"
-            ],
-            "docs": [
-                "docs/instance6-monitoring.md",
-                "docs/dashboards.md"
-            ],
-            "configs": [
-                "configs/prometheus.yaml",
-                "configs/grafana.json",
-                "configs/alerts.yaml"
-            ]
-        }
+            "src": ["src/mia_rag/monitoring/"],
+            "tests": ["tests/unit/instance6_monitoring/", "tests/integration/monitoring/"],
+            "docs": ["docs/instance6-monitoring.md", "docs/dashboards.md"],
+            "configs": ["configs/prometheus.yaml", "configs/grafana.json", "configs/alerts.yaml"],
+        },
     }
 
     # Interface contracts
-    INTERFACES = {
+    INTERFACES: ClassVar[dict[str, dict]] = {
         "storage_embeddings": {
             "from": "instance1",
             "to": "instance2",
             "interface": "src/mia_rag/interfaces/document_processor.py",
             "methods": ["process_document", "batch_process"],
-            "data_format": "ProcessedDocument"
+            "data_format": "ProcessedDocument",
         },
         "embeddings_weaviate": {
             "from": "instance2",
             "to": "instance3",
             "interface": "src/mia_rag/interfaces/embedding_store.py",
             "methods": ["store_embeddings", "batch_store"],
-            "data_format": "EmbeddingBatch"
+            "data_format": "EmbeddingBatch",
         },
         "weaviate_api": {
             "from": "instance3",
             "to": "instance4",
             "interface": "src/mia_rag/interfaces/vector_search.py",
             "methods": ["search", "hybrid_search"],
-            "data_format": "SearchResult"
+            "data_format": "SearchResult",
         },
         "weaviate_mcp": {
             "from": "instance3",
             "to": "instance5",
             "interface": "src/mia_rag/interfaces/vector_search.py",
             "methods": ["search", "get_by_id"],
-            "data_format": "SearchResult"
+            "data_format": "SearchResult",
         },
         "all_monitoring": {
             "from": "*",
             "to": "instance6",
             "interface": "src/mia_rag/interfaces/metrics.py",
             "methods": ["record_metric", "get_metrics"],
-            "data_format": "MetricData"
-        }
+            "data_format": "MetricData",
+        },
     }
 
     def __init__(self):
@@ -291,7 +225,7 @@ class BoundaryViewer:
 
         # Show interfaces
         print("\n🔗 Interfaces:")
-        for name, interface in self.INTERFACES.items():
+        for interface in self.INTERFACES.values():
             if interface["from"] == instance:
                 print(f"  → {interface['to']}: {interface['interface']}")
             elif interface["to"] == instance:
@@ -299,9 +233,9 @@ class BoundaryViewer:
 
     def show_all_boundaries(self):
         """Show overview of all instance boundaries."""
-        print("\n" + "="*80)
+        print("\n" + "=" * 80)
         print("🗺️  INSTANCE BOUNDARIES OVERVIEW")
-        print("="*80)
+        print("=" * 80)
 
         for instance, info in self.INSTANCE_INFO.items():
             color = info["color"]
@@ -313,19 +247,21 @@ class BoundaryViewer:
             test_count = len(ownership.get("tests", []))
             print(f"  📁 Owns: {src_count} source dirs, {test_count} test dirs")
 
-        print("\n" + "="*80)
+        print("\n" + "=" * 80)
 
     def show_interfaces(self):
         """Show all interface contracts between instances."""
-        print("\n" + "="*60)
+        print("\n" + "=" * 60)
         print("🔗 INTERFACE CONTRACTS")
-        print("="*60)
+        print("=" * 60)
 
-        for name, interface in self.INTERFACES.items():
+        for interface in self.INTERFACES.values():
             from_info = self.INSTANCE_INFO.get(interface["from"], {"emoji": "🌍", "name": "All"})
             to_info = self.INSTANCE_INFO.get(interface["to"], {"emoji": "❓", "name": "Unknown"})
 
-            print(f"\n{from_info['emoji']} {interface['from']} → {to_info['emoji']} {interface['to']}")
+            print(
+                f"\n{from_info['emoji']} {interface['from']} → {to_info['emoji']} {interface['to']}"
+            )
             print(f"  Interface: {interface['interface']}")
             print(f"  Format: {interface['data_format']}")
             print(f"  Methods: {', '.join(interface['methods'])}")
@@ -352,7 +288,7 @@ class BoundaryViewer:
         data = {
             "instances": self.INSTANCE_INFO,
             "ownership": self.FILE_OWNERSHIP,
-            "interfaces": self.INTERFACES
+            "interfaces": self.INTERFACES,
         }
 
         output_file.write_text(json.dumps(data, indent=2))
@@ -361,29 +297,15 @@ class BoundaryViewer:
 
 def main():
     """Main entry point for boundary viewer."""
-    parser = argparse.ArgumentParser(
-        description="Display instance boundaries and ownership"
-    )
+    parser = argparse.ArgumentParser(description="Display instance boundaries and ownership")
     parser.add_argument(
         "--instance",
         help="Show details for specific instance",
-        choices=[f"instance{i}" for i in range(1, 7)]
+        choices=[f"instance{i}" for i in range(1, 7)],
     )
-    parser.add_argument(
-        "--interfaces",
-        action="store_true",
-        help="Show interface contracts"
-    )
-    parser.add_argument(
-        "--current",
-        action="store_true",
-        help="Show current instance details"
-    )
-    parser.add_argument(
-        "--export",
-        help="Export boundaries to JSON file",
-        type=Path
-    )
+    parser.add_argument("--interfaces", action="store_true", help="Show interface contracts")
+    parser.add_argument("--current", action="store_true", help="Show current instance details")
+    parser.add_argument("--export", help="Export boundaries to JSON file", type=Path)
 
     args = parser.parse_args()
 

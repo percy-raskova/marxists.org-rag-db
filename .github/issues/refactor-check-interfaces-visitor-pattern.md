@@ -173,8 +173,19 @@ class InterfaceValidator:
 
 ## Related Issues
 
-- Part of #XXXX: Systematic complexity reduction initiative
-- Complements #XXXX: Both use AST parsing
+- Part of Code Refactoring Project (.github/projects/refactoring-code-complexity.md)
+  - **Stream 1**: Script complexity reduction (5 scripts, 1 complete)
+  - **Stream 4**: Metadata pipeline refactoring (4 components, 0 complete)
+- Related script refactors:
+  - check_boundaries.py (Specification pattern) - ✅ Complete
+  - check_conflicts.py (Chain of Responsibility pattern) - Complements this (both use AST)
+  - instance_map.py (Command pattern)
+  - instance_recovery.py (Template Method pattern)
+- Related metadata refactors:
+  - Unified Metadata Schema (40+ fields, 5 layers)
+  - Multi-Source Extraction Pipeline (85%+ author coverage)
+  - Glossary Entity Linker (canonical name normalization)
+  - Section-Specific Extractors (Archive, ETOL, EROL, Subject)
 - Blocked by: None
 - Blocks: None
 

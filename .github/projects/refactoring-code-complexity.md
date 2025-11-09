@@ -1,25 +1,39 @@
 # Code Refactoring Project
 
-**Status**: In Progress (1/5 Complete)
+**Status**: In Progress (1/9 Complete - Scripts + Metadata Pipeline)
 **Owner**: Shared across instances (boundary-respecting)
 **Priority**: HIGH
-**Timeline**: 2-3 weeks
+**Timeline**: 4-5 weeks
 
 ---
 
 ## Project Overview
 
-Refactor scripts with code complexity violations (cyclomatic complexity, statement count) using design patterns to improve maintainability, testability, and AI agent comprehension.
+Refactor scripts and processing pipeline to:
+1. **Eliminate complexity violations** using design patterns (scripts)
+2. **Implement unified metadata schema** from corpus analysis (mia_processor.py)
+3. **Build multi-source extraction pipeline** for 85%+ author coverage
+4. **Create Glossary entity linker** for knowledge graph support
 
-**Goal**: Reduce all scripts to 0 complexity violations while maintaining functionality.
+**Goals**:
+- Reduce all scripts to 0 complexity violations
+- Implement complete metadata schema from docs/corpus-analysis/06-metadata-unified-schema.md
+- Achieve metadata coverage targets (Archive 100%, ETOL 85%, EROL 95%)
 
 ---
 
 ## Current Status
 
+### Scripts Refactoring
 - ✅ **1/5 Scripts Refactored**: `check_boundaries.py` (Specification pattern)
 - 🔄 **4/5 Scripts Remaining**: check_conflicts, instance_map, check_interfaces, instance_recovery
 - ✅ **Pytest Configuration Fixed**: Migrated to pyproject.toml (supports inline comments)
+
+### Metadata Pipeline Refactoring
+- ✅ **Corpus Analysis Complete**: 46GB analyzed, 55,753 documents across 6 sections
+- ✅ **Unified Schema Designed**: 5-layer metadata model specified
+- 📋 **4/4 Pipeline Components Planned**: Schema implementation, multi-source extraction, Glossary linker, section-specific rules
+- 🔄 **0/4 Components Implemented**
 
 ---
 
@@ -68,6 +82,32 @@ Refactor scripts with code complexity violations (cyclomatic complexity, stateme
 | Conflict detection | TBD | 📋 Planned | TBD |
 | Instance mapping | TBD | 📋 Planned | TBD |
 | Interface checking | TBD | 📋 Planned | TBD |
+
+### Stream 4: Metadata Pipeline Refactoring 🔄 0/4 Complete
+
+**Purpose**: Implement unified metadata schema from corpus analysis
+
+| Component | Purpose | Status | Priority | Issue |
+|-----------|---------|--------|----------|-------|
+| **Unified Schema Implementation** | 5-layer metadata dataclass | 📋 Planned | CRITICAL | #TBD |
+| **Multi-Source Extraction Pipeline** | Author extraction (85%+ coverage) | 📋 Planned | CRITICAL | #TBD |
+| **Glossary Entity Linker** | Canonical name normalization | 📋 Planned | HIGH | #TBD |
+| **Section-Specific Extractors** | Archive, ETOL, EROL, Subject rules | 📋 Planned | HIGH | #TBD |
+
+**Metadata Coverage Targets** (from corpus analysis):
+- **Archive**: 100% author coverage (path-based extraction)
+- **ETOL**: 85% author coverage (title + keywords fallback)
+- **EROL**: 95% organization attribution (title-based)
+- **Subject**: 64% subject categories (breadcrumb extraction)
+- **Glossary**: 100% entity structure (canonical IDs)
+- **Reference**: 100% author coverage (path-based)
+
+**Key Dependencies**:
+- Glossary section must be processed first (builds entity index)
+- Requires chardet library for encoding detection
+- Needs HTML structure analyzer for document_structure metadata
+
+**Estimated Effort**: 2-3 weeks for complete pipeline integration
 
 ---
 
@@ -140,10 +180,113 @@ Refactor scripts with code complexity violations (cyclomatic complexity, stateme
 - 📋 `tests/unit/test_recovery_strategies.py` - Unit tests
 - 📋 Refactored `scripts/instance_recovery.py`
 
+### Milestone 6: Unified Metadata Schema (mia_processor) 📋 PLANNED
+- **Target**: Week 3-4
+- **Pattern**: Dataclass with multi-layer structure
+- **Module**: `mia_processor.py` metadata extraction
+- **Current State**: Basic DocumentMetadata (8 fields) → Full schema (40+ fields)
+- **Estimated Effort**: 12-16 hours
+
+**Planned Deliverables**:
+- 📋 Updated `DocumentMetadata` dataclass (5 layers, 40+ fields)
+- 📋 `mia_processor/metadata/schema.py` - Schema definitions
+- 📋 `mia_processor/metadata/extractors.py` - Field extraction functions
+- 📋 `tests/unit/test_metadata_schema.py` - Schema validation tests
+- 📋 Migration script for existing processed documents
+
+**Success Criteria**:
+- All required fields populated (source_url, title, content_hash, section_type, etc.)
+- Provenance tracking for all extracted fields (author_source, date_source)
+- Confidence scoring for extracted metadata (author_confidence, etc.)
+
+### Milestone 7: Multi-Source Extraction Pipeline 📋 PLANNED
+- **Target**: Week 4
+- **Pattern**: Strategy pattern for extraction sources
+- **Module**: Author, date, keywords extraction
+- **Coverage Targets**: Archive 100%, ETOL 85%, EROL 95%
+- **Estimated Effort**: 16-20 hours
+
+**Planned Deliverables**:
+- 📋 `mia_processor/extractors/author.py` - Multi-source author extraction
+- 📋 `mia_processor/extractors/date.py` - Multi-source date extraction
+- 📋 `mia_processor/extractors/keywords.py` - Keywords & classification
+- 📋 `mia_processor/extractors/section_rules.py` - Section-specific rules
+- 📋 `tests/unit/test_extractors.py` - Extraction validation (100-sample test sets per section)
+
+**Extraction Strategies**:
+- **Author**: Path → Title → Keywords → Meta tag → Content (7 strategies)
+- **Date**: Path → Title → Provenance → Meta tag (5 strategies)
+- **Keywords**: Meta tag → Breadcrumb → Cross-reference extraction
+
+**Success Criteria**:
+- Archive section: 100% author coverage (path-based)
+- ETOL section: 85%+ author coverage (title + keywords)
+- EROL section: 95%+ organization attribution
+- Date extraction: 60%+ coverage across corpus
+- Encoding normalization: Handle 62% ISO-8859-1 → UTF-8
+
+### Milestone 8: Glossary Entity Linker 📋 PLANNED
+- **Target**: Week 4-5
+- **Pattern**: Index + fuzzy matching
+- **Module**: Entity linking for canonical names
+- **Dependencies**: Glossary section processing complete
+- **Estimated Effort**: 10-14 hours
+
+**Planned Deliverables**:
+- 📋 `mia_processor/glossary/index_builder.py` - Build entity index from Glossary
+- 📋 `mia_processor/glossary/entity_linker.py` - Fuzzy matching & normalization
+- 📋 `mia_processor/glossary/cross_referencer.py` - Extract cross-references
+- 📋 `tests/unit/test_glossary_linker.py` - Entity linking accuracy tests
+- 📋 Glossary index cache (JSON/Parquet format for fast loading)
+
+**Entity Types**:
+- People (~800 entries): Name normalization, alias matching
+- Terms (~600 entries): Definition linking
+- Organizations (~400 entries): Acronym expansion
+- Events (~300 entries): Temporal context
+- Periodicals (~200 entries): Publication metadata
+- Places (~200 entries): Geographic context
+
+**Success Criteria**:
+- Author name normalization: 90%+ accuracy
+- Entity mention extraction: 80%+ precision
+- Cross-reference network: 5,000-10,000 edges
+- Glossary index load time: <2 seconds
+
+### Milestone 9: Section-Specific Extraction Rules 📋 PLANNED
+- **Target**: Week 5
+- **Pattern**: Section-specific extractor classes
+- **Module**: Archive, ETOL, EROL, Subject, Glossary, Reference rules
+- **Dependencies**: Multi-source extraction pipeline complete
+- **Estimated Effort**: 8-12 hours
+
+**Planned Deliverables**:
+- 📋 `mia_processor/sections/archive.py` - Archive-specific extraction
+- 📋 `mia_processor/sections/etol.py` - ETOL-specific extraction
+- 📋 `mia_processor/sections/erol.py` - EROL-specific extraction
+- 📋 `mia_processor/sections/subject.py` - Subject-specific extraction
+- 📋 `mia_processor/sections/glossary.py` - Glossary-specific extraction
+- 📋 `mia_processor/sections/reference.py` - Reference-specific extraction
+- 📋 `tests/integration/test_section_extractors.py` - End-to-end validation
+
+**Section-Specific Features**:
+- **Archive**: Work collection detection, chapter numbering, letter recipients
+- **ETOL**: Transcriber vs. author disambiguation, newspaper detection, movement affiliation
+- **EROL**: Organization attribution (MLOC, RCP, etc.), NCM classification, unique h3-as-title handling
+- **Subject**: Anthology detection, Peking Review special handling, cross-reference network
+- **Glossary**: Entry type classification, cross-reference count, canonical ID generation
+- **Reference**: Non-Marxist author detection, Git LFS verification, subject organization
+
+**Success Criteria**:
+- All section-specific fields populated correctly
+- Edge cases handled (index pages, multi-article files, heading-less documents)
+- Integration tests pass for representative documents from each section
+
 ---
 
 ## Critical Path
 
+### Scripts Refactoring Track
 ```
 Specification Pattern (✅ Complete)
   ↓
@@ -157,6 +300,21 @@ Template Method (instance_recovery.py)
   ↓
 All Scripts Refactored (0 violations)
 ```
+
+### Metadata Pipeline Track (Can run in parallel)
+```
+Unified Metadata Schema
+  ↓
+Multi-Source Extraction Pipeline
+  ↓
+Glossary Entity Linker (depends on Glossary processing)
+  ↓
+Section-Specific Extraction Rules
+  ↓
+Complete Metadata Pipeline (85%+ author coverage)
+```
+
+**Note**: Both tracks can proceed in parallel - scripts refactoring doesn't block metadata work
 
 ---
 
@@ -184,13 +342,35 @@ All Scripts Refactored (0 violations)
 - **Readability**: Clear separation of concerns, single responsibility
 - **AI Agent Comprehension**: Explicit patterns easier for AI to understand
 
-### Test Coverage
+### Test Coverage (Scripts)
 
 - ✅ `check_boundaries`: 15 unit tests (100% pattern coverage)
 - 📋 `instance_map`: TBD
 - 📋 `check_conflicts`: TBD
 - 📋 `check_interfaces`: TBD
 - 📋 `instance_recovery`: TBD
+
+### Metadata Coverage Metrics (Pipeline)
+
+**Current State** (basic schema):
+- DocumentMetadata: 8 fields (source_url, title, author, date, language, doc_type, word_count, content_hash)
+- Author extraction: ~70% coverage (path-based only for Archive)
+- Date extraction: ~53% coverage (path-based only)
+- No entity linking, no section-specific rules
+
+**Target State** (unified schema):
+- DocumentMetadata: 40+ fields across 5 layers
+- **Author Coverage Targets**:
+  - Archive: 100% (path-based extraction)
+  - ETOL: 85%+ (multi-source: title + keywords + meta)
+  - EROL: 95%+ (organization attribution from title/keywords)
+  - Subject: 48%+ (meta tag + cross-reference)
+  - Glossary: 100% (entry structure)
+  - Reference: 100% (path-based)
+- **Date Coverage**: 60%+ across corpus (multi-source extraction)
+- **Entity Linking**: 90%+ author name normalization accuracy
+- **Cross-References**: 5,000-10,000 edges extracted from Glossary
+- **Encoding Normalization**: 100% UTF-8 (handle 62% ISO-8859-1 conversion)
 
 ---
 
@@ -245,7 +425,34 @@ None - all blockers resolved:
 - 📋 `check_interfaces`: ~15,000 tokens
 - 📋 `instance_recovery`: ~15,000 tokens
 
-**Total Estimated**: ~83,000 tokens (15k used, 68k remaining)
+**Total Estimated Scripts**: ~83,000 tokens (15k used, 68k remaining)
+
+### AI Agent Time per Metadata Component
+
+- 📋 Unified Schema Implementation: ~14 hours
+- 📋 Multi-Source Extraction Pipeline: ~18 hours
+- 📋 Glossary Entity Linker: ~12 hours
+- 📋 Section-Specific Extractors: ~10 hours
+
+**Total Estimated Metadata**: ~54 hours
+
+### Token Budget per Metadata Component
+
+- 📋 Unified Schema: ~25,000 tokens (40+ field dataclass)
+- 📋 Multi-Source Extraction: ~35,000 tokens (7 extraction strategies)
+- 📋 Glossary Linker: ~22,000 tokens (fuzzy matching, index building)
+- 📋 Section Extractors: ~20,000 tokens (6 section handlers)
+
+**Total Estimated Metadata**: ~102,000 tokens
+
+### Combined Project Totals
+
+- **AI Agent Time**: ~87 hours (6 hours complete, 81 hours remaining)
+  - Scripts: ~33 hours
+  - Metadata: ~54 hours
+- **Token Budget**: ~185,000 tokens (15k used, 170k remaining)
+  - Scripts: ~83,000 tokens
+  - Metadata: ~102,000 tokens
 
 ---
 
@@ -253,19 +460,32 @@ None - all blockers resolved:
 
 ### External Dependencies
 
-None
+**Metadata Pipeline**:
+- `chardet` library: Character encoding detection (62% ISO-8859-1 corpus)
+- `python-Levenshtein` (optional): Fuzzy string matching for entity linking
+- BeautifulSoup: HTML parsing (already required)
+
+**Scripts**:
+- None
 
 ### Internal Dependencies
 
-- **Domain models**: Each refactoring may add domain models to `scripts/domain/`
+**Scripts Refactoring**:
+- **Domain models**: Each refactoring adds domain models to `scripts/domain/`
 - **Pattern infrastructure**: Each pattern needs base classes in `scripts/patterns/`
 - **Test infrastructure**: Pytest configuration must support all instances
+
+**Metadata Pipeline**:
+- **Glossary processing**: Must process Glossary section first to build entity index
+- **HTML structure analyzer**: `scripts/html_structure_analyzer.py` for document_structure metadata
+- **Corpus analysis specs**: `docs/corpus-analysis/06-metadata-unified-schema.md` defines schema
 
 ### Cross-Project Dependencies
 
 - **Documentation Project**: Clear docs help agents understand refactoring goals
-- **Corpus Analysis**: Not blocked by refactoring, can proceed in parallel
+- **Corpus Analysis**: ✅ Complete - Metadata schema defined from 46GB analysis
 - **Infrastructure**: Refactored code will be easier to deploy/maintain
+- **Instance 1 (Storage)**: Will use unified metadata schema for processed documents
 
 ---
 

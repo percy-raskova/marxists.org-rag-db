@@ -32,18 +32,14 @@ class InterfaceChecker(ast.NodeVisitor):
         """Visit class definitions to find ABC interfaces."""
         # Check if it's an ABC
         is_abc = any(
-            (isinstance(base, ast.Name) and base.id == "ABC") or
-            (isinstance(base, ast.Attribute) and base.attr == "ABC")
+            (isinstance(base, ast.Name) and base.id == "ABC")
+            or (isinstance(base, ast.Attribute) and base.attr == "ABC")
             for base in node.bases
         )
 
         if is_abc:
             self.current_class = node.name
-            self.interfaces[node.name] = {
-                "methods": [],
-                "properties": [],
-                "class_methods": []
-            }
+            self.interfaces[node.name] = {"methods": [], "properties": [], "class_methods": []}
 
         self.generic_visit(node)
         self.current_class = None
@@ -106,9 +102,7 @@ def find_implementations(interface_name: str, search_dir: Path) -> list[Path]:
 
 
 def check_implementation(
-    interface_name: str,
-    interface_def: dict[str, list[str]],
-    impl_file: Path
+    interface_name: str, interface_def: dict[str, list[str]], impl_file: Path
 ) -> list[str]:
     """Check if a file properly implements an interface."""
     violations = []
@@ -123,22 +117,24 @@ def check_implementation(
                 # Check if it inherits from our interface
                 inherits = False
                 for base in node.bases:
-                    if isinstance(base, ast.Name) and base.id == interface_name or isinstance(base, ast.Attribute) and base.attr == interface_name:
+                    if (
+                        isinstance(base, ast.Name)
+                        and base.id == interface_name
+                        or isinstance(base, ast.Attribute)
+                        and base.attr == interface_name
+                    ):
                         inherits = True
 
                 if inherits:
                     # Check that all interface methods are implemented
                     class_methods = {
-                        n.name for n in ast.walk(node)
-                        if isinstance(n, ast.FunctionDef)
+                        n.name for n in ast.walk(node) if isinstance(n, ast.FunctionDef)
                     }
 
                     for method_sig in interface_def["methods"]:
                         method_name = method_sig.split("(")[0]
                         if method_name not in class_methods:
-                            violations.append(
-                                f"{node.name} missing method: {method_sig}"
-                            )
+                            violations.append(f"{node.name} missing method: {method_sig}")
 
     except Exception as e:
         violations.append(f"Error checking {impl_file}: {e}")
@@ -184,7 +180,7 @@ def main(check_all: bool, interface: str | None, fix: bool):
         table.add_row(
             name,
             str(len(definition["methods"])),
-            "contracts.py"  # Assuming standard location
+            "contracts.py",  # Assuming standard location
         )
 
     console.print(table)
@@ -207,11 +203,7 @@ def main(check_all: bool, interface: str | None, fix: bool):
             continue
 
         for impl_file in impl_files:
-            violations = check_implementation(
-                interface_name,
-                interface_def,
-                impl_file
-            )
+            violations = check_implementation(interface_name, interface_def, impl_file)
 
             if violations:
                 console.print(f"  [red]❌ {impl_file.relative_to(PROJECT_ROOT)}[/red]")

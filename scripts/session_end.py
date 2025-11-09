@@ -44,18 +44,22 @@ class SessionEnder:
                 ["git", "diff", "--name-only", self.session_data["git"]["commit"], "HEAD"],
                 capture_output=True,
                 text=True,
-                check=True
+                check=True,
             )
 
             files = result.stdout.strip().split("\n") if result.stdout.strip() else []
 
             # Also get staged files
-            staged = subprocess.run(
-                ["git", "diff", "--cached", "--name-only"],
-                capture_output=True,
-                text=True,
-                check=True
-            ).stdout.strip().split("\n")
+            staged = (
+                subprocess.run(
+                    ["git", "diff", "--cached", "--name-only"],
+                    capture_output=True,
+                    text=True,
+                    check=True,
+                )
+                .stdout.strip()
+                .split("\n")
+            )
 
             # Combine and deduplicate
             all_files = list(set(files + staged))
@@ -68,12 +72,7 @@ class SessionEnder:
 
     def get_tests_run(self) -> dict:
         """Check for test results."""
-        test_results = {
-            "tests_found": False,
-            "coverage": None,
-            "passed": None,
-            "failed": None
-        }
+        test_results = {"tests_found": False, "coverage": None, "passed": None, "failed": None}
 
         # Check for pytest cache
         pytest_cache = Path(".pytest_cache")
@@ -94,10 +93,11 @@ class SessionEnder:
                 if "%" in content:
                     # Extract coverage percentage (this is a simplification)
                     import re
-                    match = re.search(r'(\d+)%', content)
+
+                    match = re.search(r"(\d+)%", content)
                     if match:
                         test_results["coverage"] = int(match.group(1))
-            except:
+            except OSError:
                 pass
 
         return test_results
@@ -115,13 +115,7 @@ class SessionEnder:
         test_results = self.get_tests_run()
 
         # Categorize files
-        file_categories = {
-            "source": [],
-            "tests": [],
-            "docs": [],
-            "config": [],
-            "other": []
-        }
+        file_categories = {"source": [], "tests": [], "docs": [], "config": [], "other": []}
 
         for file in modified_files:
             if file.startswith("src/"):
@@ -142,7 +136,7 @@ class SessionEnder:
             "file_categories": file_categories,
             "test_results": test_results,
             "lines_added": self.get_lines_changed()[0],
-            "lines_removed": self.get_lines_changed()[1]
+            "lines_removed": self.get_lines_changed()[1],
         }
 
     def get_lines_changed(self) -> tuple:
@@ -152,7 +146,7 @@ class SessionEnder:
                 ["git", "diff", "--stat", self.session_data["git"]["commit"], "HEAD"],
                 capture_output=True,
                 text=True,
-                check=True
+                check=True,
             )
 
             # Parse the last line which contains totals
@@ -160,31 +154,31 @@ class SessionEnder:
             if lines:
                 last_line = lines[-1]
                 import re
+
                 # Look for patterns like "10 insertions(+), 5 deletions(-)"
-                insertions = re.search(r'(\d+) insertion', last_line)
-                deletions = re.search(r'(\d+) deletion', last_line)
+                insertions = re.search(r"(\d+) insertion", last_line)
+                deletions = re.search(r"(\d+) deletion", last_line)
 
                 added = int(insertions.group(1)) if insertions else 0
                 removed = int(deletions.group(1)) if deletions else 0
 
                 return added, removed
 
-        except:
+        except (subprocess.CalledProcessError, KeyError):
             pass
 
         return 0, 0
 
-    def update_session_file(self, notes: str = None, summary: dict = None):
+    def update_session_file(self, notes: str | None = None, summary: dict | None = None):
         """Update session file with end time and summary."""
         self.session_data["end_time"] = datetime.now().isoformat()
         self.session_data["status"] = "completed"
         self.session_data["files_modified"] = self.get_modified_files()
 
         if notes:
-            self.session_data["notes"].append({
-                "timestamp": datetime.now().isoformat(),
-                "note": notes
-            })
+            self.session_data["notes"].append(
+                {"timestamp": datetime.now().isoformat(), "note": notes}
+            )
 
         if summary:
             self.session_data["summary"] = summary
@@ -201,19 +195,19 @@ class SessionEnder:
         summary.append(f"Instance: {self.session_data['instance']}")
         summary.append(f"Session ID: {self.session_data['session_id']}")
 
-        if self.session_data.get('task_description'):
+        if self.session_data.get("task_description"):
             summary.append(f"Task: {self.session_data['task_description']}")
 
         summary.append(f"Duration: {stats['duration_hours']}h {stats['duration_minutes']}m")
         summary.append(f"Files Modified: {stats['files_modified']}")
 
-        if stats['lines_added'] or stats['lines_removed']:
+        if stats["lines_added"] or stats["lines_removed"]:
             summary.append(f"Lines: +{stats['lines_added']} -{stats['lines_removed']}")
 
         # File breakdown
-        if stats['files_modified'] > 0:
+        if stats["files_modified"] > 0:
             summary.append("\n📁 Files Modified:")
-            for category, files in stats['file_categories'].items():
+            for category, files in stats["file_categories"].items():
                 if files:
                     summary.append(f"  {category.capitalize()}: {len(files)} files")
                     if len(files) <= 3:
@@ -221,12 +215,12 @@ class SessionEnder:
                             summary.append(f"    - {file}")
 
         # Test results
-        if stats['test_results']['tests_found']:
+        if stats["test_results"]["tests_found"]:
             summary.append("\n🧪 Test Results:")
-            if stats['test_results']['coverage']:
+            if stats["test_results"]["coverage"]:
                 summary.append(f"  Coverage: {stats['test_results']['coverage']}%")
-            if stats['test_results']['failed'] is not None:
-                if stats['test_results']['failed'] == 0:
+            if stats["test_results"]["failed"] is not None:
+                if stats["test_results"]["failed"] == 0:
                     summary.append("  ✅ All tests passed!")
                 else:
                     summary.append(f"  ❌ {stats['test_results']['failed']} tests failed")
@@ -243,30 +237,30 @@ class SessionEnder:
             "instance3": "weaviate",
             "instance4": "api",
             "instance5": "mcp",
-            "instance6": "monitoring"
+            "instance6": "monitoring",
         }
 
         component = instance_map.get(self.session_data["instance"], "core")
 
         # Determine type of change
-        if stats['file_categories']['tests'] and not stats['file_categories']['source']:
+        if stats["file_categories"]["tests"] and not stats["file_categories"]["source"]:
             change_type = "test"
-        elif stats['file_categories']['docs'] and not stats['file_categories']['source']:
+        elif stats["file_categories"]["docs"] and not stats["file_categories"]["source"]:
             change_type = "docs"
-        elif stats['file_categories']['config'] and not stats['file_categories']['source']:
+        elif stats["file_categories"]["config"] and not stats["file_categories"]["source"]:
             change_type = "chore"
         else:
             change_type = "feat"  # or "fix" based on context
 
         # Generate message
-        if self.session_data.get('task_description'):
-            description = self.session_data['task_description'].lower()
+        if self.session_data.get("task_description"):
+            description = self.session_data["task_description"].lower()
         else:
             description = f"update {component} module"
 
         return f"{change_type}({component}): {description}"
 
-    def create_commit(self, message: str = None):
+    def create_commit(self, message: str | None = None):
         """Create a git commit with session information."""
         if not message:
             stats = self.calculate_session_stats()
@@ -276,9 +270,9 @@ class SessionEnder:
             print(f"  {message}")
             use_suggested = input("\nUse this message? (y/n/edit): ").strip().lower()
 
-            if use_suggested == "edit" or use_suggested == "e":
+            if use_suggested in ("edit", "e"):
                 message = input("Enter commit message: ").strip()
-            elif use_suggested != "y" and use_suggested != "yes":
+            elif use_suggested not in ("y", "yes"):
                 print("Skipping commit")
                 return
 
@@ -296,22 +290,10 @@ class SessionEnder:
 
 def main():
     """Main entry point for session end."""
-    parser = argparse.ArgumentParser(
-        description="End work session and generate summary"
-    )
-    parser.add_argument(
-        "--notes",
-        help="Add notes to the session"
-    )
-    parser.add_argument(
-        "--no-commit",
-        action="store_true",
-        help="Don't offer to commit changes"
-    )
-    parser.add_argument(
-        "--commit-message",
-        help="Commit message to use"
-    )
+    parser = argparse.ArgumentParser(description="End work session and generate summary")
+    parser.add_argument("--notes", help="Add notes to the session")
+    parser.add_argument("--no-commit", action="store_true", help="Don't offer to commit changes")
+    parser.add_argument("--commit-message", help="Commit message to use")
 
     args = parser.parse_args()
 
@@ -328,7 +310,7 @@ def main():
     ender.update_session_file(notes=args.notes, summary=stats)
 
     # Offer to commit
-    if not args.no_commit and stats['files_modified'] > 0:
+    if not args.no_commit and stats["files_modified"] > 0:
         ender.create_commit(args.commit_message)
 
     # Clean up session file

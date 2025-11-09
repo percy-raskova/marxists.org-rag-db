@@ -236,8 +236,20 @@ def create_recovery_strategy(recovery_type: str) -> RecoveryStrategy:
 
 ## Related Issues
 
-- Part of #XXXX: Systematic complexity reduction initiative
-- Largest refactor: 3 violations in one module
+- Part of Code Refactoring Project (.github/projects/refactoring-code-complexity.md)
+  - **Stream 1**: Script complexity reduction (5 scripts, 1 complete)
+  - **Stream 4**: Metadata pipeline refactoring (4 components, 0 complete)
+- Related script refactors:
+  - check_boundaries.py (Specification pattern) - ✅ Complete
+  - check_conflicts.py (Chain of Responsibility pattern)
+  - check_interfaces.py (Visitor pattern)
+  - instance_map.py (Command pattern)
+  - **Largest refactor**: 3 violations in one module
+- Related metadata refactors:
+  - Unified Metadata Schema (40+ fields, 5 layers)
+  - Multi-Source Extraction Pipeline (85%+ author coverage)
+  - Glossary Entity Linker (canonical name normalization)
+  - Section-Specific Extractors (Archive, ETOL, EROL, Subject)
 - Blocked by: None
 - Blocks: None
 

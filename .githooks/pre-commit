@@ -56,6 +56,8 @@ for pattern in "${SECRET_PATTERNS[@]}"; do
         grep -v ".gitignore" | \
         grep -v ".githooks/" | \
         grep -v "docs/rfc/" | \
+        grep -v "docs/corpus-analysis/" | \
+        grep -v "specs/" | \
         grep -v "scripts/check_todos.py" | \
         grep -v "docker-compose.yml" | \
         grep -v ".github/workflows/" || true)

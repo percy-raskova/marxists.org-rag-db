@@ -14,7 +14,7 @@ NC='\033[0m' # No Color
 # Project configuration
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 WORKTREE_BASE="${PROJECT_ROOT}/.."
-DEVELOP_BRANCH="develop"
+DEVELOP_BRANCH="dev"
 
 echo -e "${BLUE}🚩 Setting up Git Worktrees for Revolutionary Parallel Development 🚩${NC}"
 echo -e "${YELLOW}Project Root: ${PROJECT_ROOT}${NC}"

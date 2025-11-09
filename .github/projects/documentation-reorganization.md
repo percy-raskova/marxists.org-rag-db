@@ -1,9 +1,9 @@
 # Documentation Reorganization Project
 
-**Status**: Phase 1 Complete, Phase 2 Planned
+**Status**: Phase 1 Complete, Corpus Integration Complete, Phase 2 Planned
 **Owner**: Shared across instances
 **Priority**: MEDIUM
-**Timeline**: 1 week remaining
+**Timeline**: 1 week remaining (cleanup tasks only)
 
 ---
 
@@ -18,6 +18,7 @@ Reorganize scattered root documentation to facilitate 6 parallel AI agent workfl
 ## Current Status
 
 - ✅ **Phase 1 Complete**: Instance entry points, architecture consolidation, master index
+- ✅ **Corpus Integration Complete**: Corpus analysis integrated into all navigation and instance guides (115+ cross-references)
 - 📋 **Phase 2 Planned**: Cleanup (delete deprecated files, fix cross-references, reorganize specs)
 
 ---
@@ -93,6 +94,49 @@ docs/instances/
 | `delete-deprecated-root-documentation.md` | Remove consolidated files | MEDIUM | 📋 Created |
 | `update-cross-references-verify-links.md` | Fix broken links | MEDIUM | 📋 Created |
 
+### Stream 5: Corpus Analysis Integration ✅ Complete
+
+**Purpose**: Integrate completed corpus analysis work into documentation navigation structure
+
+**Completed**: 2025-11-08
+
+**What Was Done**:
+
+| Component | Updates | Status |
+|-----------|---------|--------|
+| Navigation Layer | START_HERE.md, DOCUMENTATION-INDEX.md, ARCHITECTURE.md, CLAUDE.md | ✅ Complete |
+| Instance Guides | All 6 INSTANCE*.md with "Essential Corpus Analysis Reading" sections | ✅ Complete |
+| Specification Index | specs/INDEX.md with specs 07-08 and dependency graph | ✅ Complete |
+
+**Deliverables**:
+- ✅ Added "Corpus Analysis & Data Architecture" navigation section to START_HERE.md
+- ✅ Added complete corpus analysis topic to DOCUMENTATION-INDEX.md with navigation patterns
+- ✅ Added "Corpus Foundation: Data Architecture" section to ARCHITECTURE.md
+- ✅ Added "Corpus Analysis Foundation" section to CLAUDE.md
+- ✅ Added corpus-specific reading sections to all 6 instance guides:
+  - INSTANCE1 → Metadata schema (5-layer model, 85%+ author coverage)
+  - INSTANCE2 → Chunking strategies (4 adaptive strategies)
+  - INSTANCE3 → Knowledge graph (entity schema, hybrid retrieval)
+  - INSTANCE4 → Query expansion patterns (cross-references)
+  - INSTANCE5 → MCP tool design (entity lookup, definitions)
+  - INSTANCE6 → Quality metrics (corpus-derived targets)
+- ✅ Updated specs/INDEX.md with:
+  - Spec 07 (Chunking Strategies)
+  - Spec 08 (Knowledge Graph Architecture)
+  - Updated dependency graph showing corpus analysis as foundation
+
+**Cross-Reference Verification**:
+- ✅ Metadata schema: 19 references (target: 10+)
+- ✅ Chunking strategies: 27 references (target: 8+)
+- ✅ Knowledge graph: 35 references (target: 6+)
+- ✅ Overall corpus analysis: 115 total references
+
+**Navigation Tests**:
+- ✅ START_HERE → corpus analysis: 1 click (target: ≤2)
+- ✅ Any INSTANCE → relevant spec: 0 clicks (in Essential Reading)
+
+**Impact**: Made 200k+ tokens of systematic corpus investigation discoverable and actionable for parallel AI agents, preserving the "streamlining and tidying" spirit of documentation reorganization.
+
 ---
 
 ## Milestones
@@ -121,6 +165,21 @@ docs/instances/
 - ✅ Updated START_HERE.md with instance routing
 - ✅ Created docs/instances/ structure
 
+### Milestone 2.5: Corpus Analysis Integration ✅ COMPLETE
+- **Completed**: 2025-11-08
+- **Deliverables**: Corpus analysis integrated into all navigation and instance documentation
+- **Outcome**: 46GB systematic corpus investigation made discoverable to all AI agents
+
+**Integration Work**:
+- ✅ Updated 4 navigation files (START_HERE, DOCUMENTATION-INDEX, ARCHITECTURE, CLAUDE)
+- ✅ Updated all 6 instance guides with Essential Corpus Analysis Reading sections
+- ✅ Updated specs/INDEX.md with specs 07-08 and dependency graph
+- ✅ Created 115+ cross-references to corpus analysis documentation
+- ✅ Verified navigation: START_HERE → corpus analysis in 1 click
+- ✅ Verified instance routing: INSTANCE → relevant spec in 0 clicks
+
+**Key Achievement**: Corpus analysis work (metadata schema, chunking strategies, knowledge graph) is now discoverable from every entry point without AI agents needing to rediscover patterns.
+
 ### Milestone 3: Cleanup and Verification 📋 PLANNED
 - **Target**: Week 1
 - **Deliverables**: Delete deprecated files, fix cross-references, reorganize specs
@@ -141,6 +200,8 @@ docs/instances/
 Instance Entry Points (✅ Complete)
   ↓
 Architecture Consolidation (✅ Complete)
+  ↓
+Corpus Analysis Integration (✅ Complete)
   ↓
 GitHub Issues Created (✅ Complete)
   ↓
@@ -183,9 +244,11 @@ Project Root
 │   │   ├── instance4-query/
 │   │   ├── instance5-orchestration/
 │   │   └── instance6-monitoring/
-│   └── corpus-analysis/             # Corpus investigation (separate project)
+│   └── corpus-analysis/             # Corpus investigation (✅ integrated into navigation)
 ├── specs/                           # Formal specifications
-│   ├── INDEX.md
+│   ├── INDEX.md (✅ updated with corpus specs 07-08)
+│   ├── 07-chunking-strategies-spec.md (✅ corpus-derived)
+│   ├── 08-knowledge-graph-spec.md (✅ corpus-derived)
 │   └── [to be reorganized to 01-06 pattern]
 └── [deprecated files to be deleted]
 ```
@@ -206,6 +269,8 @@ Project Root
 - ✅ 6 instance entry points created (100%)
 - ✅ 1 consolidated architecture document (vs 9 scattered)
 - ✅ 1 master index created
+- ✅ Corpus analysis integrated (115+ cross-references)
+- ✅ 2 new corpus-derived specs added (07, 08)
 - 📋 0 deprecated files remaining (target)
 - 📋 0 broken links (target)
 - 📋 100% consistent naming in specs/
@@ -213,8 +278,10 @@ Project Root
 ### Navigation Metrics
 
 - ✅ AI agents can find instance entry point in 1 click (START_HERE.md)
+- ✅ AI agents can find corpus analysis in 1 click (START_HERE.md)
 - ✅ Instance boundaries clearly documented
 - ✅ Cross-instance integration points mapped
+- ✅ Corpus analysis discoverable from all instances (0 clicks from instance guides)
 - 📋 All links verified working
 
 ### Maintenance Metrics
@@ -253,19 +320,21 @@ None - Phase 1 complete
 
 - ✅ Instance entry points: ~4 hours (Complete)
 - ✅ Architecture consolidation: ~3 hours (Complete)
+- ✅ Corpus analysis integration: ~4 hours (Complete)
 - ✅ GitHub issues: ~1 hour (Complete)
 - 📋 Cleanup and verification: ~3 hours (Planned)
 
-**Total Estimated**: ~11 hours (8 complete, 3 remaining)
+**Total Estimated**: ~15 hours (12 complete, 3 remaining)
 
 ### Token Budget
 
 - ✅ Instance entry points: ~18,000 tokens (Used)
 - ✅ Architecture consolidation: ~12,000 tokens (Used)
+- ✅ Corpus analysis integration: ~30,000 tokens (Used)
 - ✅ GitHub issues: ~3,000 tokens (Used)
 - 📋 Cleanup and verification: ~5,000 tokens (Planned)
 
-**Total Estimated**: ~38,000 tokens (33k used, 5k remaining)
+**Total Estimated**: ~68,000 tokens (63k used, 5k remaining)
 
 ---
 
@@ -283,8 +352,8 @@ None
 ### Cross-Project Dependencies
 
 - **Refactoring Project**: Benefits from clear documentation
-- **Corpus Analysis**: Separate documentation tree (docs/corpus-analysis/)
-- **RAG Implementation**: Will reference ARCHITECTURE.md
+- **Corpus Analysis**: ✅ Integrated into navigation (docs/corpus-analysis/ + 115+ cross-references)
+- **RAG Implementation**: Will reference ARCHITECTURE.md + corpus analysis specs
 
 ---
 
@@ -392,9 +461,9 @@ def validate_links(md_file):
 
 ## Related Projects
 
-- **Corpus Analysis** - Separate doc tree (docs/corpus-analysis/)
+- **Corpus Analysis** - ✅ Integrated into navigation (docs/corpus-analysis/ with 115+ cross-references)
 - **Refactoring** - Benefits from clear instance boundaries
-- **Infrastructure** - References ARCHITECTURE.md
+- **Infrastructure** - References ARCHITECTURE.md + corpus analysis foundation
 
 ---
 

@@ -64,12 +64,7 @@ def run_command(cmd: list[str], capture: bool = True) -> tuple[int, str, str]:
     """Run a command and return exit code, stdout, and stderr."""
     try:
         if capture:
-            result = subprocess.run(
-                cmd,
-                capture_output=True,
-                text=True,
-                check=False
-            )
+            result = subprocess.run(cmd, capture_output=True, text=True, check=False)
             return result.returncode, result.stdout, result.stderr
         else:
             result = subprocess.run(cmd, check=False)
@@ -80,27 +75,45 @@ def run_command(cmd: list[str], capture: bool = True) -> tuple[int, str, str]:
 
 def get_git_log(instance: str, limit: int = 10) -> list[dict]:
     """Get recent git commits for an instance."""
-    cmd = ["git", "log", f"--grep={instance}", "--oneline", f"-{limit}", "--format=%H|%s|%an|%ad", "--date=relative"]
+    cmd = [
+        "git",
+        "log",
+        f"--grep={instance}",
+        "--oneline",
+        f"-{limit}",
+        "--format=%H|%s|%an|%ad",
+        "--date=relative",
+    ]
     returncode, stdout, stderr = run_command(cmd)
 
     commits = []
     if returncode == 0:
-        for line in stdout.strip().split('\n'):
+        for line in stdout.strip().split("\n"):
             if line:
-                parts = line.split('|')
+                parts = line.split("|")
                 if len(parts) >= 4:
-                    commits.append({
-                        'hash': parts[0][:7],
-                        'message': parts[1],
-                        'author': parts[2],
-                        'date': parts[3],
-                    })
+                    commits.append(
+                        {
+                            "hash": parts[0][:7],
+                            "message": parts[1],
+                            "author": parts[2],
+                            "date": parts[3],
+                        }
+                    )
     return commits
 
 
 def get_open_prs(instance: str) -> list[dict]:
     """Get open PRs for an instance."""
-    cmd = ["gh", "pr", "list", "--search", instance, "--json", "number,title,state,author,createdAt"]
+    cmd = [
+        "gh",
+        "pr",
+        "list",
+        "--search",
+        instance,
+        "--json",
+        "number,title,state,author,createdAt",
+    ]
     returncode, stdout, stderr = run_command(cmd)
 
     if returncode == 0:
@@ -118,7 +131,7 @@ def cli():
 
 
 @cli.command()
-@click.argument('instance', type=click.Choice(list(INSTANCE_MAP.keys())))
+@click.argument("instance", type=click.Choice(list(INSTANCE_MAP.keys())))
 def diagnose(instance):
     """Run comprehensive diagnostics for an instance."""
     console.print(Panel.fit(f"[bold cyan]Diagnosing {instance}[/bold cyan]"))
@@ -137,7 +150,7 @@ def diagnose(instance):
 
         if stdout:
             console.print("\n[yellow]⚠️  Uncommitted changes detected:[/yellow]")
-            for line in stdout.strip().split('\n')[:10]:
+            for line in stdout.strip().split("\n")[:10]:
                 console.print(f"  {line}")
 
         # Check recent commits
@@ -155,10 +168,7 @@ def diagnose(instance):
 
             for commit in commits[:5]:
                 table.add_row(
-                    commit['hash'],
-                    commit['message'][:50],
-                    commit['author'],
-                    commit['date']
+                    commit["hash"], commit["message"][:50], commit["author"], commit["date"]
                 )
             console.print(table)
 
@@ -178,14 +188,14 @@ def diagnose(instance):
         returncode, stdout, stderr = run_command(test_cmd)
         progress.remove_task(task)
 
-        test_count = len([l for l in stdout.split('\n') if 'test_' in l])
+        test_count = len([line for line in stdout.split("\n") if "test_" in line])
         console.print("\n[cyan]Test Status:[/cyan]")
         console.print(f"  • Found {test_count} tests for {instance}")
 
         # Check dependencies
         task = progress.add_task("Checking dependencies...", total=None)
         dep_issues = []
-        for dep in config['dependencies']:
+        for dep in config["dependencies"]:
             check_cmd = ["poetry", "show", dep]
             returncode, stdout, stderr = run_command(check_cmd)
             if returncode != 0:
@@ -207,38 +217,40 @@ def diagnose(instance):
 
         if stdout:
             console.print("\n[red]❌ Merge conflicts detected:[/red]")
-            for file in stdout.strip().split('\n'):
+            for file in stdout.strip().split("\n"):
                 console.print(f"  • {file}")
 
     # Summary
-    console.print("\n" + "="*50)
+    console.print("\n" + "=" * 50)
     console.print(Panel.fit("[bold green]Diagnosis Complete[/bold green]"))
 
 
 @cli.command()
-@click.argument('instance', type=click.Choice(list(INSTANCE_MAP.keys())))
-@click.argument('commit')
-@click.option('--dry-run', is_flag=True, help='Show what would be restored without doing it')
+@click.argument("instance", type=click.Choice(list(INSTANCE_MAP.keys())))
+@click.argument("commit")
+@click.option("--dry-run", is_flag=True, help="Show what would be restored without doing it")
 def restore(instance, commit, dry_run):
     """Restore an instance to a specific commit."""
     config = INSTANCE_MAP[instance]
 
-    console.print(Panel.fit(
-        f"[bold yellow]Restoring {instance} to {commit}[/bold yellow]\n" +
-        f"Instance: {config['name']}"
-    ))
+    console.print(
+        Panel.fit(
+            f"[bold yellow]Restoring {instance} to {commit}[/bold yellow]\n"
+            + f"Instance: {config['name']}"
+        )
+    )
 
     if dry_run:
         console.print("[yellow]DRY RUN MODE - No changes will be made[/yellow]\n")
 
     # Get files that would be affected
     affected_files = []
-    for path in config['paths']:
+    for path in config["paths"]:
         if Path(path).exists():
             cmd = ["git", "diff", "--name-only", commit, "HEAD", "--", path]
             returncode, stdout, stderr = run_command(cmd)
             if returncode == 0 and stdout:
-                affected_files.extend(stdout.strip().split('\n'))
+                affected_files.extend(stdout.strip().split("\n"))
 
     if not affected_files:
         console.print("[yellow]No files to restore[/yellow]")
@@ -257,7 +269,7 @@ def restore(instance, commit, dry_run):
 
         # Perform restore
         with console.status("Restoring files..."):
-            for path in config['paths']:
+            for path in config["paths"]:
                 if Path(path).exists():
                     cmd = ["git", "checkout", commit, "--", path]
                     returncode, stdout, stderr = run_command(cmd)
@@ -270,7 +282,7 @@ def restore(instance, commit, dry_run):
 
 
 @cli.command()
-@click.argument('instance', type=click.Choice(list(INSTANCE_MAP.keys())))
+@click.argument("instance", type=click.Choice(list(INSTANCE_MAP.keys())))
 def boundaries(instance):
     """Show ownership boundaries for an instance."""
     config = INSTANCE_MAP[instance]
@@ -279,20 +291,20 @@ def boundaries(instance):
     console.print(f"\n[bold]Instance:[/bold] {config['name']}")
     console.print("\n[bold]Owned Paths:[/bold]")
 
-    for path in config['paths']:
+    for path in config["paths"]:
         if Path(path).exists():
             # Count files
-            file_count = len(list(Path(path).rglob('*.py')))
+            file_count = len(list(Path(path).rglob("*.py")))
             console.print(f"  ✅ {path} ({file_count} Python files)")
         else:
             console.print(f"  ❌ {path} (not found)")
 
     console.print("\n[bold]Test Markers:[/bold]")
-    for marker in config['test_markers']:
+    for marker in config["test_markers"]:
         console.print(f"  • {marker}")
 
     console.print("\n[bold]Dependencies:[/bold]")
-    for dep in config['dependencies']:
+    for dep in config["dependencies"]:
         console.print(f"  • {dep}")
 
     # Check for boundary violations in current changes
@@ -302,13 +314,13 @@ def boundaries(instance):
 
     if returncode == 0 and stdout:
         violations = []
-        for file in stdout.strip().split('\n'):
+        for file in stdout.strip().split("\n"):
             is_allowed = False
-            for path in config['paths']:
+            for path in config["paths"]:
                 if file.startswith(path):
                     is_allowed = True
                     break
-            if not is_allowed and file.endswith('.py'):
+            if not is_allowed and file.endswith(".py"):
                 violations.append(file)
 
         if violations:
@@ -320,33 +332,33 @@ def boundaries(instance):
 
 
 @cli.command()
-@click.argument('instance', type=click.Choice(list(INSTANCE_MAP.keys())))
-@click.option('--days', default=7, help='Number of days to analyze')
+@click.argument("instance", type=click.Choice(list(INSTANCE_MAP.keys())))
+@click.option("--days", default=7, help="Number of days to analyze")
 def activity(instance, days):
     """Show recent activity for an instance."""
     config = INSTANCE_MAP[instance]
 
-    console.print(Panel.fit(
-        f"[bold cyan]Activity Report for {instance}[/bold cyan]\n" +
-        f"Last {days} days"
-    ))
+    console.print(
+        Panel.fit(f"[bold cyan]Activity Report for {instance}[/bold cyan]\n" + f"Last {days} days")
+    )
 
     # Get commit activity
     since_date = (datetime.now() - timedelta(days=days)).strftime("%Y-%m-%d")
     cmd = [
-        "git", "log",
+        "git",
+        "log",
         f"--since={since_date}",
         f"--grep={instance}",
         "--format=%H|%s|%an|%ad",
-        "--date=short"
+        "--date=short",
     ]
     returncode, stdout, stderr = run_command(cmd)
 
     commits_by_date = {}
     if returncode == 0:
-        for line in stdout.strip().split('\n'):
+        for line in stdout.strip().split("\n"):
             if line:
-                parts = line.split('|')
+                parts = line.split("|")
                 if len(parts) >= 4:
                     date = parts[3]
                     if date not in commits_by_date:
@@ -376,23 +388,17 @@ def activity(instance, days):
 
     # File change statistics
     console.print("\n[cyan]File Change Statistics:[/cyan]")
-    for path in config['paths']:
+    for path in config["paths"]:
         if Path(path).exists():
-            cmd = [
-                "git", "log",
-                f"--since={since_date}",
-                "--format=",
-                "--numstat",
-                "--", path
-            ]
+            cmd = ["git", "log", f"--since={since_date}", "--format=", "--numstat", "--", path]
             returncode, stdout, stderr = run_command(cmd)
 
             if returncode == 0:
                 lines_added = 0
                 lines_removed = 0
-                for line in stdout.strip().split('\n'):
+                for line in stdout.strip().split("\n"):
                     if line:
-                        parts = line.split('\t')
+                        parts = line.split("\t")
                         if len(parts) >= 2:
                             try:
                                 lines_added += int(parts[0])
@@ -401,7 +407,9 @@ def activity(instance, days):
                                 pass
 
                 console.print(f"  {path}:")
-                console.print(f"    [green]+{lines_added}[/green] / [red]-{lines_removed}[/red] lines")
+                console.print(
+                    f"    [green]+{lines_added}[/green] / [red]-{lines_removed}[/red] lines"
+                )
 
 
 @cli.command()
@@ -430,13 +438,7 @@ def status():
         if commit_count == 0:
             status = "[yellow]⚠️ Inactive[/yellow]"
 
-        table.add_row(
-            instance_id,
-            config['name'],
-            str(commit_count),
-            str(pr_count),
-            status
-        )
+        table.add_row(instance_id, config["name"], str(commit_count), str(pr_count), status)
 
     console.print(table)
 
@@ -445,15 +447,15 @@ def status():
     returncode, stdout, stderr = run_command(cmd)
 
     if returncode == 0 and stdout:
-        branches = stdout.strip().split('\n')
+        branches = stdout.strip().split("\n")
         if branches:
-            latest = branches[-1].replace('origin/', '')
+            latest = branches[-1].replace("origin/", "")
             console.print(f"\n[cyan]Latest integration branch:[/cyan] {latest}")
 
 
 @cli.command()
-@click.argument('instance', type=click.Choice(list(INSTANCE_MAP.keys())))
-@click.option('--fix', is_flag=True, help='Attempt to fix issues automatically')
+@click.argument("instance", type=click.Choice(list(INSTANCE_MAP.keys())))
+@click.option("--fix", is_flag=True, help="Attempt to fix issues automatically")
 def health(instance, fix):
     """Run health check for an instance."""
     config = INSTANCE_MAP[instance]
@@ -463,14 +465,14 @@ def health(instance, fix):
 
     with console.status("Running health checks..."):
         # Check if paths exist
-        for path in config['paths']:
+        for path in config["paths"]:
             if not Path(path).exists():
                 issues.append(f"Path does not exist: {path}")
                 if fix:
                     Path(path).mkdir(parents=True, exist_ok=True)
 
         # Check for __init__.py files
-        for path in config['paths']:
+        for path in config["paths"]:
             init_file = Path(path) / "__init__.py"
             if Path(path).exists() and not init_file.exists():
                 issues.append(f"Missing __init__.py: {path}")
@@ -478,7 +480,7 @@ def health(instance, fix):
                     init_file.touch()
 
         # Check dependencies
-        for dep in config['dependencies']:
+        for dep in config["dependencies"]:
             cmd = ["poetry", "show", dep]
             returncode, stdout, stderr = run_command(cmd)
             if returncode != 0:

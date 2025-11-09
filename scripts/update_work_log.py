@@ -38,11 +38,7 @@ class WorkLogUpdater:
 
     def add_note(self, note: str, category: str = "general"):
         """Add a note to the session log."""
-        note_entry = {
-            "timestamp": datetime.now().isoformat(),
-            "category": category,
-            "note": note
-        }
+        note_entry = {"timestamp": datetime.now().isoformat(), "category": category, "note": note}
 
         if "notes" not in self.session_data:
             self.session_data["notes"] = []
@@ -58,7 +54,7 @@ class WorkLogUpdater:
             "timestamp": datetime.now().isoformat(),
             "priority": priority,
             "todo": todo,
-            "completed": False
+            "completed": False,
         }
 
         if "todos" not in self.session_data:
@@ -85,13 +81,13 @@ class WorkLogUpdater:
 
         print(f"✅ TODO #{todo_index} marked as complete")
 
-    def add_command(self, command: str, output: str = None, success: bool = True):
+    def add_command(self, command: str, output: str | None = None, success: bool = True):
         """Log a command that was executed."""
         command_entry = {
             "timestamp": datetime.now().isoformat(),
             "command": command,
             "success": success,
-            "output": output[:500] if output else None  # Limit output size
+            "output": output[:500] if output else None,  # Limit output size
         }
 
         if "commands_executed" not in self.session_data:
@@ -102,13 +98,13 @@ class WorkLogUpdater:
 
         print("✅ Command logged")
 
-    def add_test_result(self, test_name: str, passed: bool, duration: float = None):
+    def add_test_result(self, test_name: str, passed: bool, duration: float | None = None):
         """Log test execution results."""
         test_entry = {
             "timestamp": datetime.now().isoformat(),
             "test": test_name,
             "passed": passed,
-            "duration_seconds": duration
+            "duration_seconds": duration,
         }
 
         if "tests_run" not in self.session_data:
@@ -136,7 +132,7 @@ class WorkLogUpdater:
         progress_entry = {
             "timestamp": datetime.now().isoformat(),
             "milestone": milestone,
-            "percentage": percentage
+            "percentage": percentage,
         }
 
         if "progress" not in self.session_data:
@@ -184,7 +180,13 @@ class WorkLogUpdater:
             print("\n📝 TODOs:")
             for i, todo in enumerate(todos):
                 status = "✅" if todo["completed"] else "⬜"
-                priority_icon = "🔴" if todo["priority"] == "high" else "🟡" if todo["priority"] == "medium" else ""
+                priority_icon = (
+                    "🔴"
+                    if todo["priority"] == "high"
+                    else "🟡"
+                    if todo["priority"] == "medium"
+                    else ""
+                )
                 print(f"  {status} [{i}] {priority_icon} {todo['todo']}")
 
         # Show recent notes
@@ -217,7 +219,8 @@ class WorkLogUpdater:
                 ["poetry", "run", "pytest", f"tests/unit/{instance}_*/", "-v"],
                 capture_output=True,
                 text=True,
-                timeout=60, check=False
+                timeout=60,
+                check=False,
             )
 
             # Parse output for test results
@@ -234,7 +237,7 @@ class WorkLogUpdater:
             self.add_command(
                 f"pytest tests/unit/{instance}_*/",
                 result.stdout[-500:],  # Last 500 chars
-                result.returncode == 0
+                result.returncode == 0,
             )
 
             if result.returncode == 0:
@@ -296,46 +299,15 @@ class WorkLogUpdater:
 
 def main():
     """Main entry point for work log updater."""
-    parser = argparse.ArgumentParser(
-        description="Update work log during active session"
-    )
-    parser.add_argument(
-        "--note",
-        help="Add a note to the session"
-    )
-    parser.add_argument(
-        "--todo",
-        help="Add a TODO item"
-    )
-    parser.add_argument(
-        "--complete-todo",
-        type=int,
-        help="Mark TODO at index as complete"
-    )
-    parser.add_argument(
-        "--progress",
-        help="Record progress milestone"
-    )
-    parser.add_argument(
-        "--percentage",
-        type=int,
-        help="Progress percentage (0-100)"
-    )
-    parser.add_argument(
-        "--status",
-        action="store_true",
-        help="Show session status"
-    )
-    parser.add_argument(
-        "--test",
-        action="store_true",
-        help="Run tests for current instance"
-    )
-    parser.add_argument(
-        "--interactive",
-        action="store_true",
-        help="Interactive update mode"
-    )
+    parser = argparse.ArgumentParser(description="Update work log during active session")
+    parser.add_argument("--note", help="Add a note to the session")
+    parser.add_argument("--todo", help="Add a TODO item")
+    parser.add_argument("--complete-todo", type=int, help="Mark TODO at index as complete")
+    parser.add_argument("--progress", help="Record progress milestone")
+    parser.add_argument("--percentage", type=int, help="Progress percentage (0-100)")
+    parser.add_argument("--status", action="store_true", help="Show session status")
+    parser.add_argument("--test", action="store_true", help="Run tests for current instance")
+    parser.add_argument("--interactive", action="store_true", help="Interactive update mode")
 
     args = parser.parse_args()
 
