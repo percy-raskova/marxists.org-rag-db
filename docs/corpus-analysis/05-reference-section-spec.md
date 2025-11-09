@@ -1096,8 +1096,66 @@ marcuse, althusser, sartre, adorno, horkheimer, benjamin
 voltaire, rousseau, kant, diderot, locke
 
 **Other (66):**
-bacon, baillie, bellamy-ed, bernstein, blanqui, bulwer, butler-samuel, chernyshevsky, clausewitz, comte, cooper, croce, css, cunningham, darwin, de-tocqueville, debord, dewey, durkheim, einstein, faure, field-alice, freud, gramsci-archive, hgwells, hibben, horkheimer, keller-helen, kerensky, la-mettrie, lowenthal, lysenko, machiavelli, makarenko, mazumdar, mctaggart, mishra, morgan-lewis, more, paine, perlman-fredy, plekhanov-archive, ravachol, shaw, sinclair-upton, smith-cyril, spinoza, spirkin, steinbeck-john, strong-anna-louise, sun-tzu, veblen, voltaire, wang, welles, wilde-oscar, winstanley, wollstonecraft-mary, zo-daxa, zhang
-
+- bacon
+- baillie
+- bellamy-ed
+- bernstein
+- blanqui
+- bulwer
+- butler-samuel
+- chernyshevsky
+- clausewitz
+- comte
+- cooper
+- croce
+- css
+- cunningham
+- darwin
+- de-tocqueville
+- debord
+- dewey
+- durkheim
+- einstein
+- faure
+- field-alice
+- freud
+- gramsci-archive
+- hgwells
+- hibben
+- horkheimer
+- keller-helen
+- kerensky
+- la-mettrie
+- lowenthal
+- lysenko
+- machiavelli
+- makarenko
+- mazumdar
+- mctaggart
+- mishra
+- morgan-lewis
+- more
+- paine
+- perlman-fredy
+- plekhanov-archive
+- ravachol
+- shaw
+- sinclair-upton
+- smith-cyril
+- spinoza
+- spirkin
+- steinbeck-john
+- strong-anna-louise
+- sun-tzu
+- veblen
+- voltaire
+- wang
+- welles
+- wilde-oscar
+- winstanley
+- wollstonecraft-mary
+- zo-daxa
+- zhang
 ### Appendix B: Subject Section File Counts
 
 | Subject | Files | Size (MB) | Top Authors |
