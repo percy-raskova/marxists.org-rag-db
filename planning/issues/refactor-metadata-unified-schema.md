@@ -326,4 +326,4 @@ metadata_restored = DocumentMetadata.from_dict(flat_dict)
 - Corpus Analysis: `docs/corpus-analysis/06-metadata-unified-schema.md`
 - Current Implementation: `mia_processor.py:33-44`
 - Refactoring Project: `planning/projects/refactoring-code-complexity.md`
-- Metadata Coverage Analysis: `docs/corpus-analysis/01-archive-metadata-analysis.md` through `05-reference-metadata-analysis.md`
+- Metadata Coverage Analysis: `docs/corpus-analysis/01-archive-section-analysis.md` through `05-reference-metadata-analysis.md`
