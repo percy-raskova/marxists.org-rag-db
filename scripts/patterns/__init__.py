@@ -1,1 +1,1 @@
-"""Design patterns for the MIA RAG system scripts."""
+"""Design pattern implementations for scripts."""
