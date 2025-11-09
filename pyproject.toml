@@ -113,6 +113,9 @@ bandit = "^1.7.0"
 safety = "^3.0.0"
 pytest-html = "^4.1.1"
 
+# Code Quality & Complexity Analysis
+radon = "^6.0.0"  # Cyclomatic complexity analysis for refactoring
+
 [tool.poetry.extras]
 # Individual instance extras
 instance1 = ["google-cloud-storage", "google-cloud-scheduler", "pyarrow", "pandas"]

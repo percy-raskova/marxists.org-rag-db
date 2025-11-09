@@ -4,15 +4,21 @@ Check Interface Contracts
 
 This script verifies that interface contracts are properly implemented
 and haven't been broken by recent changes.
+
+Refactored to use the Visitor pattern for better separation of concerns
+and reduced cyclomatic complexity.
 """
 
-import ast
 import sys
 from pathlib import Path
 
 import click
 from rich.console import Console
 from rich.table import Table
+
+from scripts.domain.interfaces import InterfaceViolation
+from scripts.patterns.repositories import InterfaceRepository
+from scripts.patterns.visitors import InterfaceValidator
 
 
 console = Console()
@@ -21,67 +27,16 @@ PROJECT_ROOT = Path(__file__).parent.parent
 INTERFACES_DIR = PROJECT_ROOT / "src" / "mia_rag" / "interfaces"
 
 
-class InterfaceChecker(ast.NodeVisitor):
-    """AST visitor to extract interface definitions."""
-
-    def __init__(self):
-        self.interfaces: dict[str, dict[str, list[str]]] = {}
-        self.current_class = None
-
-    def visit_ClassDef(self, node: ast.ClassDef):
-        """Visit class definitions to find ABC interfaces."""
-        # Check if it's an ABC
-        is_abc = any(
-            (isinstance(base, ast.Name) and base.id == "ABC")
-            or (isinstance(base, ast.Attribute) and base.attr == "ABC")
-            for base in node.bases
-        )
-
-        if is_abc:
-            self.current_class = node.name
-            self.interfaces[node.name] = {"methods": [], "properties": [], "class_methods": []}
-
-        self.generic_visit(node)
-        self.current_class = None
-
-    def visit_FunctionDef(self, node: ast.FunctionDef):
-        """Visit function definitions to extract interface methods."""
-        if self.current_class:
-            # Check if it's abstract
-            is_abstract = any(
-                isinstance(dec, ast.Name) and dec.id == "abstractmethod"
-                for dec in node.decorator_list
-            )
-
-            if is_abstract:
-                # Get method signature
-                args = []
-                for arg in node.args.args:
-                    if arg.arg != "self":
-                        args.append(arg.arg)
-
-                method_sig = f"{node.name}({', '.join(args)})"
-                self.interfaces[self.current_class]["methods"].append(method_sig)
-
-        self.generic_visit(node)
-
-
-def extract_interfaces(file_path: Path) -> dict[str, dict[str, list[str]]]:
-    """Extract interface definitions from a Python file."""
-    try:
-        with open(file_path) as f:
-            tree = ast.parse(f.read())
-
-        checker = InterfaceChecker()
-        checker.visit(tree)
-        return checker.interfaces
-    except Exception as e:
-        console.print(f"[red]Error parsing {file_path}: {e}[/red]")
-        return {}
-
-
 def find_implementations(interface_name: str, search_dir: Path) -> list[Path]:
-    """Find files that might implement an interface."""
+    """Find files that might implement an interface.
+
+    Args:
+        interface_name: Name of the interface to search for
+        search_dir: Directory to search in
+
+    Returns:
+        List of Python files that reference the interface
+    """
     implementations = []
 
     for py_file in search_dir.rglob("*.py"):
@@ -96,128 +51,154 @@ def find_implementations(interface_name: str, search_dir: Path) -> list[Path]:
                 if interface_name in content and "class " in content:
                     implementations.append(py_file)
         except Exception:
+            # Skip files we can't read
             pass
 
     return implementations
 
 
-def check_implementation(
-    interface_name: str, interface_def: dict[str, list[str]], impl_file: Path
-) -> list[str]:
-    """Check if a file properly implements an interface."""
-    violations = []
+def display_interfaces_table(interfaces: dict) -> None:
+    """Display a table of found interfaces.
 
-    try:
-        with open(impl_file) as f:
-            tree = ast.parse(f.read())
+    Args:
+        interfaces: Dictionary of interface definitions
+    """
+    table = Table(title="Interface Contracts")
+    table.add_column("Interface", style="cyan")
+    table.add_column("Methods", style="green")
+    table.add_column("File", style="yellow")
 
-        # Find classes that inherit from the interface
-        for node in ast.walk(tree):
-            if isinstance(node, ast.ClassDef):
-                # Check if it inherits from our interface
-                inherits = False
-                for base in node.bases:
-                    if (
-                        isinstance(base, ast.Name)
-                        and base.id == interface_name
-                        or isinstance(base, ast.Attribute)
-                        and base.attr == interface_name
-                    ):
-                        inherits = True
+    for name, definition in interfaces.items():
+        table.add_row(
+            name,
+            str(len(definition.methods)),
+            "contracts.py",  # Assuming standard location
+        )
 
-                if inherits:
-                    # Check that all interface methods are implemented
-                    class_methods = {
-                        n.name for n in ast.walk(node) if isinstance(n, ast.FunctionDef)
-                    }
+    console.print(table)
 
-                    for method_sig in interface_def["methods"]:
-                        method_name = method_sig.split("(")[0]
-                        if method_name not in class_methods:
-                            violations.append(f"{node.name} missing method: {method_sig}")
 
-    except Exception as e:
-        violations.append(f"Error checking {impl_file}: {e}")
+def display_violations(violations: list[InterfaceViolation], impl_file: Path) -> None:
+    """Display violations for a file.
 
-    return violations
+    Args:
+        violations: List of violations
+        impl_file: Path to the implementation file
+    """
+    console.print(f"  [red]❌ {impl_file.relative_to(PROJECT_ROOT)}[/red]")
+    for violation in violations:
+        severity_color = "red" if violation.severity == "error" else "yellow"
+        console.print(f"    [{severity_color}]• {violation.message}[/{severity_color}]")
+
+
+def check_implementations_for_interface(
+    interface_name: str,
+    interface_def,
+    search_dir: Path,
+    validator: InterfaceValidator,
+    show_fixes: bool = False,
+) -> int:
+    """Check all implementations of a specific interface.
+
+    Args:
+        interface_name: Name of the interface
+        interface_def: Interface definition
+        search_dir: Directory to search for implementations
+        validator: InterfaceValidator instance
+        show_fixes: Whether to show suggested fixes
+
+    Returns:
+        Number of violations found
+    """
+    console.print(f"\n[cyan]Checking {interface_name}...[/cyan]")
+
+    # Find potential implementations
+    impl_files = find_implementations(interface_name, search_dir)
+
+    if not impl_files:
+        console.print("  [yellow]No implementations found[/yellow]")
+        return 0
+
+    total_violations = 0
+
+    for impl_file in impl_files:
+        violations = validator.validate(impl_file)
+
+        # Filter violations to only those related to this interface
+        # (in case file implements multiple interfaces)
+        relevant_violations = [
+            v for v in violations
+            if interface_name in str(v.message) or v.violation_type in [
+                "missing_method", "missing_import", "wrong_signature"
+            ]
+        ]
+
+        if relevant_violations:
+            display_violations(relevant_violations, impl_file)
+            total_violations += len(relevant_violations)
+
+            if show_fixes:
+                console.print(
+                    "    [green]Fix:[/green] Implement missing methods "
+                    "or update interface if signature changed"
+                )
+        else:
+            console.print(f"  [green]✅ {impl_file.relative_to(PROJECT_ROOT)}[/green]")
+
+    return total_violations
 
 
 @click.command()
 @click.option("--check-all", is_flag=True, help="Check all interfaces")
 @click.option("--interface", help="Check specific interface")
 @click.option("--fix", is_flag=True, help="Suggest fixes for violations")
-def main(check_all: bool, interface: str | None, fix: bool):
-    """Check that interface contracts are properly implemented."""
+@click.option("--strict", is_flag=True, help="Enable strict type checking")
+def main(check_all: bool, interface: str | None, fix: bool, strict: bool):
+    """Check that interface contracts are properly implemented.
+
+    This tool validates that all classes implementing interfaces
+    properly fulfill their contracts (implement all required methods,
+    have correct signatures, etc.).
+    """
 
     if not INTERFACES_DIR.exists():
         console.print(f"[yellow]Interfaces directory not found: {INTERFACES_DIR}[/yellow]")
         console.print("Run this check after creating interface contracts.")
         return
 
-    # Find all interface definition files
-    interface_files = list(INTERFACES_DIR.glob("*.py"))
-    if not interface_files:
-        console.print("[yellow]No interface files found yet.[/yellow]")
-        return
+    # Initialize repository and validator
+    repository = InterfaceRepository()
+    repository.load()
 
-    all_interfaces = {}
-    for file_path in interface_files:
-        if file_path.name != "__init__.py":
-            interfaces = extract_interfaces(file_path)
-            all_interfaces.update(interfaces)
+    all_interfaces = repository.get_all_interfaces()
 
     if not all_interfaces:
         console.print("[yellow]No interface definitions found.[/yellow]")
         return
 
     # Display found interfaces
-    table = Table(title="Interface Contracts")
-    table.add_column("Interface", style="cyan")
-    table.add_column("Methods", style="green")
-    table.add_column("File", style="yellow")
+    display_interfaces_table(all_interfaces)
 
-    for name, definition in all_interfaces.items():
-        table.add_row(
-            name,
-            str(len(definition["methods"])),
-            "contracts.py",  # Assuming standard location
-        )
-
-    console.print(table)
+    # Initialize validator with type checking setting
+    validator = InterfaceValidator(repository)
 
     # Check implementations
     total_violations = 0
     src_dir = PROJECT_ROOT / "src" / "mia_rag"
 
     for interface_name, interface_def in all_interfaces.items():
+        # Skip if checking specific interface and this isn't it
         if interface and interface != interface_name:
             continue
 
-        console.print(f"\n[cyan]Checking {interface_name}...[/cyan]")
-
-        # Find potential implementations
-        impl_files = find_implementations(interface_name, src_dir)
-
-        if not impl_files:
-            console.print("  [yellow]No implementations found[/yellow]")
-            continue
-
-        for impl_file in impl_files:
-            violations = check_implementation(interface_name, interface_def, impl_file)
-
-            if violations:
-                console.print(f"  [red]❌ {impl_file.relative_to(PROJECT_ROOT)}[/red]")
-                for violation in violations:
-                    console.print(f"    • {violation}")
-                    total_violations += len(violations)
-
-                    if fix:
-                        console.print(
-                            "    [green]Fix:[/green] Implement missing methods "
-                            "or update interface if signature changed"
-                        )
-            else:
-                console.print(f"  [green]✅ {impl_file.relative_to(PROJECT_ROOT)}[/green]")
+        violations = check_implementations_for_interface(
+            interface_name,
+            interface_def,
+            src_dir,
+            validator,
+            show_fixes=fix,
+        )
+        total_violations += violations
 
     # Summary
     if total_violations > 0:
