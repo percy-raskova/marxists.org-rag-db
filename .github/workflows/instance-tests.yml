@@ -148,7 +148,7 @@ jobs:
           poetry run python scripts/check_boundaries.py --instance "${{ matrix.instance }}" --auto
 
           # Check interface compliance
-          poetry run python scripts/check_interfaces.py --ci
+          poetry run python scripts/check_interfaces.py --check-all
 
       # Run linting
       - name: Run Ruff linting
