@@ -203,7 +203,7 @@ This decision explicitly enables future phases:
 - Original corpus analysis: `docs/corpus-analysis/00-corpus-overview.md`
 - Size investigation results: Conversation on 2025-11-08
 - Cost projections: `ARCHITECTURE.md` (original 200GB estimates)
-- Implementation tracking: `.github/projects/corpus-analysis.md`
+- Implementation tracking: `planning/projects/corpus-analysis.md`
 
 ## Review and Approval
 

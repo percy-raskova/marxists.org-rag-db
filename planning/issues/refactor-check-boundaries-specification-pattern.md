@@ -147,7 +147,7 @@ def create_boundary_rules(instance_id: str) -> Specification:
 
 ## Related Issues
 
-- Part of Code Refactoring Project (.github/projects/refactoring-code-complexity.md)
+- Part of Code Refactoring Project (planning/projects/refactoring-code-complexity.md)
   - **Stream 1**: Script complexity reduction (5 scripts, 1 complete)
   - **Stream 4**: Metadata pipeline refactoring (4 components, 0 complete)
 - Related script refactors:

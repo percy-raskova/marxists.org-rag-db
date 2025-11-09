@@ -498,5 +498,5 @@ print(metadata.semantic.cross_references)
 - Corpus Analysis (Glossary): `docs/corpus-analysis/04-glossary-metadata-analysis.md`
 - Unified Schema: `docs/corpus-analysis/06-metadata-unified-schema.md`
 - Glossary Location: `/media/user/marxists.org/www.marxists.org/glossary/`
-- Refactoring Project: `.github/projects/refactoring-code-complexity.md`
+- Refactoring Project: `planning/projects/refactoring-code-complexity.md`
 - Design Pattern: Entity Linking with Fuzzy Matching

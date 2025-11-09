@@ -644,5 +644,5 @@ print(metadata.semantic.chapter_number)
   - `docs/corpus-analysis/04-glossary-metadata-analysis.md`
   - `docs/corpus-analysis/05-reference-metadata-analysis.md`
 - Unified Schema: `docs/corpus-analysis/06-metadata-unified-schema.md`
-- Refactoring Project: `.github/projects/refactoring-code-complexity.md`
+- Refactoring Project: `planning/projects/refactoring-code-complexity.md`
 - Design Pattern: [Template Method Pattern](https://refactoring.guru/design-patterns/template-method)

@@ -419,5 +419,5 @@ report = pipeline.generate_coverage_report(processed_documents)
 - Corpus Analysis (metadata patterns): `docs/corpus-analysis/01-archive-metadata-analysis.md` through `05-reference-metadata-analysis.md`
 - Unified Schema: `docs/corpus-analysis/06-metadata-unified-schema.md`
 - Current Implementation: `mia_processor.py:144-182`
-- Refactoring Project: `.github/projects/refactoring-code-complexity.md`
+- Refactoring Project: `planning/projects/refactoring-code-complexity.md`
 - Design Pattern: [Strategy Pattern](https://refactoring.guru/design-patterns/strategy)

@@ -302,7 +302,7 @@ Flag immediately:
 When a project completes:
 1. Mark status as ✅ Complete in this README
 2. Add completion date to project file
-3. Move to `.github/projects/archive/` subdirectory
+3. Move to `planning/projects/archive/` subdirectory
 4. Keep archived for future reference
 
 **Archived Projects**: None yet
@@ -315,7 +315,7 @@ When a project completes:
 - **Instance Docs**: `docs/instances/instance{1-6}-*/`
 - **Specifications**: `specs/INDEX.md`
 - **Corpus Analysis**: `docs/corpus-analysis/README.md`
-- **Issues**: `.github/issues/`
+- **Issues**: `planning/issues/`
 
 ---
 
@@ -324,7 +324,7 @@ When a project completes:
 ### For AI Agents
 
 - **Starting a corpus investigation?** → `docs/corpus-analysis/00-investigation-methodology-spec.md`
-- **Refactoring a script?** → `.github/projects/refactoring-code-complexity.md`
+- **Refactoring a script?** → `planning/projects/refactoring-code-complexity.md`
 - **Looking for instance boundaries?** → `INSTANCE{1-6}-*.md` in root
 - **Need architecture overview?** → `ARCHITECTURE.md`
 

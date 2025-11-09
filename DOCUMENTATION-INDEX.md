@@ -136,20 +136,54 @@ docs/
 
 ---
 
-### .github/ Directory
+### planning/ Directory - Project Planning & Issues
+
+**Purpose**: Centralized project tracking, issues, and development strategies (accessible to AI agents)
+
+#### Main Index
+- [planning/README.md](./planning/README.md) - Planning directory overview
+
+#### Active Projects
+- [planning/projects/refactoring-code-complexity.md](./planning/projects/refactoring-code-complexity.md) - 9 components (1/9 complete)
+- [planning/projects/corpus-analysis.md](./planning/projects/corpus-analysis.md) - ✅ Complete
+- [planning/projects/documentation-reorganization.md](./planning/projects/documentation-reorganization.md) - ✅ Complete
+
+#### Development Strategies
+- [planning/PARALLEL-REFACTORING-STRATEGY.md](./planning/PARALLEL-REFACTORING-STRATEGY.md) - 4-wave parallel execution plan
+- [planning/WORKFLOW-VALIDATION.md](./planning/WORKFLOW-VALIDATION.md) - CI/CD testing results
+
+#### Refactoring Issues (Scripts)
+- [planning/issues/refactor-check-conflicts-chain-of-responsibility.md](./planning/issues/refactor-check-conflicts-chain-of-responsibility.md)
+- [planning/issues/refactor-check-boundaries-specification-pattern.md](./planning/issues/refactor-check-boundaries-specification-pattern.md) - ✅ Complete
+- [planning/issues/refactor-check-interfaces-visitor-pattern.md](./planning/issues/refactor-check-interfaces-visitor-pattern.md)
+- [planning/issues/refactor-instance-map-command-pattern.md](./planning/issues/refactor-instance-map-command-pattern.md)
+- [planning/issues/refactor-instance-recovery-template-method.md](./planning/issues/refactor-instance-recovery-template-method.md)
+
+#### Refactoring Issues (Metadata Pipeline)
+- [planning/issues/refactor-metadata-unified-schema.md](./planning/issues/refactor-metadata-unified-schema.md) - 5-layer model, 40+ fields
+- [planning/issues/refactor-metadata-extraction-pipeline.md](./planning/issues/refactor-metadata-extraction-pipeline.md) - Multi-source extraction
+- [planning/issues/refactor-glossary-entity-linker.md](./planning/issues/refactor-glossary-entity-linker.md) - Entity linking
+- [planning/issues/refactor-section-specific-extractors.md](./planning/issues/refactor-section-specific-extractors.md) - Archive, ETOL, EROL, Subject
+
+#### Documentation Issues
+- [planning/issues/delete-deprecated-root-documentation.md](./planning/issues/delete-deprecated-root-documentation.md) - ✅ Complete
+- [planning/issues/reorganize-specs-consistent-naming.md](./planning/issues/reorganize-specs-consistent-naming.md) - Partial
+- [planning/issues/update-cross-references-verify-links.md](./planning/issues/update-cross-references-verify-links.md)
+
+---
+
+### .github/ Directory - GitHub Configuration
+
+#### Workflows (CI/CD)
+- [.github/workflows/instance-tests.yml](./.github/workflows/instance-tests.yml) - Instance boundary testing
+- [.github/workflows/conflict-detection.yml](./.github/workflows/conflict-detection.yml) - PR conflict detection
+- [.github/workflows/daily-integration.yml](./.github/workflows/daily-integration.yml) - Daily integration tests
+- [.github/workflows/release.yml](./.github/workflows/release.yml) - Release automation
 
 #### Templates
 - [.github/pull_request_template.md](./.github/pull_request_template.md) - PR template with instance validation
 - [.github/ISSUE_TEMPLATE/bug_report.md](./.github/ISSUE_TEMPLATE/bug_report.md) - Bug report template
 - [.github/ISSUE_TEMPLATE/integration_failure.md](./.github/ISSUE_TEMPLATE/integration_failure.md) - Integration failure template
-
-#### Issues (Design Pattern Refactoring)
-- [.github/issues/README.md](./.github/issues/README.md) - Complexity reduction initiative index
-- [refactor-check-conflicts-chain-of-responsibility.md](./.github/issues/refactor-check-conflicts-chain-of-responsibility.md)
-- [refactor-instance-map-command-pattern.md](./.github/issues/refactor-instance-map-command-pattern.md)
-- [refactor-check-boundaries-specification-pattern.md](./.github/issues/refactor-check-boundaries-specification-pattern.md)
-- [refactor-check-interfaces-visitor-pattern.md](./.github/issues/refactor-check-interfaces-visitor-pattern.md)
-- [refactor-instance-recovery-template-method.md](./.github/issues/refactor-instance-recovery-template-method.md)
 
 ---
 

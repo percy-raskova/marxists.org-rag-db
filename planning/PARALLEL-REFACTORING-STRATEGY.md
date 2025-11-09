@@ -268,15 +268,15 @@ git checkout -b refactor/instance-recovery
 ```bash
 # Agent 1
 git checkout -b refactor/check-conflicts
-# Issue: .github/issues/refactor-check-conflicts-chain-of-responsibility.md
+# Issue: planning/issues/refactor-check-conflicts-chain-of-responsibility.md
 
 # Agent 2
 git checkout -b refactor/check-interfaces
-# Issue: .github/issues/refactor-check-interfaces-visitor-pattern.md
+# Issue: planning/issues/refactor-check-interfaces-visitor-pattern.md
 
 # Agent 3
 git checkout -b refactor/instance-map
-# Issue: .github/issues/refactor-instance-map-command-pattern.md
+# Issue: planning/issues/refactor-instance-map-command-pattern.md
 ```
 
 **Merge all Wave 1 branches**, then proceed to Wave 2.
@@ -290,7 +290,7 @@ After each wave:
 1. **Merge all branches** from the wave into `main`
 2. **Run full test suite**: `poetry run pytest`
 3. **Verify pre-commit hooks**: All checks pass
-4. **Update project tracking**: Mark milestones complete in `.github/projects/refactoring-code-complexity.md`
+4. **Update project tracking**: Mark milestones complete in `planning/projects/refactoring-code-complexity.md`
 
 ---
 
