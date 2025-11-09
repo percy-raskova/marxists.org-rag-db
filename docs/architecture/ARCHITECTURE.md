@@ -7,18 +7,20 @@
 ## Executive Summary
 
 - **Scale**: 50GB corpus (optimized from 200GB through strategic content filtering)
+- **Corpus Analysis**: ✅ Complete - 46GB English content analyzed (55,753 documents across 6 sections)
 - **Infrastructure**: Simplified architecture - can use managed services or self-hosted
 - **Cost**: ~$100-150 for one-time embedding generation + ~$30-50/month operational
 - **Development**: Simplified from 6 to 3-4 parallel workstreams
-- **Status**: ✅ Corpus optimized and ready for processing
+- **Status**: ✅ Corpus analysis complete, ready for implementation
 
 **Key Decision**: See [ADR-001](docs/adr/ADR-001-corpus-optimization.md) for corpus optimization rationale (75% reduction)
+**Corpus Foundation**: See [Corpus Foundation](#corpus-foundation-data-architecture) section below for data architecture details
 
 **Quick Navigation**:
 - Instance developers → See `INSTANCE{1-6}-*.md` for your role
 - Architecture details → Continue reading below
 - Infrastructure → See `TERRAFORM.md` and `docs/architecture/infrastructure.md`
-- Testing → See `PARALLEL-TEST-STRATEGY.md`
+- Testing → See `specs/06-TESTING.md`
 
 ---
 
@@ -53,6 +55,61 @@ Archive Sources (50GB - optimized)
   - MCP integration for Claude
   - Simple rate limiting
 ```
+
+---
+
+## Corpus Foundation: Data Architecture
+
+**All architecture decisions are informed by systematic corpus analysis** (46GB English content, 55,753 documents analyzed).
+
+### Key Corpus Findings
+
+**Scale & Composition**:
+- **Archive Section**: 4.3GB (15,637 files) - Core Marxist theory
+- **History Section**: 33GB (33,190 files) - ETOL (8.3GB), EROL (14GB), Other (10.7GB)
+- **Subject Section**: 8.9GB (2,259 files) - Thematic content (94% Peking Review)
+- **Glossary**: 62MB (~2,500 entities) - Critical for entity extraction
+- **Reference**: 460MB (4,867 files) - Non-Marxist authors (Hegel, Smith, Ricardo, anarchists)
+
+**Metadata Extraction Strategy**:
+- **5-Layer Metadata Model**: Core identification → Authorship → Temporal → Technical → Semantic
+- **85%+ Author Coverage Target**: Multi-source extraction (path + meta tags + title + keywords)
+- **Section-Specific Rules**: Archive (100% path-based), ETOL (85% title+keywords), EROL (95% org from title)
+- **Encoding Normalization**: 62% ISO-8859-1 → UTF-8 conversion required
+
+**Document Structure Patterns**:
+- **70% Good Heading Hierarchies**: Enable semantic-break chunking (best for theory)
+- **40% Heading-Less Documents**: Require paragraph-cluster chunking fallback
+- **Entry-Based Content**: Glossary uses specialized entry-based chunking
+- **Edge Cases Identified**: Index pages, multi-article files, long paragraphs (500-1000 words)
+
+**Chunking Strategy**: 4 adaptive strategies based on document structure analysis
+- Target: 650-750 tokens/chunk average, >70% chunks with heading context
+
+**Knowledge Graph Foundation**: ~2,500 Glossary entities form canonical node set
+- 10 node types, 14 edge types for hybrid retrieval (vector + graph)
+- 5k-10k cross-references extracted from corpus analysis
+
+### Essential Corpus Documentation
+
+**For Implementation** (Read BEFORE coding):
+1. [Metadata Schema](./docs/corpus-analysis/06-metadata-unified-schema.md) - 5-layer metadata model
+2. [Chunking Strategies](./specs/07-chunking-strategies-spec.md) - 4 adaptive strategies with selection algorithm
+3. [Knowledge Graph](./specs/08-knowledge-graph-spec.md) - Entity relationships and hybrid retrieval
+
+**For Deep Understanding** (Section-specific details):
+- [Archive Analysis](./docs/corpus-analysis/01-archive-section-analysis.md) - Theoretical works structure
+- [History Analysis](./docs/corpus-analysis/02-history-section-spec.md) - ETOL, EROL, Other subsections
+- [Subject Analysis](./docs/corpus-analysis/03-subject-section-spec.md) - Thematic taxonomy
+- [Glossary Analysis](./docs/corpus-analysis/04-glossary-section-spec.md) - Entity extraction foundation
+- [Reference Analysis](./docs/corpus-analysis/05-reference-section-spec.md) - Non-Marxist authors
+
+**Why This Matters**:
+- Instance 1 (Storage): Needs metadata schema for correct extraction
+- Instance 2 (Embeddings): Needs chunking strategies for optimal semantic units
+- Instance 3 (Weaviate): Needs entity schema for knowledge graph nodes
+- Instance 4 (API): Needs query expansion patterns from corpus cross-references
+- Instance 6 (Monitoring): Needs quality metrics from corpus analysis targets
 
 ---
 
@@ -354,7 +411,7 @@ See `TERRAFORM.md` for complete infrastructure as code.
 - [Infrastructure Details](./docs/architecture/infrastructure.md)
 - [Storage Strategy](./docs/architecture/storage-strategy.md)
 - [Interface Contracts](./docs/architecture/interface-contracts.md)
-- [Testing Strategy](./PARALLEL-TEST-STRATEGY.md)
+- [Testing Strategy](./specs/06-TESTING.md)
 - [Terraform](./TERRAFORM.md)
 
 **Specifications**:

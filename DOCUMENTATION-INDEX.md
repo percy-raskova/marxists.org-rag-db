@@ -77,6 +77,17 @@ docs/
 │   ├── instance5-mcp/
 │   └── instance6-monitoring/
 │
+├── corpus-analysis/            # ⭐ Corpus investigation (46GB analyzed)
+│   ├── README.md               # Investigation overview & roadmap
+│   ├── 00-investigation-methodology-spec.md  # Reproducible methodology
+│   ├── 00-corpus-overview.md   # Full corpus statistics
+│   ├── 01-archive-section-analysis.md        # 4.3GB theory (15,637 files)
+│   ├── 02-history-section-spec.md            # 33GB historical (ETOL, EROL, Other)
+│   ├── 03-subject-section-spec.md            # 8.9GB thematic content
+│   ├── 04-glossary-section-spec.md           # 62MB (~2,500 entities)
+│   ├── 05-reference-section-spec.md          # 460MB non-Marxist authors
+│   └── 06-metadata-unified-schema.md         # 5-layer metadata model (85%+ coverage)
+│
 ├── architecture/               # Architecture documentation
 │   ├── system-overview.md      (to be created)
 │   ├── infrastructure.md       (to be created)
@@ -107,11 +118,13 @@ docs/
 **Current**:
 - [INDEX.md](./specs/INDEX.md) - Master specification index
 - [00-ARCHITECTURE-SPEC.md](./specs/00-ARCHITECTURE-SPEC.md) - System architecture
-- [02-DOCUMENT-PROCESSING-SPEC.md](./specs/02-DOCUMENT-PROCESSING-SPEC.md) - Processing spec
+- [02-DOCUMENT-PROCESSING-SPEC.md](./specs/02-DOCUMENT-PROCESSING-SPEC.md) - Processing spec (v2.0 - corpus-informed)
 - [03-RAG-INGESTION-SPEC.md](./specs/03-RAG-INGESTION-SPEC.md) - RAG ingestion
 - [04-QUERY-INTERFACE-SPEC.md](./specs/04-QUERY-INTERFACE-SPEC.md) - Query interface
 - [05-MCP-INTEGRATION-SPEC.md](./specs/05-MCP-INTEGRATION-SPEC.md) - MCP integration
 - [06-TESTING-VALIDATION-SPEC.md](./specs/06-TESTING-VALIDATION-SPEC.md) - Testing
+- [07-chunking-strategies-spec.md](./specs/07-chunking-strategies-spec.md) - ⭐ 4 adaptive chunking strategies
+- [08-knowledge-graph-spec.md](./specs/08-knowledge-graph-spec.md) - ⭐ Hybrid retrieval architecture
 
 **Planned Reorganization**:
 - [01-STORAGE-PIPELINE.md](./specs/01-STORAGE-PIPELINE.md) - Consolidated storage spec
@@ -148,6 +161,26 @@ docs/
 3. [CONTRIBUTING.md](./CONTRIBUTING.md) - How to contribute
 4. [ARCHITECTURE.md](./ARCHITECTURE.md) - System architecture
 
+### Corpus Analysis & Data Architecture
+**Essential reading for understanding the data foundation** (46GB analyzed, 55,753 documents)
+
+**Key Resources**:
+1. [docs/corpus-analysis/06-metadata-unified-schema.md](./docs/corpus-analysis/06-metadata-unified-schema.md) - **5-layer metadata model** (85%+ author coverage)
+2. [specs/07-chunking-strategies-spec.md](./specs/07-chunking-strategies-spec.md) - **4 adaptive chunking strategies** based on document structure
+3. [specs/08-knowledge-graph-spec.md](./specs/08-knowledge-graph-spec.md) - **Knowledge graph architecture** for hybrid retrieval
+
+**Section-Specific Analyses** (Implementation-ready specs):
+- [docs/corpus-analysis/01-archive-section-analysis.md](./docs/corpus-analysis/01-archive-section-analysis.md) - Archive (4.3GB, 15,637 files)
+- [docs/corpus-analysis/02-history-section-spec.md](./docs/corpus-analysis/02-history-section-spec.md) - History: ETOL, EROL, Other (33GB, 33,190 files)
+- [docs/corpus-analysis/03-subject-section-spec.md](./docs/corpus-analysis/03-subject-section-spec.md) - Subject (8.9GB, 2,259 files)
+- [docs/corpus-analysis/04-glossary-section-spec.md](./docs/corpus-analysis/04-glossary-section-spec.md) - Glossary (~2,500 entities)
+- [docs/corpus-analysis/05-reference-section-spec.md](./docs/corpus-analysis/05-reference-section-spec.md) - Reference (460MB, 4,867 files)
+
+**Methodology & Overview**:
+- [docs/corpus-analysis/README.md](./docs/corpus-analysis/README.md) - Investigation roadmap
+- [docs/corpus-analysis/00-investigation-methodology-spec.md](./docs/corpus-analysis/00-investigation-methodology-spec.md) - Reproducible methodology
+- [docs/corpus-analysis/00-corpus-overview.md](./docs/corpus-analysis/00-corpus-overview.md) - Full corpus statistics
+
 ### For AI Agents (Instance-Specific)
 1. Choose your instance guide (INSTANCE1-6)
 2. Read [AI-AGENTS.md](./AI-AGENTS.md) for rules
@@ -166,7 +199,7 @@ docs/
 3. Interface contracts in `src/mia_rag/interfaces/contracts.py`
 
 ### Testing & Quality
-1. [PARALLEL-TEST-STRATEGY.md](./PARALLEL-TEST-STRATEGY.md) - Testing approach
+1. [specs/06-TESTING.md](./specs/06-TESTING.md) - Testing approach
 2. [specs/06-TESTING-VALIDATION-SPEC.md](./specs/06-TESTING-VALIDATION-SPEC.md) - Formal testing spec
 3. `docs/processes/testing-strategy.md` (to be created)
 
@@ -190,6 +223,20 @@ START_HERE.md
   → Start implementing!
 ```
 
+### "I need to understand the corpus structure and data"
+```
+START_HERE.md → "I need to understand the corpus structure"
+  → docs/corpus-analysis/06-metadata-unified-schema.md (5-layer metadata model)
+  → specs/07-chunking-strategies-spec.md (4 adaptive strategies)
+  → specs/08-knowledge-graph-spec.md (hybrid retrieval)
+  → Section analyses for implementation details:
+    - 01-archive-section-analysis.md (4.3GB theory)
+    - 02-history-section-spec.md (33GB ETOL/EROL/Other)
+    - 03-subject-section-spec.md (8.9GB thematic)
+    - 04-glossary-section-spec.md (~2,500 entities)
+    - 05-reference-section-spec.md (460MB non-Marxist)
+```
+
 ### "I need to understand the architecture"
 ```
 ARCHITECTURE.md (comprehensive overview)
@@ -209,7 +256,7 @@ ARCHITECTURE.md (comprehensive overview)
 
 ### "I need to test my code"
 ```
-PARALLEL-TEST-STRATEGY.md (testing approach)
+specs/06-TESTING.md (testing approach)
   → docs/instances/instanceX/README.md (instance-specific tests)
   → specs/06-TESTING-VALIDATION-SPEC.md (formal requirements)
   → tests/unit/instanceX_*/ (write your tests here)
@@ -254,8 +301,9 @@ A:
 |----------|-------|--------|
 | Instance guides (root) | 6 | ✅ Complete |
 | Instance detailed docs | 6 | 📝 Stubs created |
+| Corpus analysis docs | 9 | ✅ Complete (46GB analyzed) |
 | Architecture docs | 1 | ✅ Consolidated |
-| Specs | 7 | 🔄 To be reorganized |
+| Specs | 9 | 🔄 To be reorganized |
 | Process docs | 1 | 📝 More needed |
 | RFCs | 1 example | ✅ Template exists |
 
@@ -272,7 +320,7 @@ A:
 1. **Reorganize specs/** - Consistent naming (01-06 with hyphens)
 2. **Create detailed architecture docs** - Move content to `docs/architecture/`
 3. **Expand instance docs** - Fill in implementation details as development proceeds
-4. **Delete legacy files** - Remove CLAUDE_ENTERPRISE.md, CLOUD-ARCHITECTURE-PLAN.md, etc. (consolidated into ARCHITECTURE.md)
+4. **Delete legacy files** - ✅ Complete - Deprecated files deleted (consolidated into ARCHITECTURE.md)
 
 ---
 

@@ -70,7 +70,7 @@ class PipelineInterface(Protocol):
    - Batch processing (1000 files/batch)
    - Progress tracking
 
-3. **Storage Tiers** (see STORAGE-STRATEGY.md)
+3. **Storage Tiers** (see docs/instances/instance1-storage/)
    - Hot tier: gs://mia-processed-markdown/ (Parquet)
    - Warm tier: gs://mia-raw-html/ (7-day lifecycle)
    - Cold tier: gs://mia-archive/ (Coldline storage)
@@ -97,8 +97,40 @@ git push origin storage-dev
 
 ---
 
+## 📚 Essential Corpus Analysis Reading
+
+**CRITICAL**: Metadata extraction must follow the corpus-informed schema. Read these BEFORE coding:
+
+### Required Reading
+1. **[Metadata Unified Schema](./docs/corpus-analysis/06-metadata-unified-schema.md)** ⭐ ESSENTIAL
+   - 5-layer metadata model (Core → Authorship → Temporal → Technical → Semantic)
+   - **85%+ author coverage target** through multi-source extraction
+   - Section-specific extraction rules:
+     - Archive: 100% path-based (`/archive/author-name/work/`)
+     - ETOL: 85% title + keywords (low meta tag accuracy)
+     - EROL: 95% organization from title (not meta tags!)
+   - **Character encoding**: 62% ISO-8859-1 → UTF-8 normalization required
+   - Confidence scoring for all extracted metadata
+
+2. **[Document Processing Spec v2.0](./specs/02-DOCUMENT-PROCESSING-SPEC.md)**
+   - Corpus-informed extraction algorithms
+   - CSS class patterns from corpus analysis (`.fst`, `.footer`, `.linkback` removal)
+   - Edge case handling (index pages, multi-article files)
+
+### Section-Specific References (Implementation Details)
+- [Archive Analysis](./docs/corpus-analysis/01-archive-section-analysis.md) - 15,637 files, metadata patterns
+- [History Analysis](./docs/corpus-analysis/02-history-section-spec.md) - ETOL/EROL/Other subsection differences
+- [Subject Analysis](./docs/corpus-analysis/03-subject-section-spec.md) - Thematic taxonomy structure
+- [Glossary Analysis](./docs/corpus-analysis/04-glossary-section-spec.md) - Entity extraction foundation
+- [Reference Analysis](./docs/corpus-analysis/05-reference-section-spec.md) - 100% Git-LFS storage (must run `git lfs pull`)
+
+**Why This Matters**: Your metadata extraction directly impacts search quality for all downstream instances. The corpus analysis provides concrete extraction strategies achieving 85%+ accuracy targets.
+
+---
+
 ## 📋 Development Checklist
 
+- [ ] **Read corpus analysis metadata schema** (see Essential Reading above) ⭐
 - [ ] Read `docs/architecture/storage-strategy.md` (Parquet schema, lifecycle)
 - [ ] Read `specs/01-STORAGE-PIPELINE.md` (formal specification)
 - [ ] Set up GCS service account credentials in `.env.instance1` (see AI-AGENTS.md for setup)
@@ -136,9 +168,9 @@ git push origin storage-dev
 3. `specs/01-STORAGE-PIPELINE.md` - Formal specification
 
 **Reference**:
-- `CLOUD-ARCHITECTURE-PLAN.md` - GCP infrastructure
+- `ARCHITECTURE.md` - GCP infrastructure
 - `TERRAFORM.md` - Infrastructure as code
-- `PARALLEL-TEST-STRATEGY.md` - Testing without cloud
+- `specs/06-TESTING.md` - Testing without cloud
 
 **Communication**:
 - `work-logs/instance1/` - Your async work log

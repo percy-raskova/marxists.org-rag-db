@@ -110,10 +110,49 @@ git push origin monitoring-dev
 
 ---
 
+## 📚 Essential Corpus Analysis Reading
+
+**CRITICAL**: Quality metrics and acceptance criteria derive from corpus analysis targets. Read these BEFORE defining metrics:
+
+### Required Reading
+1. **[Metadata Unified Schema](./docs/corpus-analysis/06-metadata-unified-schema.md)** ⭐ ESSENTIAL
+   - **Quality targets from corpus analysis**:
+     - **85%+ author coverage** across entire corpus (section-specific targets below)
+     - **Archive**: 100% author extraction accuracy (path-based is deterministic)
+     - **ETOL**: 85% author coverage target (title + keywords fallback)
+     - **EROL**: 95% organization attribution (title-based extraction)
+     - **Character encoding**: 62% ISO-8859-1 → UTF-8 (monitor conversion errors)
+   - **Confidence scoring**: Monitor low-confidence metadata (<0.7) for manual review
+
+2. **[Chunking Strategies Spec](./specs/07-chunking-strategies-spec.md)**
+   - **Quality metrics**:
+     - Average chunk size: 650-750 tokens (monitor variance)
+     - **>70% chunks with heading context** (semantic quality indicator)
+     - Strategy distribution: ~70% semantic breaks, ~40% paragraph clusters fallback
+   - **Edge case monitoring**: Track index page detection, multi-article splitting, long paragraph handling
+
+3. **[All Section Analyses](./docs/corpus-analysis/)** (For test fixture selection)
+   - Use documented patterns to create representative test fixtures:
+     - Archive: 74% articles, 15% chapters, 5.5% letters (test all types)
+     - ETOL: 70% good hierarchies, 30% poor (test both)
+     - Subject: 55% navigation indexes (should NOT be chunked - regression test!)
+   - **Metadata completeness baselines**: 75% author tags in Archive, 60% ISO-8859-1 encoding
+
+**Why This Matters**: Your monitoring dashboards and integration tests must validate that implemented pipelines achieve corpus analysis targets. These are NOT arbitrary goals—they're empirically-derived quality thresholds from 46GB systematic investigation.
+
+**Metrics to Track**:
+- Metadata extraction accuracy (by section): Archive 100%, ETOL 85%, EROL 95%
+- Chunking quality: avg token count, heading context %, strategy selection distribution
+- Entity linking coverage: % chunks with glossary entity annotations
+- Encoding normalization success rate
+
+---
+
 ## 📋 Development Checklist
 
+- [ ] **Read metadata schema and chunking spec for quality targets** (see Essential Reading above) ⭐
 - [ ] Read `docs/instances/instance6-monitoring/README.md` (your detailed guide)
-- [ ] Read `PARALLEL-TEST-STRATEGY.md` (testing without cloud resources)
+- [ ] Read `specs/06-TESTING.md` (testing without cloud resources)
 - [ ] Read `specs/06-TESTING.md` (formal specification)
 - [ ] Set up local Prometheus + Grafana (Docker Compose)
 - [ ] Implement `MonitoringInterface` in `src/mia_rag/monitoring/metrics.py`
@@ -146,7 +185,7 @@ git push origin monitoring-dev
 
 **Start Here**:
 1. `docs/instances/instance6-monitoring/README.md` - Your detailed guide
-2. `PARALLEL-TEST-STRATEGY.md` - Testing strategy, mocking cloud services
+2. `specs/06-TESTING.md` - Testing strategy, mocking cloud services
 3. `specs/06-TESTING.md` - Formal specification
 
 **Reference**:

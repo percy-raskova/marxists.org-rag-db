@@ -1,11 +1,12 @@
 # Marxists Internet Archive: Corpus Overview
 
-**Total Size**: **155GB** (English-only, fully extracted)
-**HTML Files**: **64,634** (reduced from 96,637 after language trimming)
-**PDF Files**: **31,280** (increased from 21,141 - more PDFs discovered)
-**Top-Level Directories**: 15 (reduced from 67 - all non-English removed)
+**Total Size**: **~46GB** (optimized from 200GB, 77% reduction)
+**Repository Size**: 63GB (including 19GB .git repository)
+**HTML Files**: ~40,000 (estimated after optimization)
+**PDF Files**: ~15,000 (estimated after removing duplicates)
+**Top-Level Sections**: 6 (archive, history, subject, glossary, reference, ebooks)
 **Investigation Date**: 2025-11-08
-**Status**: ✅ Fully extracted and analyzed, language-trimmed to English
+**Status**: ✅ Optimized, extracted, and ready for investigation
 
 ---
 
@@ -23,85 +24,98 @@
 
 ## Executive Summary
 
-The Marxists Internet Archive (MIA) is a **155GB English-only corpus** containing 64,634 HTML files and 31,280 PDFs across 15 directories. Major discovery: The History section is actually **140GB** (not 46GB as initially estimated), containing two massive encyclopedias:
-- **ETOL** (Encyclopedia of Trotskyism On-Line): 61GB
-- **EROL** (Encyclopedia of anti-Revisionism On-Line): 14GB
+The Marxists Internet Archive (MIA) has been **optimized from 200GB to ~46GB** (77% reduction) through strategic content filtering. The optimized corpus focuses on high-value textual content while deferring specialized encyclopedias, periodicals, and multimedia to future phases.
 
-The archive is organized into five primary sections:
+The archive is organized into six primary sections:
 
-1. **History Archive** (**140GB, 90%**) - Encyclopedias (ETOL, EROL) and labor periodicals
-2. **Subject Archive** (9.1GB, 6%) - Thematic collections with expert curation
-3. **Archive by Author** (4.5GB, 3%) - Theoretical works by 411 revolutionary thinkers
-4. **Reference** (582MB, <1%) - Reference materials and resources
-5. **Glossary** (62MB, <1%) - Encyclopedia entries (critical for metadata)
+1. **History Archive** (**33GB, 72%**) - Core historical texts and documents (ETOL/EROL encyclopedias removed)
+2. **Subject Archive** (8.9GB, 19%) - Thematic collections with expert curation
+3. **Archive by Author** (4.3GB, 9%) - Theoretical works by 411+ revolutionary thinkers
+4. **Reference** (460MB, <1%) - Reference materials and resources
+5. **Glossary** (62MB, <1%) - Encyclopedia entries (critical for metadata and entity disambiguation)
+6. **Ebooks** (57MB, <1%) - 92 epub/mobi/pdf formatted books
 
-### Critical Insight: Corpus Architecture
+### Critical Insight: Optimization Strategy
 
-After full extraction and language trimming, the **actual English-only corpus is 155GB**. The History section alone is 140GB (90% of total), dominated by two massive encyclopedias we hadn't discovered in initial sampling:
+Through corpus optimization (see ADR-001), we've achieved a manageable dataset by:
 
-1. **Theoretical Works** (Archive section, 4.5GB) - Long-form theory by 411 authors
-2. **Encyclopedias** (ETOL 61GB + EROL 14GB = 75GB) - Specialized Trotskyist and Maoist encyclopedias
-3. **Periodicals** (USA pubs, 56GB) - Labor newspapers and magazines
-4. **Reference Materials** (Subject + Glossary, ~10GB) - Curated collections, definitions
+1. **Removed multimedia** - All audio, video, images (reduces complexity, saves 53GB from ETOL alone)
+2. **Removed duplicate PDFs** - Kept only PDFs without HTML equivalents (~2GB saved)
+3. **Kept ETOL/EROL text** - 22.3GB of specialized encyclopedias (multimedia removed, text retained)
+4. **Deferred periodicals** - 56GB of labor newspapers (future Phase 3)
+5. **Deferred non-English** - 28GB of multilingual content (future Phase 5)
 
-Each content type requires different processing strategies, chunking approaches, and metadata schemas.
+This optimization maintains 100% coverage of core theoretical works **plus both major encyclopedias (ETOL/EROL)** while reducing processing time from 200+ hours to 25-30 hours and GPU costs from $400-600 to $100-120.
+
+**Phase 1 includes**: Archive (4.3GB) + History w/ ETOL/EROL (33GB) + Subject (8.9GB) + Glossary (62MB) + Reference (460MB) = **~46GB comprehensive corpus**
 
 ---
 
 ## Corpus Composition
 
-### Size Distribution by Section
+### Size Distribution by Section (Optimized)
 
-| Section | Size | % of Total | HTML Count | PDF Count | Content Type |
-|---------|------|------------|------------|-----------|--------------|
-| **History** | **140GB** | 90% | ~45,000 | ~25,000 | Encyclopedias + periodicals |
-| - ETOL | 61GB | 39% | ~20,000 | ~10,000 | Trotskyist encyclopedia |
-| - EROL | 14GB | 9% | ~5,000 | ~3,000 | Anti-revisionist encyclopedia |
-| - USA pubs | 56GB | 36% | ~15,000 | ~10,000 | Labor periodicals |
-| **Subject** | 9.1GB | 6% | 2,259 | 1,412 | Thematic collections |
-| **Archive** | 4.5GB | 3% | ~15,000 | ~4,000 | Theoretical works by author |
-| **Reference** | 582MB | <1% | ~1,500 | ~800 | Reference materials |
-| **Glossary** | 62MB | <1% | 685 | 0 | Encyclopedia entries |
-| **Other** | ~1GB | <1% | Variable | Variable | Admin, ebooks, audiobooks |
+| Section | Size | % of Total | Content Type | Processing Complexity |
+|---------|------|------------|--------------|----------------------|
+| **History** | **33GB** | 72% | Core historical texts | Medium-High (mixed HTML/PDF) |
+| **Subject** | 8.9GB | 19% | Thematic collections | Medium |
+| **Archive** | 4.3GB | 9% | Theoretical works by author | Medium |
+| **Reference** | 460MB | <1% | Reference materials | Low |
+| **Glossary** | 62MB | <1% | Encyclopedia entries | Low (critical for metadata) |
+| **Ebooks** | 57MB | <1% | Formatted books (92 files) | Low |
+| **TOTAL** | **~46GB** | 100% | Text-focused corpus | Manageable |
 
-### Content Type Breakdown
+### Content Removed via Optimization
 
-**Total English Content**: 155GB (all non-English removed)
+**Removed from corpus** (see ADR-001 for rationale):
 
-| Content Type | Size | Primary Use | Processing Complexity |
-|--------------|------|-------------|----------------------|
-| ETOL Encyclopedia | 61GB | Trotskyist reference | High (mixed formats) |
-| USA Periodicals | 56GB | Historical journalism | High (OCR) |
-| EROL Encyclopedia | 14GB | Maoist/anti-revisionist | High (mixed formats) |
-| Subject Collections | 9.1GB | Thematic navigation | Medium |
-| Archive (Theory) | 4.5GB | Core theoretical works | Medium |
-| Reference | 582MB | Supporting materials | Low |
-| Glossary | 62MB | Entity definitions | Low (but critical) |
+| Content Type | Size Removed | Rationale | Future Phase |
+|--------------|--------------|-----------|--------------|
+| ETOL Audio | ~53GB | Audio requires transcription | Phase 4 (if needed) |
+| USA Labor Periodicals | ~56GB | Different use case (journalism/OCR) | Phase 3 |
+| Non-English Content | ~28GB | Requires multilingual models | Phase 5 |
+| Audio/Video/Images | ~15GB | Multimedia requires different pipeline | Phase 4 |
+| Duplicate PDFs | ~2GB | HTML equivalents exist | N/A (redundant) |
+| **Total Removed** | **~154GB** | - | - |
+
+**✅ Kept in Phase 1 Corpus**:
+- **ETOL Encyclopedia** (8.3GB text) - Trotskyist materials, MEDIUM-HIGH priority
+- **EROL Encyclopedia** (14GB text) - Maoist/anti-revisionist materials, MEDIUM-HIGH priority
+- All encyclopedias are **text-only** with multimedia removed
+- Combined 22.3GB of encyclopedia content **included in Phase 1 RAG**
 
 ---
 
 ## Major Sections
 
-### 1. History Archive (140GB) - **MAJOR DISCOVERY**
+### 1. History Archive (33GB) - **OPTIMIZED**
 
 **Path**: `/history/`
-**Actual Size**: **140GB** (was estimated at 46GB from partial sampling)
-**Primary Content**: Two massive encyclopedias + labor periodicals
-**Processing Complexity**: HIGH (mixed formats, OCR-intensive)
+**Size**: **33GB** (reduced from 140GB, 76% reduction)
+**Primary Content**: Historical documents + ETOL/EROL encyclopedias (multimedia removed)
+**Processing Complexity**: MEDIUM-HIGH (mixed HTML/PDF)
 
-#### 1.1 ETOL - Encyclopedia of Trotskyism On-Line (61GB) - **NEW DISCOVERY**
+**Breakdown**:
+- **ETOL** (Encyclopedia of Trotskyism On-Line): 8.3GB (reduced from 61GB via audio removal)
+- **EROL** (Encyclopedia of anti-Revisionism On-Line): 14GB (text only, multimedia removed)
+- **Other History** (country-specific, thematic): ~10.7GB
+
+**Investigation Priority**: HIGH - This is the largest section (72% of total corpus)
+
+#### 1.1 ETOL - Encyclopedia of Trotskyism On-Line (8.3GB)
 
 **Path**: `/history/etol/`
+**Size**: 8.3GB (optimized from 61GB by removing 21 audio subdirectories)
 **Content**: Comprehensive Trotskyist materials including:
-- Audio materials (21 subdirectories)
 - Books, critiques, documents
 - International Trotskyist publications
-- Newspaper archives
+- Newspaper archives (74 subdirectories)
+- Revolutionary history archives
 - Subject-based collections
 
-**Significance**: This is a **complete specialized encyclopedia** we hadn't discovered in initial sampling. It represents the largest single collection of Trotskyist materials online.
+**Significance**: Complete specialized encyclopedia of Trotskyist materials, now text-only.
 
-#### 1.2 EROL - Encyclopedia of anti-Revisionism On-Line (14GB) - **NEW DISCOVERY**
+#### 1.2 EROL - Encyclopedia of anti-Revisionism On-Line (14GB)
 
 **Path**: `/history/erol/`
 **Content**: Anti-revisionist (primarily Maoist) materials including:
@@ -370,33 +384,53 @@ Example: v02n085-apr-21-1925-DW.pdf
 
 ---
 
-### 5. Language Directories (~28GB)
+### 5. Reference Section (460MB)
 
-**Total**: 40+ language directories
-**Processing Complexity**: OUT OF SCOPE (for English-only RAG)
+**Path**: `/reference/`
+**Size**: 460MB
+**Processing Complexity**: LOW
 
-**Major Language Sections**:
-- Chinese (`/chinese/`): 21GB
-- Spanish (`/espanol/`): 4.2GB
-- Russian (`/russkij/`): 1.2GB
-- French (`/francais/`): 1.1GB
-- German (`/deutsch/`): 110MB
-- Italian (`/italiano/`): 44MB
-- 35+ other languages: <50MB each
+**Purpose**: Reference materials and supporting resources
 
-**Organizational Pattern**:
-- Often mirrors English structure: `/espanol/archivo/{author}/`
-- Some parallel translations of English content
-- Some unique content not in English archive
-- Variable completeness (some languages nearly complete, others minimal)
+**Content Types**:
+- Bibliographies
+- Timelines and chronologies
+- Maps and geographic resources
+- Reading guides
+- Research resources
+
+**Investigation Status**: Requires investigation (see `05-reference-section-spec.md` - TODO)
+
+---
+
+### 6. Ebooks Section (57MB)
+
+**Path**: `/ebooks/`
+**Size**: 57MB
+**File Count**: 105 files (epub/mobi/pdf formats)
+**Author Count**: 27 authors
+**Processing Complexity**: LOW
+
+**Purpose**: Pre-formatted ebook versions of selected works
+
+**Notable Authors**:
+- Hegel, Ilyenkov, Lenin, Luxemburg
+- Bukharin, Draper, Grossman
+- Kollontai, Marcuse, Morris
+- And 18 others
+
+**Characteristics**:
+- High-quality formatted versions
+- Optimized for e-readers
+- Subset of Archive content (likely duplicates HTML versions)
+- Multiple formats per work (epub, mobi, pdf)
 
 **RAG Implications**:
-- Out of scope for English-only RAG
-- Potential future multilingual expansion
-- Cross-lingual linking opportunities (parallel texts)
-- Translation quality varies
+- Likely duplicates Archive HTML content
+- Lower priority for ingestion (HTML versions preferred)
+- Could serve as validation corpus (check extraction quality)
 
-**Investigation Status**: Low priority (see `05-language-sections-spec.md` - Future work)
+**Investigation Status**: Low priority (likely redundant with Archive section)
 
 ---
 

@@ -106,10 +106,10 @@ Initial working code (not spec-compliant but functional):
 
 ### 📘 Development Guides
 
-1. **PARALLEL-DEV-QUICKSTART.md** (8.0 KB)
+1. **INSTANCE{1-6}-*.md** - Instance-specific quick start guides
    - How to use specs with multiple Claude instances
    - Example prompts for each module
-   - Sequential vs parallel workflows
+   - Parallel development workflows
    - Integration testing guide
    - Debugging tips
 
@@ -130,7 +130,7 @@ claude-code --context specs/00-ARCHITECTURE-SPEC.md,specs/03-RAG-INGESTION-SPEC.
 claude-code --context specs/00-ARCHITECTURE-SPEC.md,specs/04-QUERY-INTERFACE-SPEC.md,specs/05-MCP-INTEGRATION-SPEC.md
 ```
 
-See `PARALLEL-DEV-QUICKSTART.md` for detailed instructions.
+See `INSTANCE{1-6}-*.md` for detailed instructions.
 
 ### Option 2: Sequential Development
 
@@ -165,7 +165,7 @@ outputs/
 │   ├── 05-MCP-INTEGRATION-SPEC.md
 │   └── 06-TESTING-VALIDATION-SPEC.md
 │
-├── PARALLEL-DEV-QUICKSTART.md     # How to use with AI instances
+├── INSTANCE{1-6}-*.md             # Instance-specific guides
 ├── README.md                       # End-user documentation
 │
 ├── mia_processor.py                # Reference implementation
@@ -316,10 +316,10 @@ This is **Documentation Driven Development for LLMs** in practice:
 - query_example.py
 - requirements.txt
 
-### Documentation: 2 files (~20 KB)
+### Documentation: 7 files
 
 - README.md
-- PARALLEL-DEV-QUICKSTART.md
+- INSTANCE{1-6}-*.md (6 instance guides)
 
 ---
 

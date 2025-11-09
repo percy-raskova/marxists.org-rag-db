@@ -104,8 +104,38 @@ git push origin api-dev
 
 ---
 
+## 📚 Essential Corpus Analysis Reading
+
+**CRITICAL**: Query expansion and hybrid retrieval depend on corpus cross-reference patterns. Read these BEFORE API design:
+
+### Required Reading
+1. **[Knowledge Graph Spec](./specs/08-knowledge-graph-spec.md)** ⭐ ESSENTIAL
+   - **Hybrid retrieval patterns**: Vector-first + graph-enhanced, graph-first + vector-filtered, multi-hop traversal
+   - **Query expansion via cross-references**: ~5k-10k corpus-extracted links enable "find related works"
+   - **Multi-hop query examples**:
+     - "Intellectual genealogy": Find works citing Marx → works citing those works → ...
+     - "Citation chains": Trace concept evolution through references
+     - "Thematic exploration": Subject → related works → authors → other works by those authors
+   - **Entity-based filtering**: "Find works by Lenin about imperialism" = vector search + entity filters
+
+2. **[Subject Analysis](./docs/corpus-analysis/03-subject-section-spec.md)**
+   - **Multi-dimensional taxonomy**: 8 subject categories (theoretical, economic, political, geographical, etc.)
+   - **64% link to /archive/** - enables subject → author navigation
+   - **19% link to /reference/** - philosophical foundations routing
+
+3. **[Glossary Analysis](./docs/corpus-analysis/04-glossary-section-spec.md)**
+   - **~2,500 entities** for query enrichment ("What is X?" definition queries)
+   - **80-95% cross-references** - glossary as knowledge graph hub
+
+**Why This Matters**: Your API should support BOTH simple semantic search ("find documents about X") AND complex graph queries ("find works by Y's contemporaries about Z"). The corpus analysis defines cross-reference patterns that enable these advanced queries.
+
+**Implementation Hint**: Consider separate endpoints for vector-only, graph-only, and hybrid retrieval to optimize performance for different query types.
+
+---
+
 ## 📋 Development Checklist
 
+- [ ] **Read knowledge graph spec and subject/glossary analyses** (see Essential Reading above) ⭐
 - [ ] Read `docs/instances/instance4-api/README.md` (your detailed guide)
 - [ ] Read `docs/architecture/infrastructure.md` (Cloud Run deployment)
 - [ ] Read `specs/04-API.md` (formal specification)
@@ -146,7 +176,7 @@ git push origin api-dev
 **Reference**:
 - [FastAPI Docs](https://fastapi.tiangolo.com/) - Official docs
 - `docs/architecture/storage-strategy.md` - Data schemas
-- `PARALLEL-TEST-STRATEGY.md` - Testing without cloud
+- `specs/06-TESTING.md` - Testing without cloud
 
 **Communication**:
 - `work-logs/instance4/` - Your async work log

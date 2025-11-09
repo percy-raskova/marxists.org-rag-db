@@ -267,4 +267,7 @@ prometheus-data/
 # Keep these
 !.gitkeep
 !requirements.txt
-!pyproject.toml
+!pyproject.tomlnode_modules
+package-lock.json
+test-report.html
+test-results.html

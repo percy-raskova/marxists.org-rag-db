@@ -97,8 +97,37 @@ git push origin embeddings-dev
 
 ---
 
+## 📚 Essential Corpus Analysis Reading
+
+**CRITICAL**: Chunking strategy directly impacts embedding quality. Read these BEFORE implementing:
+
+### Required Reading
+1. **[Chunking Strategies Spec](./specs/07-chunking-strategies-spec.md)** ⭐ ESSENTIAL
+   - **4 adaptive chunking strategies** based on document structure analysis:
+     - **Semantic Breaks** (70% of corpus): Best for documents with good heading hierarchies
+     - **Paragraph Clusters** (40% fallback): For heading-less documents
+     - **Entry-Based** (Glossary only): Specialized for entity definitions
+     - **Token-Based** (failsafe): When structure detection fails
+   - **Automatic strategy selection algorithm** based on document_structure metrics
+   - **Quality targets**: 650-750 tokens/chunk average, >70% chunks with heading context
+   - **Edge case handling**: Index pages, multi-article files, long paragraphs (500-1000 words)
+
+2. **[Document Processing Spec v2.0](./specs/02-DOCUMENT-PROCESSING-SPEC.md)**
+   - Document structure detection (heading depth, paragraph count)
+   - Metadata enrichment for chunks (preserve author, date, section context)
+
+### Section-Specific Insights
+- [Archive Analysis](./docs/corpus-analysis/01-archive-section-analysis.md) - 74% articles, 15% chapters, 5.5% letters (different rhetorical structures)
+- [History Analysis](./docs/corpus-analysis/02-history-section-spec.md) - ETOL: 70% good hierarchies, EROL: 90% use h3 as title (not h1!)
+- [Subject Analysis](./docs/corpus-analysis/03-subject-section-spec.md) - 55% navigation indexes (should NOT be chunked for embeddings!)
+
+**Why This Matters**: Poor chunking splits semantic units mid-thought, degrading embedding quality. The corpus analysis identifies optimal break points for Marxist theoretical texts (thesis → evidence → synthesis → implications).
+
+---
+
 ## 📋 Development Checklist
 
+- [ ] **Read chunking strategies spec** (see Essential Reading above) ⭐
 - [ ] Read `docs/instances/instance2-embeddings/README.md` (your detailed guide)
 - [ ] Read `RUNPOD.md` (GPU rental strategy, cost optimization)
 - [ ] Read `specs/02-EMBEDDINGS.md` (formal specification)
@@ -138,7 +167,7 @@ git push origin embeddings-dev
 
 **Reference**:
 - `docs/architecture/storage-strategy.md` - Parquet schema details
-- `PARALLEL-TEST-STRATEGY.md` - Testing without GPU costs
+- `specs/06-TESTING.md` - Testing without GPU costs
 
 **Communication**:
 - `work-logs/instance2/` - Your async work log

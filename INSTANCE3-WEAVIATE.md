@@ -99,8 +99,41 @@ git push origin weaviate-dev
 
 ---
 
+## 📚 Essential Corpus Analysis Reading
+
+**CRITICAL**: Collection schema must support knowledge graph integration. Read these BEFORE schema design:
+
+### Required Reading
+1. **[Knowledge Graph Spec](./specs/08-knowledge-graph-spec.md)** ⭐ ESSENTIAL
+   - **Hybrid retrieval architecture**: Vector-first + graph-enhanced AND graph-first + vector-filtered queries
+   - **~2,500 Glossary entities** as canonical node set (people, terms, organizations, events, periodicals, places)
+   - **10 node types, 14 edge types** for entity relationships:
+     - Authorship edges (Person → Work)
+     - Structural edges (Work → Chapter, Section → Document)
+     - Mention edges (Work mentions Entity)
+     - Thematic edges (Work → Subject)
+   - **Cross-reference network**: 5k-10k edges from corpus analysis
+   - **Multi-hop query patterns**: Intellectual genealogy, citation chains, thematic exploration
+
+2. **[Metadata Unified Schema](./docs/corpus-analysis/06-metadata-unified-schema.md)**
+   - 5-layer metadata model → Weaviate properties design
+   - Entity linking fields (glossary_entities, cross_references)
+
+3. **[Glossary Analysis](./docs/corpus-analysis/04-glossary-section-spec.md)**
+   - ~2,500 entity entries with metadata completeness metrics:
+     - 90% dates, 60% portraits, 80-95% cross-references
+   - Entity types: people (800-1,200), terms (500-600), organizations (200-300), events, periodicals, places
+   - **CRITICAL for entity extraction**: Canonical names for authors, terms, organizations
+
+**Why This Matters**: Your Weaviate schema must support BOTH vector search AND graph traversal. The corpus analysis defines the entity schema and relationship types for knowledge graph integration.
+
+**Storage Options Evaluated**: Neo4j (recommended for complex graph), NetworkX (simpler, Python-native), SQLite (hybrid SQL+graph). See spec for trade-offs.
+
+---
+
 ## 📋 Development Checklist
 
+- [ ] **Read knowledge graph spec and glossary analysis** (see Essential Reading above) ⭐
 - [ ] Read `docs/instances/instance3-weaviate/README.md` (your detailed guide)
 - [ ] Read `docs/architecture/infrastructure.md` (GKE deployment)
 - [ ] Read `specs/03-VECTOR-DB.md` (formal specification)
@@ -141,7 +174,7 @@ git push origin weaviate-dev
 **Reference**:
 - [Weaviate Docs](https://weaviate.io/developers/weaviate) - Official docs
 - `docs/architecture/storage-strategy.md` - Parquet format
-- `PARALLEL-TEST-STRATEGY.md` - Testing locally
+- `specs/06-TESTING.md` - Testing locally
 
 **Communication**:
 - `work-logs/instance3/` - Your async work log

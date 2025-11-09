@@ -4,23 +4,26 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## ⚠️ CRITICAL SCALE UPDATE
 
-**The corpus is 200GB, not 38GB as originally assumed.**
+**Corpus Scale**: 200GB raw archive → **50GB optimized** (75% reduction through strategic filtering)
 
-For enterprise-scale implementation, see: **[CLAUDE_ENTERPRISE.md](./CLAUDE_ENTERPRISE.md)**
+**Corpus Analysis**: ✅ **Complete** - 46GB English content analyzed (55,753 documents across 6 sections)
 
-The enterprise document includes:
+For architecture overview, see: **[ARCHITECTURE.md](./ARCHITECTURE.md)** (includes corpus foundation)
 
-- Distributed processing with Ray/Dask
-- VertexAI embeddings (recommended) with alternatives
-- Weaviate vector database for billion-scale vectors
-- Parallel development strategy for 6 Claude instances
-- Complete monitoring and observability stack
+The architecture includes:
+
+- **Corpus Foundation**: Systematic 46GB analysis informing all data decisions
+- **Metadata Schema**: 5-layer model achieving 85%+ author coverage
+- **Chunking Strategies**: 4 adaptive strategies based on document structure
+- **Knowledge Graph**: ~2,500 entities forming hybrid retrieval foundation
+- **Infrastructure**: Simplified GCP architecture with Weaviate + Runpod embeddings
+- **Parallel Development**: 6-instance coordination strategy
 
 ## Project Overview
 
 The Marxists Internet Archive (MIA) RAG Pipeline converts 126,000+ pages of Marxist theory (HTML + PDFs) into a queryable RAG system. This is a local, private, fully-owned knowledge base designed for material analysis research, class composition studies, and theoretical framework development.
 
-**Note**: The reference implementation below works for small-scale testing. For production 200GB processing, follow CLAUDE_ENTERPRISE.md.
+**Note**: The reference implementation below works for small-scale testing. For production processing, see ARCHITECTURE.md for complete details.
 
 ## Architecture
 
@@ -53,6 +56,51 @@ MIA Archive (HTML/PDF)
 
 - Contains: content (str), metadata (Dict), chunk_id (str), chunk_index (int)
 - Metadata preserves all DocumentMetadata fields plus chunk-specific info
+
+## Corpus Analysis Foundation
+
+**CRITICAL**: All implementation decisions must be informed by the completed corpus analysis (46GB English content, 55,753 documents).
+
+### Essential Reading Before Coding
+
+**Metadata & Schemas**:
+- [docs/corpus-analysis/06-metadata-unified-schema.md](./docs/corpus-analysis/06-metadata-unified-schema.md) - **5-layer metadata model**
+  - Achieves 85%+ author coverage through multi-source extraction
+  - Section-specific rules: Archive (100% path), ETOL (85% title+keywords), EROL (95% org from title)
+  - Encoding normalization: 62% ISO-8859-1 → UTF-8 conversion required
+
+**Chunking & Document Structure**:
+- [specs/07-chunking-strategies-spec.md](./specs/07-chunking-strategies-spec.md) - **4 adaptive chunking strategies**
+  - 70% documents have good heading hierarchies → semantic-break chunking
+  - 40% heading-less → paragraph-cluster chunking fallback
+  - Glossary → entry-based chunking (special case)
+  - Target: 650-750 tokens/chunk average, >70% with heading context
+
+**Knowledge Graph & Entities**:
+- [specs/08-knowledge-graph-spec.md](./specs/08-knowledge-graph-spec.md) - **Hybrid retrieval architecture**
+  - ~2,500 Glossary entities form canonical node set
+  - 10 node types, 14 edge types for vector + graph retrieval
+  - 5k-10k cross-references extracted from corpus
+
+### Section-Specific Analyses
+
+When implementing processing for specific corpus sections, consult:
+
+- **Archive** (4.3GB, 15,637 files): [docs/corpus-analysis/01-archive-section-analysis.md](./docs/corpus-analysis/01-archive-section-analysis.md)
+- **History** (33GB, 33,190 files - ETOL/EROL/Other): [docs/corpus-analysis/02-history-section-spec.md](./docs/corpus-analysis/02-history-section-spec.md)
+- **Subject** (8.9GB, 2,259 files): [docs/corpus-analysis/03-subject-section-spec.md](./docs/corpus-analysis/03-subject-section-spec.md)
+- **Glossary** (62MB, ~2,500 entities): [docs/corpus-analysis/04-glossary-section-spec.md](./docs/corpus-analysis/04-glossary-section-spec.md)
+- **Reference** (460MB, 4,867 files): [docs/corpus-analysis/05-reference-section-spec.md](./docs/corpus-analysis/05-reference-section-spec.md)
+
+### Why This Matters
+
+- **Instance 1 (Storage)**: Metadata schema defines extraction rules, encoding normalization
+- **Instance 2 (Embeddings)**: Chunking strategies optimize semantic unit quality
+- **Instance 3 (Weaviate)**: Entity schema from Glossary analysis defines node structure
+- **Instance 4 (API)**: Cross-reference patterns enable query expansion
+- **Instance 6 (Monitoring)**: Quality targets from corpus analysis (85% author coverage, etc.)
+
+**Don't reinvent the wheel**: These specs encode 200k+ tokens of systematic corpus investigation.
 
 ## Common Development Tasks
 

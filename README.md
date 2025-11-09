@@ -6,12 +6,12 @@
 
 > **⚠️ OPTIMIZATION UPDATE**: Corpus strategically reduced from 200GB to 50GB for feasibility.
 >
-> **Key Documents for 200GB Scale:**
+> **Key Documents:**
 >
-> - **[CLOUD-ARCHITECTURE-PLAN.md](./CLOUD-ARCHITECTURE-PLAN.md)** - Complete GCP infrastructure
-> - **[RUNPOD_EMBEDDINGS.md](./RUNPOD_EMBEDDINGS.md)** - GPU rental strategy ($40-60 total!)
-> - **[PARALLEL-DEV-ARCHITECTURE.md](./PARALLEL-DEV-ARCHITECTURE.md)** - 6-instance development plan
-> - **[200GB_SOLUTION_SUMMARY.md](./200GB_SOLUTION_SUMMARY.md)** - Executive summary
+> - **[ARCHITECTURE.md](./ARCHITECTURE.md)** - Complete system architecture
+> - **[RUNPOD.md](./RUNPOD.md)** - GPU rental strategy ($40-60 total!)
+> - **[BOUNDARIES.md](./BOUNDARIES.md)** - Parallel development coordination
+> - **[START_HERE.md](./START_HERE.md)** - Quick start guide
 
 Complete enterprise-scale pipeline for converting the **200GB Marxists Internet Archive** into a queryable RAG system on Google Cloud Platform.
 
@@ -45,7 +45,7 @@ Perfect for:
 ### Cloud Infrastructure Required
 
 - **GCP Project** with billing enabled
-- **GCS Buckets** for storage (see TERRAFORM-INFRASTRUCTURE.md)
+- **GCS Buckets** for storage (see TERRAFORM.md)
 - **GKE Cluster** for Weaviate (3+ nodes)
 - **Runpod GPU** rental (RTX 4090 recommended)
 
@@ -64,7 +64,7 @@ gcloud auth application-default login
 
 # Terraform for infrastructure
 brew install terraform  # macOS
-# or see TERRAFORM-INFRASTRUCTURE.md for other platforms
+# or see TERRAFORM.md for other platforms
 
 # For embeddings (Runpod, not Ollama!)
 pip install sentence-transformers torch
@@ -80,7 +80,7 @@ cd terraform/environments/prod
 terraform init
 terraform apply
 
-# See TERRAFORM-INFRASTRUCTURE.md for complete setup
+# See TERRAFORM.md for complete setup
 ```
 
 ### Step 1: Get the 200GB Archive

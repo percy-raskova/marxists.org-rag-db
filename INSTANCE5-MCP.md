@@ -99,8 +99,38 @@ git push origin mcp-dev
 
 ---
 
+## 📚 Essential Corpus Analysis Reading
+
+**CRITICAL**: MCP tools should leverage corpus patterns for intelligent query expansion. Read these BEFORE tool design:
+
+### Required Reading
+1. **[Knowledge Graph Spec](./specs/08-knowledge-graph-spec.md)** ⭐ ESSENTIAL
+   - **Query expansion patterns** from 5k-10k cross-references:
+     - Entity-based: "Lenin" → expand to works by Lenin + works mentioning Lenin
+     - Temporal: "1917" → works written in 1917 + works about 1917 events
+     - Thematic: "imperialism" → works tagged + Glossary definition + related subjects
+   - **Hybrid retrieval tools**: Expose both vector and graph capabilities to Claude
+   - **Multi-hop queries**: "Find Lenin's works on imperialism, then find responses by other theorists"
+
+2. **[Glossary Analysis](./docs/corpus-analysis/04-glossary-section-spec.md)**
+   - **~2,500 entities** enable "What is X?" definition lookup tool
+   - Separate MCP tool for glossary definitions vs. full semantic search
+   - **80-95% cross-references** - use for automatic query enrichment
+
+3. **[Subject Analysis](./docs/corpus-analysis/03-subject-section-spec.md)**
+   - **8 subject categories** (theoretical, economic, political, etc.) for faceted search
+   - **64% link to /archive/** - subject browsing as navigation aid
+   - MCP resource for subject taxonomy exploration
+
+**Why This Matters**: Your MCP tools are Claude's interface to RAG capabilities. Well-designed tools leveraging corpus patterns enable Claude to perform complex research tasks (e.g., "trace the evolution of the theory of imperialism from Hobson to Lenin to Mao").
+
+**Tool Design Hint**: Consider 4-5 specialized tools (semantic search, entity lookup, definition query, subject browse, related works) rather than one generic search tool.
+
+---
+
 ## 📋 Development Checklist
 
+- [ ] **Read knowledge graph spec and glossary/subject analyses** (see Essential Reading above) ⭐
 - [ ] Read `docs/instances/instance5-mcp/README.md` (your detailed guide)
 - [ ] Read [MCP Specification](https://modelcontextprotocol.io/docs) (official docs)
 - [ ] Read `specs/05-MCP.md` (formal specification)
@@ -140,7 +170,7 @@ git push origin mcp-dev
 **Reference**:
 - [MCP Python SDK](https://github.com/anthropics/python-mcp-sdk) - Code examples
 - `docs/instances/instance4-api/README.md` - API contract
-- `PARALLEL-TEST-STRATEGY.md` - Testing without Claude Desktop
+- `specs/06-TESTING.md` - Testing without Claude Desktop
 
 **Communication**:
 - `work-logs/instance5/` - Your async work log

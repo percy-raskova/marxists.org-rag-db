@@ -10,18 +10,24 @@
 
 **CRITICAL UPDATES FOR 200GB SCALE:**
 
-- Read **[CLOUD-ARCHITECTURE-PLAN.md](../CLOUD-ARCHITECTURE-PLAN.md)** for GCP infrastructure
-- Read **[RUNPOD_EMBEDDINGS.md](../RUNPOD_EMBEDDINGS.md)** for GPU embedding strategy ($40-60 total!)
-- Read **[PARALLEL-DEV-ARCHITECTURE.md](../PARALLEL-DEV-ARCHITECTURE.md)** for instance coordination
+- Read **[ARCHITECTURE.md](../ARCHITECTURE.md)** for complete architecture (includes corpus foundation)
+- Read **[docs/corpus-analysis/](../docs/corpus-analysis/)** ⭐ **ESSENTIAL** - 46GB systematic analysis informing all data decisions
+- Read **[RUNPOD.md](../RUNPOD.md)** for GPU embedding strategy ($40-60 total!)
+- Read instance guides **[INSTANCE1-6-*.md](../)** for your role
+
+**Corpus Analysis Foundation** (READ BEFORE CODING):
+- [Metadata Schema](../docs/corpus-analysis/06-metadata-unified-schema.md) - 5-layer model, 85%+ author coverage
+- [Chunking Strategies](./07-chunking-strategies-spec.md) - 4 adaptive strategies from document structure analysis
+- [Knowledge Graph](./08-knowledge-graph-spec.md) - ~2,500 entities, hybrid retrieval architecture
 
 Each specification document is standalone and can be implemented independently. Follow this workflow:
 
-1. **Choose your instance assignment** (see PARALLEL-DEV-ARCHITECTURE.md)
-2. **Read the architecture spec** (00-ARCHITECTURE-SPEC.md) first
-3. **Read your module's spec** completely before coding
-4. **Review cloud infrastructure requirements**
+1. **Choose your instance assignment** (see ARCHITECTURE.md)
+2. **Read corpus analysis docs relevant to your instance** ⭐ (see instance guides for essential reading)
+3. **Read the architecture spec** (00-ARCHITECTURE-SPEC.md) for system overview
+4. **Read your module's spec** completely before coding
 5. **Implement according to the spec** (data structures, interfaces, acceptance criteria)
-6. **Test against the acceptance criteria** using PARALLEL-TEST-STRATEGY.md
+6. **Test against corpus-informed acceptance criteria** using specs/06-TESTING.md
 7. **Submit for integration**
 
 ## Specification Documents
@@ -230,21 +236,103 @@ Each specification document is standalone and can be implemented independently. 
 
 ---
 
+### 07. Chunking Strategies
+
+**File:** `07-chunking-strategies-spec.md`
+**Dependencies:** Corpus analysis (docs/corpus-analysis/)
+**Estimated Time:** Implementation integrated into 02-Processing
+**Priority:** **CRITICAL** (informs Instance 2 embeddings quality)
+
+**Implements:**
+
+- 4 adaptive chunking strategies based on document structure
+- Automatic strategy selection algorithm
+- Document structure detection
+- Quality metrics and targets
+
+**Key Strategies:**
+
+- **Semantic Breaks** (70% of corpus): Respects heading hierarchies
+- **Paragraph Clusters** (40% fallback): For heading-less documents
+- **Entry-Based** (Glossary): Specialized for entity definitions
+- **Token-Based** (failsafe): Fixed token count when structure detection fails
+
+**Quality Targets:**
+
+- Average chunk size: 650-750 tokens
+- >70% chunks with heading context
+- Proper handling of edge cases (index pages, multi-article files, long paragraphs)
+
+**Corpus Foundation:** Based on systematic analysis of 55,753 documents identifying structural patterns
+
+**Acceptance Criteria:** Target metrics from corpus analysis (see spec)
+
+---
+
+### 08. Knowledge Graph Architecture
+
+**File:** `08-knowledge-graph-spec.md`
+**Dependencies:** Corpus analysis (docs/corpus-analysis/), 04-Query
+**Estimated Time:** 40-60 hours (optional enhancement)
+**Priority:** MEDIUM (enables hybrid retrieval, not required for v1)
+
+**Implements:**
+
+- Knowledge graph schema (10 node types, 14 edge types)
+- Hybrid retrieval (vector + graph)
+- Entity extraction from Glossary (~2,500 entities)
+- Cross-reference network (5k-10k edges)
+- Multi-hop query patterns
+
+**Key Components:**
+
+- **Entity Nodes**: People, terms, organizations, events, periodicals, places
+- **Relationship Edges**: Authorship, structural, mentions, thematic
+- **Hybrid Retrieval Patterns**: Vector-first + graph-enhanced, graph-first + vector-filtered
+- **Query Types**: Intellectual genealogy, citation chains, thematic exploration
+
+**Storage Options:**
+
+- Neo4j (recommended for complex graph)
+- NetworkX (simpler, Python-native)
+- SQLite (hybrid SQL+graph)
+
+**Corpus Foundation:** Based on Glossary analysis (~2,500 entities with 80-95% cross-reference completeness)
+
+**Acceptance Criteria:** Entity extraction accuracy, cross-reference coverage, query performance (see spec)
+
+---
+
 ## Parallel Development Strategy
 
 ### Dependency Graph
 
 ```
-00-Architecture (read first)
+Corpus Analysis (docs/corpus-analysis/) ⭐ FOUNDATION
+    │
+    ├─▶ 06-Metadata Schema ──────┐
+    ├─▶ 07-Chunking Strategies ──┤
+    └─▶ 08-Knowledge Graph ───────┤
+                                  ▼
+00-Architecture (read first) ◀────┘
     │
     ├─▶ 02-Processing ──▶ 03-Ingestion ──▶ 04-Query ──▶ 05-MCP
-    │                          │
-    └─▶ 06-Testing ────────────┴──────────────────────────┘
+    │        │                  │              │
+    │        │                  │              └──▶ 08-Knowledge Graph
+    │        └──▶ 07-Chunking   │
+    │                            │
+    └─▶ 06-Testing ──────────────┴──────────────────────────┘
+
+**Key**:
+- ⭐ Corpus analysis (46GB, 55,753 docs) informs all data architecture decisions
+- Specs 06, 07, 08 are corpus-derived specifications
+- Spec 02 implements metadata + chunking
+- Spec 08 is optional (v2 enhancement for hybrid retrieval)
 ```
 
 ### 6-Instance Parallel Development (REQUIRED for 200GB)
 
-**Instance Assignments (from PARALLEL-DEV-ARCHITECTURE.md):**
+**Instance Assignments:**
 
 - **Instance 1 (storage):** Storage & Data Pipeline - GCS management, lifecycle policies
 - **Instance 2 (embeddings):** Runpod GPU Embeddings - $40-60 total cost!
@@ -258,7 +346,7 @@ Each specification document is standalone and can be implemented independently. 
 - Each instance gets isolated GCS bucket prefix
 - Dedicated Terraform workspace
 - Isolated test environment
-- No resource conflicts (see PARALLEL-DEV-ARCHITECTURE.md)
+- No resource conflicts (see BOUNDARIES.md)
 
 ### Integration Points
 
@@ -486,18 +574,16 @@ specs/
 └── INDEX.md                        (This file)
 ```
 
-### 200GB Scale Documentation (MUST READ)
+### Essential Documentation (MUST READ)
 
 ```
 project-root/
-├── CLAUDE_ENTERPRISE.md            (200GB architecture overview)
-├── CLOUD-ARCHITECTURE-PLAN.md      (GCP infrastructure details)
-├── TERRAFORM-INFRASTRUCTURE.md     (Complete IaC implementation)
-├── STORAGE-STRATEGY.md             (Storage tiers, Parquet format)
-├── RUNPOD_EMBEDDINGS.md            ($40-60 GPU solution!)
-├── PARALLEL-DEV-ARCHITECTURE.md    (6-instance coordination)
-├── PARALLEL-TEST-STRATEGY.md       (Testing without cloud)
-└── 200GB_SOLUTION_SUMMARY.md       (Executive summary)
+├── ARCHITECTURE.md                 (Complete system architecture)
+├── TERRAFORM.md                    (Infrastructure as Code)
+├── RUNPOD.md                       (GPU embedding strategy)
+├── BOUNDARIES.md                   (Instance coordination)
+├── START_HERE.md                   (Quick start guide)
+└── specs/06-TESTING.md             (Testing strategy)
 ```
 
 ## Ready to Start?

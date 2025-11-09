@@ -68,11 +68,29 @@ A complete system to convert the **200GB Marxists Internet Archive** into an ent
 
 ### 🧪 "I need to test without cloud resources"
 
-→ Read [PARALLEL-TEST-STRATEGY.md](./PARALLEL-TEST-STRATEGY.md) - Mocking GCS, Runpod, Weaviate locally
+→ Read [specs/06-TESTING.md](./specs/06-TESTING.md) - Mocking GCS, Runpod, Weaviate locally
 
 ### 🏗️ "I need to deploy infrastructure"
 
 → Read [TERRAFORM.md](./TERRAFORM.md) - Complete infrastructure as code
+
+### 📊 "I need to understand the corpus structure"
+
+→ See [docs/corpus-analysis/](./docs/corpus-analysis/) - **Complete corpus investigation** (46GB analyzed, 55,753 documents)
+
+**Key Resources**:
+- [Metadata Schema](./docs/corpus-analysis/06-metadata-unified-schema.md) - 5-layer metadata model achieving 85%+ author coverage
+- [Chunking Strategies](./specs/07-chunking-strategies-spec.md) - 4 adaptive strategies based on document structure
+- [Knowledge Graph](./specs/08-knowledge-graph-spec.md) - Entity relationships and hybrid retrieval architecture
+
+**Section Analyses** (Implementation-ready):
+- [Archive Section](./docs/corpus-analysis/01-archive-section-analysis.md) - 4.3GB theoretical works (15,637 files)
+- [History Section](./docs/corpus-analysis/02-history-section-spec.md) - 33GB historical texts (ETOL, EROL, Other)
+- [Subject Section](./docs/corpus-analysis/03-subject-section-spec.md) - 8.9GB thematic content
+- [Glossary Section](./docs/corpus-analysis/04-glossary-section-spec.md) - 62MB (~2,500 entities)
+- [Reference Section](./docs/corpus-analysis/05-reference-section-spec.md) - 460MB non-Marxist authors
+
+**Why This Matters**: This corpus analysis informs metadata extraction, chunking strategies, and knowledge graph design across all instances.
 
 ---
 
@@ -131,6 +149,15 @@ A complete system to convert the **200GB Marxists Internet Archive** into an ent
 │   │   ├── 📁 instance5-mcp/
 │   │   └── 📁 instance6-monitoring/
 │   │
+│   ├── 📁 corpus-analysis/ ⭐ (Corpus investigation - 46GB analyzed)
+│   │   ├── README.md (Investigation overview)
+│   │   ├── 01-archive-section-analysis.md (4.3GB theory)
+│   │   ├── 02-history-section-spec.md (33GB historical)
+│   │   ├── 03-subject-section-spec.md (8.9GB thematic)
+│   │   ├── 04-glossary-section-spec.md (62MB entities)
+│   │   ├── 05-reference-section-spec.md (460MB non-Marxist)
+│   │   └── 06-metadata-unified-schema.md (5-layer metadata model)
+│   │
 │   ├── 📁 architecture/ (Architecture details)
 │   │   ├── system-overview.md
 │   │   ├── infrastructure.md
@@ -152,11 +179,13 @@ A complete system to convert the **200GB Marxists Internet Archive** into an ent
     ├── INDEX.md (Spec overview)
     ├── 00-ARCHITECTURE.md
     ├── 01-STORAGE-PIPELINE.md
-    ├── 02-EMBEDDINGS.md
+    ├── 02-DOCUMENT-PROCESSING-SPEC.md ⭐ (v2.0 - corpus-informed)
     ├── 03-VECTOR-DB.md
     ├── 04-API.md
     ├── 05-MCP.md
-    └── 06-TESTING.md
+    ├── 06-TESTING.md
+    ├── 07-chunking-strategies-spec.md ⭐ (4 adaptive strategies)
+    └── 08-knowledge-graph-spec.md ⭐ (Hybrid retrieval)
 ```
 
 ---
