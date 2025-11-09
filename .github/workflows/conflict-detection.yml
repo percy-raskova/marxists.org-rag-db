@@ -6,6 +6,7 @@ on:
 
 env:
   PYTHON_VERSION: '3.10'
+  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }} #make sure to always add this in env section when using gh cli!
 
 jobs:
   detect-conflicts:
